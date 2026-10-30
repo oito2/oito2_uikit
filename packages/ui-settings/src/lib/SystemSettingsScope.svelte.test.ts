@@ -81,6 +81,16 @@ describe('SystemSettingsScope', () => {
 		await expect.element(page.getByTestId('accent')).toHaveTextContent('#222222');
 	});
 
+	it('keeps the current settings when the values are malformed', async () => {
+		const source = new FakeSettingsSource(null as unknown as RawSettings);
+		render(ScopeHarness, { source, platform: linux });
+		await expect.poll(() => source.reads).toBe(1);
+		await expect.poll(() => source.listening).toBe(1);
+		source.emit({ ...emptyRawSettings, config: null } as unknown as RawSettings);
+		await new Promise((resolve) => setTimeout(resolve, 30));
+		await expect.element(page.getByTestId('desktop')).toHaveTextContent('unknown');
+	});
+
 	it('keeps the defaults without a source', async () => {
 		render(ScopeHarness, { source: null, platform: linux });
 		await expect.element(page.getByTestId('desktop')).toHaveTextContent('unknown');

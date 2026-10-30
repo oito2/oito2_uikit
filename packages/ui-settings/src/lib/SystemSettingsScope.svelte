@@ -60,10 +60,19 @@
 	);
 	let generation = 0;
 
-	/** Applies new values unless a newer read already did, and only when they change. */
+	/**
+	 * Applies new values unless a newer read already did, and only when they change; values
+	 * that can't be composed are ignored.
+	 */
 	function apply(raw: RawSettings, from: number) {
 		if (from !== generation) return;
-		const next = composeSystemSettings(raw, platform);
+		let next: SystemSettings;
+		try {
+			next = composeSystemSettings(raw, platform);
+		} catch {
+			// Values the plugin couldn't read in full keep the current settings.
+			return;
+		}
 		if (sameSystemSettings(next, settings)) return;
 		settings = next;
 		onSettingsChange?.(next);
