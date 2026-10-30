@@ -14,6 +14,8 @@
 		"test": "pnpm -r test",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
+		"generate": "node tools/generate-css/generate.ts",
+		"generate:check": "node tools/generate-css/generate.ts --check",
 		"showcase": "pnpm --filter @oito2/showcase",
 		"tauri": "pnpm --filter @oito2/showcase tauri",
 		"changeset": "changeset"

@@ -41,11 +41,15 @@
 			"svelte": "./dist/index.js",
 			"default": "./dist/index.js"
 		},
-		"./fonts.css": "./dist/styles/fonts.css"
+		"./styles.css": "./dist/styles/styles.css",
+		"./fonts.css": "./dist/styles/fonts.css",
+		"./tokens.css": "./dist/styles/tokens.css",
+		"./density.css": "./dist/styles/density.css",
+		"./base.css": "./dist/styles/base.css"
 	},
 	"scripts": {
 		"build": "svelte-package && publint",
-		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
 		"test": "vitest run"
 	},
 	"peerDependencies": {

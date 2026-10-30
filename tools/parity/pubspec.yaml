@@ -31,6 +31,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Imported for Typography; the version follows dependency_overrides.
+  material_ui: any
 
 # Outside its own workspace, oito2_ui would resolve newer versions than the ones
 # it is tested with. These follow the versions locked in oito2_ui/pubspec.lock.

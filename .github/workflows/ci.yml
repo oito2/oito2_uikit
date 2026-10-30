@@ -31,6 +31,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - name: Generated CSS is up to date
+        run: pnpm generate:check
       - run: pnpm build
       - run: pnpm check
       - name: Install Playwright browsers

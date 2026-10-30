@@ -16,7 +16,7 @@
 -->
 
 <script lang="ts">
-	import '@oito2/ui/fonts.css';
+	import '@oito2/ui/styles.css';
 	import '@oito2/ui-syntax/fonts.css';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';

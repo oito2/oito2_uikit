@@ -22,10 +22,15 @@
 <main>
 	<h1>oito2_uikit</h1>
 	<p>
-		The component pages arrive phase by phase. Phase F0 ships the workspace and the platform
-		spikes below.
+		The component pages arrive phase by phase. Phase F1 adds the foundation; the platform spikes
+		of phase F0 stay below.
 	</p>
 	<ul>
+		<li>
+			<a href={resolve('/foundation')}
+				>Foundation: tokens, type scale, platform and formatting</a
+			>
+		</li>
 		<li><a href={resolve('/spikes/baseline')}>Baseline: CSS, DOM, JavaScript and fonts</a></li>
 		<li><a href={resolve('/spikes/chrome')}>Window chrome: title bar, drag and resize</a></li>
 	</ul>

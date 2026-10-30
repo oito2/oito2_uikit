@@ -14,25 +14,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Writes the oito2_ui design data that oito2_uikit must reproduce as JSON
-// fixtures. Run with `flutter test` from tools/parity; the output directory
-// defaults to packages/ui/src/fixtures/parity and can be changed with the
-// PARITY_OUT environment variable.
+// fixtures. Run with `flutter test` from tools/parity.
 
-import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' show Color;
+import 'dart:ui' show Brightness;
 
+import 'package:flutter/painting.dart' show TextStyle;
+import 'package:material_ui/material_ui.dart' show Typography;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oito2_ui/oito2_ui.dart';
 
-/// Formats a color as `#RRGGBB`, or `#RRGGBBAA` when it is not opaque.
-String hex(Color color) {
-  final argb = color.toARGB32();
-  final rgb = (argb & 0xFFFFFF).toRadixString(16).padLeft(6, '0');
-  final alpha = (argb >>> 24) & 0xFF;
-  final suffix = alpha == 0xFF ? '' : alpha.toRadixString(16).padLeft(2, '0');
-  return '#$rgb$suffix'.toUpperCase();
-}
+import 'support.dart';
 
 Map<String, String> neutrals(Oito2NeutralPalette p) => {
   'surface': hex(p.surface),
@@ -55,6 +46,41 @@ Map<String, String> status(Oito2StatusPalette p) => {
   'info': hex(p.info),
   'link': hex(p.link),
 };
+
+/// The size, line height, weight and letter spacing of every style of the
+/// light oito2 text theme, keyed by the Material style name. The theme is
+/// merged over the Material 2021 English-like geometry, as ThemeData does.
+Map<String, Object> textScale() {
+  final theme = Typography.material2021().englishLike.merge(
+    Oito2Typography.textTheme(Brightness.light),
+  );
+  final styles = <String, TextStyle?>{
+    'displayLarge': theme.displayLarge,
+    'displayMedium': theme.displayMedium,
+    'displaySmall': theme.displaySmall,
+    'headlineLarge': theme.headlineLarge,
+    'headlineMedium': theme.headlineMedium,
+    'headlineSmall': theme.headlineSmall,
+    'titleLarge': theme.titleLarge,
+    'titleMedium': theme.titleMedium,
+    'titleSmall': theme.titleSmall,
+    'bodyLarge': theme.bodyLarge,
+    'bodyMedium': theme.bodyMedium,
+    'bodySmall': theme.bodySmall,
+    'labelLarge': theme.labelLarge,
+    'labelMedium': theme.labelMedium,
+    'labelSmall': theme.labelSmall,
+  };
+  return {
+    for (final MapEntry(:key, :value) in styles.entries)
+      key: {
+        'fontSize': value!.fontSize,
+        'lineHeight': value.fontSize! * value.height!,
+        'fontWeight': value.fontWeight!.value,
+        'letterSpacing': value.letterSpacing,
+      },
+  };
+}
 
 void main() {
   test('exports the design tokens', () {
@@ -108,17 +134,10 @@ void main() {
         'bodyMediumSize': Oito2Typography.bodyMediumSize,
         'bodySmallSize': Oito2Typography.bodySmallSize,
         'emphasisWeight': Oito2Typography.emphasisWeight.value,
+        'scale': textScale(),
       },
     };
 
-    final out = Directory(
-      Platform.environment['PARITY_OUT'] ??
-          '../../packages/ui/src/fixtures/parity',
-    )..createSync(recursive: true);
-    final file = File('${out.path}/tokens.json')
-      ..writeAsStringSync(
-        '${const JsonEncoder.withIndent('\t').convert(tokens)}\n',
-      );
-    expect(file.existsSync(), isTrue);
+    expect(writeFixture('tokens.json', tokens).existsSync(), isTrue);
   });
 }

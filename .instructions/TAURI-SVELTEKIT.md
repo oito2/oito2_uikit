@@ -72,6 +72,7 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - **Props:** `class`, a `$bindable` `ref`, `...rest` spread on the root element, `disabled`, and controllable state (`value`/`open`/`checked` with `bind:`, an `on<Name>Change` callback and a `default<Name>` for uncontrolled use).
 - **Snippets** for customizable content (`icon`, `label`, `trailing`, `empty`).
 - **State and controllers** are classes in `.svelte.ts` files with `$state`/`$derived` fields. No Svelte stores.
+- **Context:** each provider has a `set<Name>(get)` function, which takes a getter so props and `$state` stay reactive, and a `use<Name>()` function that returns a live ref (`.current`, or named getters) with a documented fallback when no provider exists. A provider component (`SystemScope`, `LocaleProvider`) only calls `set<Name>` and renders its children.
 - **Reusable behaviors** are attachments (`{@attach ...}`), not `use:` actions.
 - **SSR-safe:** no `window`, `document` or `navigator` access at module level; touch the DOM only inside `$effect`, attachments, event handlers or `onMount`.
 - **Behavior is written in-house** following the WAI-ARIA Authoring Practices pattern of each widget (roles, keyboard, focus). The only positioning dependency is `@floating-ui/dom`. Ark UI is a conceptual reference: never copy its code.
@@ -83,6 +84,7 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - Plain CSS with custom properties; no CSS framework.
 - Every component rule sits inside `@layer oito2 { ... }` in the component's scoped `<style>`, so unlayered app CSS always wins.
 - Read tokens through `var(--oito2-...)`; never hardcode a color, radius, spacing or size that has a token.
+- Token values live only in `packages/ui/src/lib/tokens/values.ts` (a module without imports). `tokens.css` is generated from it: after changing a value run `pnpm generate`; CI runs `pnpm generate:check`. Parity with oito2_ui is tested against `packages/ui/src/fixtures/parity/*.json`, exported by `tools/parity` (`flutter test` there).
 - Style states through data attributes (`data-state`, `data-disabled`, `data-orientation`, `data-highlighted`, `data-placement`).
 - Density: pointer sizes by default; touch sizes under `@media (pointer: coarse)` or `[data-oito2-density='touch']`.
 - Motion respects `prefers-reduced-motion`.

@@ -13,5 +13,68 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Public API of @oito2/ui. Exports are added phase by phase.
-export {};
+// Public API of @oito2/ui.
+
+// Tokens
+export {
+	accentColors,
+	defaultAccent,
+	neutralPalettes,
+	radius,
+	sizes,
+	spacing,
+	statusPalettes,
+	surfacesOf,
+	typography,
+	type AccentColor,
+	type NeutralPalette,
+	type StatusPalette,
+	type TextStyle,
+	type TextStyleName
+} from './tokens/values.js';
+
+// Foundation
+export { formatHex, parseHex, type Rgba } from './foundation/color.js';
+export { Contrast } from './foundation/contrast.js';
+export {
+	desktopEnvironments,
+	detectDesktopEnvironment,
+	type DesktopEnvironment,
+	type DesktopEnvironmentSources
+} from './foundation/desktop-environment.js';
+export {
+	Platform,
+	detectOperatingSystem,
+	isTauriWebview,
+	operatingSystems,
+	type Density,
+	type OperatingSystem
+} from './foundation/platform.js';
+export {
+	WindowButtonLayout,
+	resolveWindowControlStyle,
+	windowControlStyles,
+	type WindowButton,
+	type WindowControlStyle
+} from './foundation/window-button-layout.js';
+export { fallbackSystemSettings, type SystemSettings } from './foundation/system-settings.js';
+export {
+	setSystemSettings,
+	useSystemSettings,
+	type SystemSettingsRef
+} from './foundation/system-scope.js';
+export { default as SystemScope } from './foundation/SystemScope.svelte';
+
+// Localization and formatting
+export { en } from './l10n/en.js';
+export { ptBR } from './l10n/pt-br.js';
+export { timeUnits, type Localizations, type TimeUnit } from './l10n/localizations.js';
+export {
+	localizationsFor,
+	setLocale,
+	supportedLocales,
+	useLocale,
+	type LocaleRef
+} from './l10n/locale.js';
+export { default as LocaleProvider } from './l10n/LocaleProvider.svelte';
+export { Format, useFormat, type ByteUnits, type FormatRef } from './format/format.js';
