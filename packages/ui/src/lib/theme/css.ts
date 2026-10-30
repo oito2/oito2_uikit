@@ -13,10 +13,50 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { Contrast } from '../foundation/contrast.js';
 import { colorSchemeRoles, type ColorTheme } from './color-theme.js';
 import { syntaxRoles } from './syntax-palette.js';
 
 // Converts camelCase to kebab-case.
+/** The colors components derive from a theme, beyond its roles. */
+export interface ComponentColors {
+	/**
+	 * The fill of selected controls and progress indicators: the primary tone when it
+	 * stands out 3:1 from the surface, the background and the container surface, else the
+	 * text-safe primary tone.
+	 */
+	readonly selectedFill: string;
+	/** The mark drawn on `selectedFill`. */
+	readonly onSelectedFill: string;
+	/** Black or white, whichever contrasts more with the text-safe primary tone (focus ring, cursor). */
+	readonly onPrimaryText: string;
+	/** The thumb of an off switch: the variant text tone when dark, the lowest surface when light. */
+	readonly offThumb: string;
+}
+
+/** Returns the colors components derive from `theme`. */
+export function componentColors(theme: ColorTheme): ComponentColors {
+	const scheme = theme.colorScheme;
+	const text = theme.semantic.primaryText;
+	const onPrimaryText = Contrast.foregroundFor(text);
+	const offThumb =
+		theme.brightness === 'dark' ? scheme.onSurfaceVariant : scheme.surfaceContainerLowest;
+	const usePrimary =
+		Contrast.minRatio(scheme.primary, [
+			scheme.surface,
+			theme.background,
+			scheme.surfaceContainer
+		]) >= Contrast.nonTextAA;
+	return usePrimary
+		? {
+				selectedFill: scheme.primary,
+				onSelectedFill: scheme.onPrimary,
+				onPrimaryText,
+				offThumb
+			}
+		: { selectedFill: text, onSelectedFill: onPrimaryText, onPrimaryText, offThumb };
+}
+
 function kebab(name: string): string {
 	return name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }
@@ -24,7 +64,8 @@ function kebab(name: string): string {
 /**
  * Returns the CSS custom properties of `theme`, keyed by property name:
  * `--oito2-color-<role>` for the Material roles, the background and the semantic colors
- * (`--oito2-color-primary-text`, `--oito2-color-success`…), `--oito2-chrome-<surface>`
+ * (`--oito2-color-primary-text`, `--oito2-color-success`…), the component colors
+ * (`--oito2-color-selected-fill`…), `--oito2-chrome-<surface>`
  * and `--oito2-syntax-<role>`, with lowercase hex values.
  */
 export function colorThemeVariables(theme: ColorTheme): Record<string, string> {
@@ -36,6 +77,8 @@ export function colorThemeVariables(theme: ColorTheme): Record<string, string> {
 		set(`--oito2-color-${kebab(role)}`, theme.colorScheme[role]);
 	set('--oito2-color-background', theme.background);
 	for (const [name, value] of Object.entries(theme.semantic))
+		set(`--oito2-color-${kebab(name)}`, value);
+	for (const [name, value] of Object.entries(componentColors(theme)))
 		set(`--oito2-color-${kebab(name)}`, value);
 	for (const [name, value] of Object.entries(theme.chrome))
 		set(`--oito2-chrome-${kebab(name)}`, value);

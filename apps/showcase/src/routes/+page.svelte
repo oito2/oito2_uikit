@@ -28,6 +28,11 @@
 	<ul>
 		<li><a href={resolve('/colors')}>Colors: every role of the active scheme</a></li>
 		<li>
+			<a href={resolve('/material')}
+				>Material theme: buttons, toggles, fields and containers</a
+			>
+		</li>
+		<li>
 			<a href={resolve('/interaction')}
 				>Interaction: shortcuts, focus helpers and collections</a
 			>

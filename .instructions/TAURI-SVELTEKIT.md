@@ -75,6 +75,8 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - **Context:** each provider has a `set<Name>(get)` function, which takes a getter so props and `$state` stay reactive, and a `use<Name>()` function that returns a live ref (`.current`, or named getters) with a documented fallback when no provider exists. A provider component (`SystemScope`, `LocaleProvider`) only calls `set<Name>` and renders its children.
 - **Reusable behaviors** are attachments (`{@attach ...}`), not `use:` actions.
 - **Interaction primitives** live in `packages/ui/src/lib/internal/` and are not exported: focus scope, roving focus, typeahead, dismissable layer, `Portal`, floating positioning, presence, scroll lock, live region and `Controllable`. Components build on them instead of re-implementing focus or dismissal.
+- **Icons** are `@lucide/svelte` components imported one by one (`import X from '@lucide/svelte/icons/x'`); props that take an icon are typed `IconComponent`.
+- **Components** live in `packages/ui/src/lib/components/<group>/`; compound parts sit in a subfolder with an `index.ts` (`export { default as Root } …`).
 - **Overlays** render through `Portal`, which targets the host the closest `ThemeProvider` renders at the end of its `div`, so they keep the theme; they are positioned with `position: fixed`.
 - **SSR-safe:** no `window`, `document` or `navigator` access at module level; touch the DOM only inside `$effect`, attachments, event handlers or `onMount`.
 - **Behavior is written in-house** following the WAI-ARIA Authoring Practices pattern of each widget (roles, keyboard, focus). The only positioning dependency is `@floating-ui/dom`. Ark UI is a conceptual reference: never copy its code.
@@ -89,7 +91,8 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - Token values live only in `packages/ui/src/lib/tokens/values.ts` (a module without imports). `tokens.css` is generated from it: after changing a value run `pnpm generate`; CI runs `pnpm generate:check`. Parity with oito2_ui is tested against `packages/ui/src/fixtures/parity/*.json`, exported by `tools/parity` (`flutter test` there).
 - Colors come from the active theme's custom properties: `--oito2-color-<role>` (Material 3 roles in kebab-case, plus `background`, `primary-text`, `error-text`, `success`, `warning`, `info` and `link`), `--oito2-chrome-<surface>` and `--oito2-syntax-<role>`. Text uses the text-safe roles (`on-surface`, `on-surface-variant`, `primary-text`, `error-text`, status colors); `primary` and `error` are fills.
 - Style states through data attributes (`data-state`, `data-disabled`, `data-orientation`, `data-highlighted`, `data-placement`).
-- Density: pointer sizes by default; touch sizes under `@media (pointer: coarse)` or `[data-oito2-density='touch']`.
+- Density: pointer sizes by default; touch sizes under `@media (pointer: coarse)` or `[data-oito2-density='touch']`. Components read the density variables of `density.css` (`--oito2-control-height`, `--oito2-icon-size`, `--oito2-toggle-size`…), never a fixed pointer size.
+- Selected controls use `--oito2-color-selected-fill` and `--oito2-color-on-selected-fill`; the focus ring is a 2-pixel `outline` in `--oito2-color-primary-text`.
 - Motion respects `prefers-reduced-motion`.
 
 ---
@@ -115,7 +118,8 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - Chromium stands in for WebView2, WebKit for WebKitGTK and WKWebView. A test that passes in only one engine is a bug, not a flaky test.
 - Visual goldens use Vitest's `toMatchScreenshot`; reference images live in `__screenshots__/` next to the test and are committed. Regenerate them only on purpose (`vitest run --update`).
 - `expect.requireAssertions` is on: every test asserts something.
-- Accessibility: axe checks on every showcase page (phase F14 onward).
+- Accessibility: component galleries run `axe-core` inside the browser tests (keep the gallery inside the viewport, axe measures contrast only there); axe checks on every showcase page from phase F14.
+- Test harnesses import `styles.css` and wrap their content in a `ThemeProvider`: without the tokens the controls have no size.
 - The local machine needs `libavif16` for Playwright's WebKit (`sudo apt-get install libavif16`).
 
 ---

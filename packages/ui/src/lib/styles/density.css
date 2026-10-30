@@ -25,17 +25,38 @@
 	[data-oito2-density='pointer'] {
 		--oito2-control-height: var(--oito2-size-button-height);
 		--oito2-target-min: var(--oito2-size-min-pointer-target);
+		--oito2-icon-size: var(--oito2-size-icon);
+		--oito2-toggle-size: 20px;
+		--oito2-toggle-target: var(--oito2-size-button-height);
+		--oito2-switch-width: 42px;
+		--oito2-switch-height: 24px;
+		--oito2-list-tile-height: 40px;
+		--oito2-list-tile-two-line-height: 52px;
 	}
 
 	@media (pointer: coarse) {
 		:root:not([data-oito2-density='pointer']) {
 			--oito2-control-height: var(--oito2-size-touch-button-height);
 			--oito2-target-min: var(--oito2-size-min-touch-target);
+			--oito2-icon-size: 24px;
+			--oito2-toggle-size: 24px;
+			--oito2-toggle-target: var(--oito2-size-min-touch-target);
+			--oito2-switch-width: 52px;
+			--oito2-switch-height: 30px;
+			--oito2-list-tile-height: 56px;
+			--oito2-list-tile-two-line-height: 72px;
 		}
 	}
 
 	[data-oito2-density='touch'] {
 		--oito2-control-height: var(--oito2-size-touch-button-height);
 		--oito2-target-min: var(--oito2-size-min-touch-target);
+		--oito2-icon-size: 24px;
+		--oito2-toggle-size: 24px;
+		--oito2-toggle-target: var(--oito2-size-min-touch-target);
+		--oito2-switch-width: 52px;
+		--oito2-switch-height: 30px;
+		--oito2-list-tile-height: 56px;
+		--oito2-list-tile-two-line-height: 72px;
 	}
 }

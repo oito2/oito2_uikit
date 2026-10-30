@@ -17,8 +17,8 @@
 export interface ControllableOptions<T> {
 	/** Reads the controlled value: the component's prop, `undefined` when uncontrolled. */
 	value: () => T | undefined;
-	/** The value of an uncontrolled component before the first change. */
-	defaultValue: T;
+	/** Returns the value of an uncontrolled component before the first change; read once. */
+	defaultValue: () => T;
 	/** Called with each new value: assigns the bindable prop and calls `on<Name>Change`. */
 	onChange?: (value: T) => void;
 }
@@ -37,7 +37,7 @@ export class Controllable<T> {
 	constructor(options: ControllableOptions<T>) {
 		this.#value = options.value;
 		this.#onChange = options.onChange;
-		this.#own = options.defaultValue;
+		this.#own = options.defaultValue();
 	}
 
 	/** The current value. */

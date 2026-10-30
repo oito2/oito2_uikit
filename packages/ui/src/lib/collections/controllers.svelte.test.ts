@@ -274,7 +274,7 @@ describe('Controllable', () => {
 		const reported: string[] = [];
 		const value = new Controllable({
 			value: () => parent.value,
-			defaultValue: 'a',
+			defaultValue: () => 'a',
 			onChange: (next) => reported.push(next)
 		});
 		expect(value.current).toBe('a');

@@ -45,7 +45,13 @@ export {
 	type ColorTheme,
 	type SemanticColors
 } from './color-theme.js';
-export { colorThemeRule, colorThemeStyle, colorThemeVariables } from './css.js';
+export {
+	colorThemeRule,
+	colorThemeStyle,
+	colorThemeVariables,
+	componentColors,
+	type ComponentColors
+} from './css.js';
 export {
 	ensureSyntaxContrast,
 	syntaxRoles,
