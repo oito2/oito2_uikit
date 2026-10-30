@@ -33,4 +33,21 @@
 	body {
 		margin: 0;
 	}
+
+	/* The ring of the focusBorder attachment: shown while the element or one inside it has
+	   keyboard focus, or always when forced on. */
+	[data-oito2-focus-border] {
+		border-radius: var(--oito2-focus-border-radius, var(--oito2-radius-medium));
+	}
+
+	[data-oito2-focus-border='on'],
+	[data-oito2-focus-border='auto']:focus-visible,
+	[data-oito2-focus-border='auto']:has(:focus-visible) {
+		outline: var(--oito2-size-focus-border-width) solid var(--oito2-color-primary-text);
+		outline-offset: 0;
+	}
+
+	[data-oito2-focus-border='off'] {
+		outline: none;
+	}
 }

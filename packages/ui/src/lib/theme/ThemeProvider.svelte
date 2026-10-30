@@ -21,13 +21,15 @@
   custom properties, its page background and text color, and provides the theme to
   `useTheme()`. By default it follows the system: light or dark from
   `prefers-color-scheme`, the accent and high contrast from the closest `SystemScope`
-  (and `prefers-contrast: more`).
+  (and `prefers-contrast: more`). Overlays opened inside it (popovers, menus, dialogs) are
+  rendered at the end of that `div`, so they keep the theme.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { useSystemSettings } from '../foundation/system-scope.js';
+	import { setPortalTarget } from '../internal/portal.js';
 	import type { AccentColor } from '../tokens/values.js';
 	import { createColorTheme, type ColorTheme } from './color-theme.js';
 	import { colorThemeStyle } from './css.js';
@@ -84,6 +86,9 @@
 	});
 
 	setTheme(() => theme);
+
+	let portalHost: HTMLDivElement | undefined = $state();
+	setPortalTarget(() => portalHost);
 </script>
 
 <div
@@ -94,6 +99,7 @@
 	style={colorThemeStyle(theme)}
 >
 	{@render children()}
+	<div class="oito2-portal-host" bind:this={portalHost}></div>
 </div>
 
 <style>
@@ -101,6 +107,11 @@
 		.oito2-theme {
 			background: var(--oito2-color-background);
 			color: var(--oito2-color-on-surface);
+		}
+
+		/* Overlays rendered here keep the theme's custom properties. */
+		.oito2-portal-host {
+			display: contents;
 		}
 	}
 </style>

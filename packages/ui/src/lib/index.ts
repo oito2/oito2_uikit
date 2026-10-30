@@ -79,3 +79,47 @@ export { Format, useFormat, type ByteUnits, type FormatRef } from './format/form
 export * from './theme/index.js';
 export { setTheme, useTheme, type ThemeRef } from './theme/theme-context.js';
 export { default as ThemeProvider } from './theme/ThemeProvider.svelte';
+
+export {
+	ListCollection,
+	type ListCollectionOptions,
+	type ListGroup
+} from './collections/list-collection.js';
+export {
+	TreeCollection,
+	isTreeBranch,
+	treeNodeLabel,
+	type TreeEntry,
+	type TreeNode
+} from './collections/tree-collection.js';
+export {
+	SelectionController,
+	type SelectionControllerOptions,
+	type SelectionMode
+} from './collections/selection-controller.svelte.js';
+export {
+	AsyncListController,
+	type AsyncListControllerOptions,
+	type AsyncListPage,
+	type AsyncListRequest,
+	type SortDescriptor
+} from './collections/async-list-controller.svelte.js';
+
+export {
+	KeyChord,
+	Shortcut,
+	usesCommandKey,
+	type KeyChordModifiers
+} from './shortcuts/shortcut.js';
+export {
+	availableCommands,
+	isCommandEnabled,
+	shortcutConflicts,
+	useCommands,
+	type Command,
+	type CommandsRef
+} from './shortcuts/commands.js';
+export { default as Commands } from './shortcuts/Commands.svelte';
+
+export { focusBorder, type FocusBorderOptions } from './attachments/focus-border.js';
+export { edgeFocus, type EdgeFocusOptions } from './attachments/edge-focus.js';

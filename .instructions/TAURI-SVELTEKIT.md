@@ -74,6 +74,8 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - **State and controllers** are classes in `.svelte.ts` files with `$state`/`$derived` fields. No Svelte stores.
 - **Context:** each provider has a `set<Name>(get)` function, which takes a getter so props and `$state` stay reactive, and a `use<Name>()` function that returns a live ref (`.current`, or named getters) with a documented fallback when no provider exists. A provider component (`SystemScope`, `LocaleProvider`) only calls `set<Name>` and renders its children.
 - **Reusable behaviors** are attachments (`{@attach ...}`), not `use:` actions.
+- **Interaction primitives** live in `packages/ui/src/lib/internal/` and are not exported: focus scope, roving focus, typeahead, dismissable layer, `Portal`, floating positioning, presence, scroll lock, live region and `Controllable`. Components build on them instead of re-implementing focus or dismissal.
+- **Overlays** render through `Portal`, which targets the host the closest `ThemeProvider` renders at the end of its `div`, so they keep the theme; they are positioned with `position: fixed`.
 - **SSR-safe:** no `window`, `document` or `navigator` access at module level; touch the DOM only inside `$effect`, attachments, event handlers or `onMount`.
 - **Behavior is written in-house** following the WAI-ARIA Authoring Practices pattern of each widget (roles, keyboard, focus). The only positioning dependency is `@floating-ui/dom`. Ark UI is a conceptual reference: never copy its code.
 - **Strings** come from the `@oito2/ui` localizations (en and pt-BR) and can be overridden by a prop.

@@ -61,6 +61,7 @@
 		"svelte": "^5.57.0"
 	},
 	"dependencies": {
+		"@floating-ui/dom": "catalog:",
 		"@material/material-color-utilities": "catalog:"
 	},
 	"devDependencies": {
