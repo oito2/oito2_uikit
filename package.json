@@ -1,0 +1,35 @@
+{
+	"name": "oito2_uikit",
+	"private": true,
+	"type": "module",
+	"description": "Workspace root for the oito2_uikit Svelte packages, Tauri plugins and the showcase app.",
+	"license": "GPL-3.0-only",
+	"packageManager": "pnpm@12.16.1",
+	"engines": {
+		"node": ">=24"
+	},
+	"scripts": {
+		"build": "pnpm -r build",
+		"check": "pnpm -r --parallel check",
+		"test": "pnpm -r test",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write .",
+		"showcase": "pnpm --filter @oito2/showcase",
+		"tauri": "pnpm --filter @oito2/showcase tauri",
+		"changeset": "changeset"
+	},
+	"devDependencies": {
+		"@changesets/cli": "catalog:",
+		"@eslint/js": "catalog:",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-prettier": "catalog:",
+		"eslint-plugin-svelte": "catalog:",
+		"globals": "catalog:",
+		"prettier": "catalog:",
+		"prettier-plugin-svelte": "catalog:",
+		"svelte": "catalog:",
+		"typescript": "catalog:",
+		"typescript-eslint": "catalog:"
+	}
+}

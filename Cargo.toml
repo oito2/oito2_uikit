@@ -1,0 +1,42 @@
+[workspace]
+resolver = "3"
+members = [
+    "plugins/tauri-plugin-oito2-window",
+    "plugins/tauri-plugin-oito2-settings",
+    "apps/showcase/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "GPL-3.0-only"
+authors = ["OITO2"]
+repository = "https://github.com/oito2/oito2_uikit"
+homepage = "https://github.com/oito2/oito2_uikit"
+
+# One version per dependency for the whole workspace. Tauri crates stay on the
+# same major.minor as @tauri-apps/api and @tauri-apps/cli (2.12).
+[workspace.dependencies]
+tauri = "2.12.5"
+tauri-build = "2.7.4"
+tauri-plugin = "2.7.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+thiserror = "2.0.21"
+gtk = "0.18"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+panic = "deny"
+todo = "deny"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

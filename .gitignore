@@ -1,0 +1,38 @@
+# Local-only planning, references and agent memory
+.dev/
+.references/
+.sync82.json
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.svelte-kit/
+target/
+**/src-tauri/gen/schemas/
+
+# Tests
+test-results/
+**/__screenshots__/**/*-actual.png
+**/__screenshots__/**/*-diff.png
+.vitest-attachments/
+
+# Dart (tools/parity)
+.dart_tool/
+tools/parity/pubspec.lock
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Vite
+vite.config.*.timestamp-*
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

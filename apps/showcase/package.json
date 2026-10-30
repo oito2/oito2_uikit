@@ -1,0 +1,38 @@
+{
+	"name": "@oito2/showcase",
+	"private": true,
+	"version": "0.0.0",
+	"description": "Interactive showcase of the @oito2/ui components, as a Tauri desktop app and a static web build.",
+	"license": "GPL-3.0-only",
+	"author": "OITO2",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+		"test": "echo 'no showcase tests yet'",
+		"tauri": "tauri"
+	},
+	"dependencies": {
+		"@oito2/ui": "workspace:*",
+		"@oito2/ui-syntax": "workspace:*",
+		"@tauri-apps/api": "catalog:"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "catalog:",
+		"@sveltejs/kit": "catalog:",
+		"@sveltejs/vite-plugin-svelte": "catalog:",
+		"@tauri-apps/cli": "catalog:",
+		"@types/node": "catalog:",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
+	}
+}

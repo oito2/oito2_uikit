@@ -1,0 +1,66 @@
+{
+	"name": "@oito2/ui-window",
+	"version": "0.0.0",
+	"description": "Window chrome integration for @oito2/ui on Tauri v2: client-side decorations and window controls on Linux, Windows and macOS.",
+	"license": "GPL-3.0-only",
+	"author": "OITO2",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/oito2/oito2_uikit.git",
+		"directory": "packages/ui-window"
+	},
+	"homepage": "https://github.com/oito2/oito2_uikit#readme",
+	"bugs": {
+		"url": "https://github.com/oito2/oito2_uikit/issues"
+	},
+	"keywords": [
+		"svelte",
+		"svelte5",
+		"tauri",
+		"design-system",
+		"desktop"
+	],
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	},
+	"type": "module",
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "svelte-package && publint",
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"test": "vitest run"
+	},
+	"peerDependencies": {
+		"svelte": "^5.57.0"
+	},
+	"devDependencies": {
+		"@sveltejs/package": "catalog:",
+		"@sveltejs/vite-plugin-svelte": "catalog:",
+		"@vitest/browser-playwright": "catalog:",
+		"playwright": "catalog:",
+		"publint": "catalog:",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vitest": "catalog:",
+		"vitest-browser-svelte": "catalog:"
+	}
+}

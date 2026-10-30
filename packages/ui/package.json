@@ -1,0 +1,67 @@
+{
+	"name": "@oito2/ui",
+	"version": "0.0.0",
+	"description": "Svelte 5 design system for oito2 desktop apps on Tauri v2: tokens, themes, window chrome and components with desktop-grade density and GTK-style surfaces.",
+	"license": "GPL-3.0-only",
+	"author": "OITO2",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/oito2/oito2_uikit.git",
+		"directory": "packages/ui"
+	},
+	"homepage": "https://github.com/oito2/oito2_uikit#readme",
+	"bugs": {
+		"url": "https://github.com/oito2/oito2_uikit/issues"
+	},
+	"keywords": [
+		"svelte",
+		"svelte5",
+		"tauri",
+		"design-system",
+		"desktop"
+	],
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	},
+	"type": "module",
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./fonts.css": "./dist/styles/fonts.css"
+	},
+	"scripts": {
+		"build": "svelte-package && publint",
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"test": "vitest run"
+	},
+	"peerDependencies": {
+		"svelte": "^5.57.0"
+	},
+	"devDependencies": {
+		"@sveltejs/package": "catalog:",
+		"@sveltejs/vite-plugin-svelte": "catalog:",
+		"@vitest/browser-playwright": "catalog:",
+		"playwright": "catalog:",
+		"publint": "catalog:",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vitest": "catalog:",
+		"vitest-browser-svelte": "catalog:"
+	}
+}

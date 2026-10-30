@@ -1,0 +1,28 @@
+[package]
+name = "oito2-uikit-showcase"
+description = "Interactive showcase of the @oito2/ui components."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[lib]
+name = "oito2_uikit_showcase_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { workspace = true }
+
+[dependencies]
+tauri = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tauri-plugin-oito2-window = { path = "../../../plugins/tauri-plugin-oito2-window" }
+tauri-plugin-oito2-settings = { path = "../../../plugins/tauri-plugin-oito2-settings" }
+
+[lints]
+workspace = true
