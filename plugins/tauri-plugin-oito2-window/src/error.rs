@@ -24,6 +24,9 @@ pub enum Error {
     /// The requested operation is not supported on this platform.
     #[error("unsupported: {0}")]
     Unsupported(String),
+    /// A command received an argument outside its valid range.
+    #[error("invalid input: {0}")]
+    InvalidInput(String),
 }
 
 #[derive(Serialize)]
@@ -32,6 +35,7 @@ pub enum Error {
 enum ErrorKind {
     Tauri(String),
     Unsupported(String),
+    InvalidInput(String),
 }
 
 impl Serialize for Error {
@@ -43,6 +47,7 @@ impl Serialize for Error {
         let kind = match self {
             Self::Tauri(_) => ErrorKind::Tauri(message),
             Self::Unsupported(_) => ErrorKind::Unsupported(message),
+            Self::InvalidInput(_) => ErrorKind::InvalidInput(message),
         };
         kind.serialize(serializer)
     }

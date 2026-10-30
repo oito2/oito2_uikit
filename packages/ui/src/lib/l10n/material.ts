@@ -19,10 +19,12 @@ export interface MaterialStrings {
 	readonly back: string;
 	/** The label of a button that closes a dialog, page or panel. */
 	readonly close: string;
+	/** The label of a search field or of the button that shows one. */
+	readonly search: string;
 }
 
-const english: MaterialStrings = { back: 'Back', close: 'Close' };
-const portuguese: MaterialStrings = { back: 'Voltar', close: 'Fechar' };
+const english: MaterialStrings = { back: 'Back', close: 'Close', search: 'Search' };
+const portuguese: MaterialStrings = { back: 'Voltar', close: 'Fechar', search: 'Pesquisar' };
 
 /** Returns the standard button strings for `locale`: Portuguese for any `pt` locale, English otherwise. */
 export function materialStrings(locale: string): MaterialStrings {

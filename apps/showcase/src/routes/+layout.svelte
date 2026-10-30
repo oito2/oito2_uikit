@@ -18,13 +18,28 @@
 <script lang="ts">
 	import '@oito2/ui/styles.css';
 	import '@oito2/ui-syntax/fonts.css';
-	import { ThemeProvider, accentColors, type AccentColor } from '@oito2/ui';
+	import {
+		HeaderBar,
+		IconButton,
+		Platform,
+		SystemScope,
+		ThemeProvider,
+		WindowScope,
+		accentColors,
+		fallbackSystemSettings,
+		type AccentColor,
+		type WindowController
+	} from '@oito2/ui';
 	import { presetTheme, themePresetNames, themePresets } from '@oito2/ui-themes';
+	import { WindowResizeHandles, initWindow, type NativeWindowController } from '@oito2/ui-window';
+	import House from '@lucide/svelte/icons/house';
+	import { isTauri } from '@tauri-apps/api/core';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import type { LayoutProps } from './$types';
-	import { ShowcaseSettings } from '#lib/showcase-settings.svelte.js';
+	import { ShowcaseSettings, type SimulatedDesktop } from '#lib/showcase-settings.svelte.js';
+	import { SimulatedWindowController, simulatedSettings } from '#lib/simulated-window.svelte.js';
 	import { spikeRequest } from '#lib/spikes/bridge.js';
 
 	let { children }: LayoutProps = $props();
@@ -38,6 +53,35 @@
 	let source = $derived(settings.scheme === 'base' ? undefined : presetTheme(settings.scheme));
 
 	$effect(() => settings.save());
+
+	const tauri = isTauri();
+	const desktops: { value: SimulatedDesktop; label: string }[] = [
+		{ value: 'system', label: 'Browser' },
+		{ value: 'gnome', label: 'GNOME' },
+		{ value: 'kde', label: 'KDE Plasma' },
+		{ value: 'xfce', label: 'Xfce' },
+		{ value: 'cosmic', label: 'COSMIC' },
+		{ value: 'windows', label: 'Windows' },
+		{ value: 'macos', label: 'macOS' }
+	];
+
+	// In Tauri the real window drives the title bar; the browser build can imitate a desktop.
+	let native: NativeWindowController | null = $state(null);
+	const simulated = new SimulatedWindowController();
+	let simulating = $derived(!tauri && settings.desktop !== 'system');
+	let systemSettings = $derived(
+		simulating && settings.desktop !== 'system'
+			? simulatedSettings(settings.desktop)
+			: fallbackSystemSettings(Platform.current())
+	);
+	let controller: WindowController | null = $derived(native ?? (simulating ? simulated : null));
+
+	onMount(() => {
+		if (!tauri) return;
+		// The Rust setup already applied the frame and showed the window.
+		void initWindow({ show: false }).then((value) => (native = value));
+		return () => native?.dispose();
+	});
 
 	// A Tauri debug build started with OITO2_SPIKE opens that spike page and reports back.
 	onMount(async () => {
@@ -54,49 +98,74 @@
 	light={source}
 	dark={source}
 >
-	<header class="appearance">
-		<a href={resolve('/')}>oito2_uikit</a>
-		<label>
-			Scheme
-			<select bind:value={settings.scheme}>
-				<option value="base">oito2</option>
-				{#each themePresetNames as name (name)}
-					<option value={name}>{themePresets[name].label}</option>
-				{/each}
-			</select>
-		</label>
-		<label>
-			Mode
-			<select bind:value={settings.mode} disabled={preset !== null}>
-				<option value="system">System</option>
-				<option value="light">Light</option>
-				<option value="dark">Dark</option>
-			</select>
-		</label>
-		<label>
-			Accent
-			<select bind:value={settings.accent} disabled={preset !== null}>
-				{#each accents as accent (accent)}
-					<option value={accent}>{accent}</option>
-				{/each}
-			</select>
-		</label>
-		<label>
-			Contrast
-			<select
-				value={String(settings.highContrast)}
-				onchange={(event) => {
-					const value = event.currentTarget.value;
-					settings.highContrast = value === 'system' ? 'system' : value === 'true';
-				}}
-			>
-				<option value="system">System</option>
-				<option value="false">Normal</option>
-				<option value="true">High</option>
-			</select>
-		</label>
-	</header>
-	{@render children()}
+	<SystemScope settings={systemSettings}>
+		<WindowScope {controller}>
+			<div class="frame">
+				<HeaderBar title="oito2_uikit Showcase">
+					{#snippet start()}
+						<IconButton icon={House} label="Home" onclick={() => goto(resolve('/'))} />
+					{/snippet}
+				</HeaderBar>
+				<header class="appearance">
+					<label>
+						Scheme
+						<select bind:value={settings.scheme}>
+							<option value="base">oito2</option>
+							{#each themePresetNames as name (name)}
+								<option value={name}>{themePresets[name].label}</option>
+							{/each}
+						</select>
+					</label>
+					<label>
+						Mode
+						<select bind:value={settings.mode} disabled={preset !== null}>
+							<option value="system">System</option>
+							<option value="light">Light</option>
+							<option value="dark">Dark</option>
+						</select>
+					</label>
+					<label>
+						Accent
+						<select bind:value={settings.accent} disabled={preset !== null}>
+							{#each accents as accent (accent)}
+								<option value={accent}>{accent}</option>
+							{/each}
+						</select>
+					</label>
+					<label>
+						Contrast
+						<select
+							value={String(settings.highContrast)}
+							onchange={(event) => {
+								const value = event.currentTarget.value;
+								settings.highContrast =
+									value === 'system' ? 'system' : value === 'true';
+							}}
+						>
+							<option value="system">System</option>
+							<option value="false">Normal</option>
+							<option value="true">High</option>
+						</select>
+					</label>
+					{#if !tauri}
+						<label>
+							Desktop
+							<select bind:value={settings.desktop}>
+								{#each desktops as desktop (desktop.value)}
+									<option value={desktop.value}>{desktop.label}</option>
+								{/each}
+							</select>
+						</label>
+					{/if}
+					{#if simulating && simulated.lastAction}
+						<span class="action">Window action: {simulated.lastAction}</span>
+					{/if}
+				</header>
+				<div class="content">{@render children()}</div>
+			</div>
+			<WindowResizeHandles controller={native} />
+		</WindowScope>
+	</SystemScope>
 </ThemeProvider>
 
 <style>
@@ -105,7 +174,24 @@
 	}
 
 	:global(.showcase) {
-		min-height: 100vh;
+		height: 100vh;
+	}
+
+	/* The title bar stays at the top; the page scrolls below it. */
+	.frame {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.content {
+		flex: 1;
+		min-height: 0;
+		overflow: auto;
+	}
+
+	.action {
+		color: var(--oito2-color-on-surface-variant);
 	}
 
 	.appearance {
@@ -114,15 +200,8 @@
 		align-items: center;
 		gap: var(--oito2-space-md) var(--oito2-space-lg);
 		padding: var(--oito2-space-sm) var(--oito2-space-page);
-		background: var(--oito2-chrome-title-bar);
+		background: var(--oito2-chrome-mainbar);
 		border-bottom: 1px solid var(--oito2-color-outline-variant);
-	}
-
-	.appearance a {
-		margin-right: auto;
-		font-weight: var(--oito2-font-weight-emphasis);
-		color: var(--oito2-color-on-surface);
-		text-decoration: none;
 	}
 
 	.appearance label {

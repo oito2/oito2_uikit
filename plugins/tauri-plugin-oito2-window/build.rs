@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // The plugin exposes no commands yet; each phase adds its own to this list.
-const COMMANDS: &[&str] = &[];
+const COMMANDS: &[&str] = &["set_decoration_mode", "decoration_mode", "show_window_menu"];
 
 fn main() {
     tauri_plugin::Builder::new(COMMANDS).build();

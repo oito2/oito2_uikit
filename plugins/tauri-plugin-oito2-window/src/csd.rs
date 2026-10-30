@@ -13,14 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
-use tauri::{Runtime, WebviewWindow};
+use tauri::{Manager, Runtime, WebviewWindow};
 
 /// How the window frame is drawn.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "kebab-case")]
 pub enum DecorationMode {
     /// The system title bar and frame.
     Native,
@@ -87,13 +89,34 @@ pub fn apply_decoration_mode<R: Runtime>(
         DecorationMode::Undecorated => window.set_decorations(false)?,
         DecorationMode::GtkHeaderless => apply_gtk_headerless(window)?,
     }
+    if let Some(state) = window.try_state::<DecorationState>() {
+        state.record(window.label(), mode);
+    }
     Ok(())
 }
 
-/// Replaces the GTK title bar with an empty, hidden widget, which turns on GTK
-/// client-side decorations without a visible header. The widget opts out of
-/// `show_all`, so showing the window never reveals it and the theme's title
-/// bar height never takes space above the webview.
+/// The decoration mode applied to each window, by label, so the webview can ask which
+/// frame it has.
+#[derive(Debug, Default)]
+pub struct DecorationState(Mutex<HashMap<String, DecorationMode>>);
+
+impl DecorationState {
+    /// Records that the window `label` uses `mode`.
+    pub fn record(&self, label: &str, mode: DecorationMode) {
+        if let Ok(mut modes) = self.0.lock() {
+            modes.insert(label.to_owned(), mode);
+        }
+    }
+
+    /// Returns the mode recorded for the window `label`, if any.
+    pub fn get(&self, label: &str) -> Option<DecorationMode> {
+        self.0
+            .lock()
+            .ok()
+            .and_then(|modes| modes.get(label).copied())
+    }
+}
+
 #[cfg(target_os = "linux")]
 fn apply_gtk_headerless<R: Runtime>(window: &WebviewWindow<R>) -> crate::Result<()> {
     use gtk::prelude::*;
@@ -148,6 +171,26 @@ mod tests {
     #[test]
     fn rejects_unknown_modes() {
         assert!("frameless".parse::<DecorationMode>().is_err());
+    }
+
+    #[test]
+    fn serializes_as_the_parsed_names() {
+        for mode in [
+            DecorationMode::Native,
+            DecorationMode::Undecorated,
+            DecorationMode::GtkHeaderless,
+        ] {
+            let json = serde_json::to_string(&mode).unwrap();
+            assert_eq!(json, format!("\"{}\"", mode.as_str()));
+        }
+    }
+
+    #[test]
+    fn records_modes_by_window() {
+        let state = DecorationState::default();
+        assert_eq!(state.get("main"), None);
+        state.record("main", DecorationMode::GtkHeaderless);
+        assert_eq!(state.get("main"), Some(DecorationMode::GtkHeaderless));
     }
 
     #[test]

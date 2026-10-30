@@ -13,5 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Public API of @oito2/ui-window. Exports are added phase by phase.
-export {};
+export {
+	decorationMode,
+	setDecorationMode,
+	showWindowMenu,
+	type DecorationMode
+} from './commands.js';
+export {
+	NativeWindowController,
+	type NativeWindowControllerOptions,
+	type ResizeDirection
+} from './native-window-controller.svelte.js';
+export { initWindow, type InitWindowOptions } from './init-window.js';
+export { default as WindowResizeHandles } from './WindowResizeHandles.svelte';

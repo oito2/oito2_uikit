@@ -102,6 +102,8 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - Libraries must work outside Tauri (the showcase also ships as a web build). Guard native calls with `isTauri()` from `@tauri-apps/api/core`, and load Tauri-only modules with a dynamic `import()` behind that guard in library code.
 - Window actions use `getCurrentWindow()` from `@tauri-apps/api/window`; plugin calls use `invoke('plugin:<name>|<command>')` wrapped in a typed function of the plugin's `@oito2/ui-*` package.
 - Every window action or plugin command the showcase uses needs its permission in `src-tauri/capabilities/` (least privilege, see `TAURI.md`).
+- Title bars get their window through `WindowScope` (`@oito2/ui`), fed by `initWindow()` from `@oito2/ui-window`, which returns `null` outside Tauri; components never call `getCurrentWindow()` themselves.
+- `tauri-plugin-oito2-window` is the only crate that may use `unsafe`, and only in `src/menu.rs` (native window menu); every other crate keeps the workspace `unsafe_code = "forbid"`.
 - Tests mock IPC with `@tauri-apps/api/mocks` (`mockIPC`, `mockWindows`, `clearMocks`).
 - `@material/material-color-utilities` (used by the color schemes) imports its own modules without file extensions, which only a bundler resolves. Every Vitest config inlines it (`test.server.deps.inline`), build scripts load the sources through Vite's module runner, and an app that renders `@oito2/ui` on a Node server (SSR) must add it to `ssr.noExternal`. Tauri apps, which are client-only SPAs, need nothing.
 

@@ -24,9 +24,19 @@ interface Stored {
 	accent: AccentColor;
 	highContrast: boolean | 'system';
 	scheme: 'base' | ThemePreset;
+	desktop: SimulatedDesktop;
 }
 
-const defaults: Stored = { mode: 'system', accent: 'blue', highContrast: 'system', scheme: 'base' };
+/** The desktops the browser build can imitate, or the real platform (\`system\`). */
+export type SimulatedDesktop = 'system' | 'gnome' | 'kde' | 'xfce' | 'cosmic' | 'windows' | 'macos';
+
+const defaults: Stored = {
+	mode: 'system',
+	accent: 'blue',
+	highContrast: 'system',
+	scheme: 'base',
+	desktop: 'system'
+};
 
 // Reads the stored settings; private windows and blocked storage fall back to the defaults.
 function load(): Stored {
@@ -44,6 +54,7 @@ export class ShowcaseSettings {
 	accent = $state(defaults.accent);
 	highContrast = $state(defaults.highContrast);
 	scheme = $state(defaults.scheme);
+	desktop = $state(defaults.desktop);
 
 	constructor() {
 		const stored = load();
@@ -51,6 +62,7 @@ export class ShowcaseSettings {
 		this.accent = stored.accent;
 		this.highContrast = stored.highContrast;
 		this.scheme = stored.scheme;
+		this.desktop = stored.desktop;
 	}
 
 	/** Writes the settings to local storage, ignoring storage errors. */
@@ -60,7 +72,8 @@ export class ShowcaseSettings {
 				mode: this.mode,
 				accent: this.accent,
 				highContrast: this.highContrast,
-				scheme: this.scheme
+				scheme: this.scheme,
+				desktop: this.desktop
 			};
 			globalThis.localStorage?.setItem(storageKey, JSON.stringify(value));
 		} catch {

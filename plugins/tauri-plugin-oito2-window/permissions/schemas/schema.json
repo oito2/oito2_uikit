@@ -295,10 +295,46 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Default permissions for the oito2-window plugin. Empty until the plugin exposes commands.",
+          "description": "Enables the decoration_mode command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-decoration-mode",
+          "markdownDescription": "Enables the decoration_mode command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the decoration_mode command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-decoration-mode",
+          "markdownDescription": "Denies the decoration_mode command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the set_decoration_mode command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-set-decoration-mode",
+          "markdownDescription": "Enables the set_decoration_mode command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the set_decoration_mode command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-set-decoration-mode",
+          "markdownDescription": "Denies the set_decoration_mode command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the show_window_menu command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-show-window-menu",
+          "markdownDescription": "Enables the show_window_menu command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the show_window_menu command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-show-window-menu",
+          "markdownDescription": "Denies the show_window_menu command without any pre-configured scope."
+        },
+        {
+          "description": "Lets the window set its own frame, read it and show its native window menu.\n#### This default permission set includes:\n\n- `allow-set-decoration-mode`\n- `allow-decoration-mode`\n- `allow-show-window-menu`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the oito2-window plugin. Empty until the plugin exposes commands."
+          "markdownDescription": "Lets the window set its own frame, read it and show its native window menu.\n#### This default permission set includes:\n\n- `allow-set-decoration-mode`\n- `allow-decoration-mode`\n- `allow-show-window-menu`"
         }
       ]
     }

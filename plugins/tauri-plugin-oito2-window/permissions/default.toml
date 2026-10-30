@@ -16,5 +16,5 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "Default permissions for the oito2-window plugin. Empty until the plugin exposes commands."
-permissions = []
+description = "Lets the window set its own frame, read it and show its native window menu."
+permissions = ["allow-set-decoration-mode", "allow-decoration-mode", "allow-show-window-menu"]

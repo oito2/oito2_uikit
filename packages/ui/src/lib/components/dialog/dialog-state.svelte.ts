@@ -66,3 +66,8 @@ export function useDialog(): DialogState {
 	if (!hasContext(key)) throw new Error('Dialog parts must be inside a Dialog.Root');
 	return getContext<DialogState>(key);
 }
+
+/** Returns the state of the enclosing `Dialog.Root`, or `null` outside one. */
+export function maybeDialog(): DialogState | null {
+	return hasContext(key) ? getContext<DialogState>(key) : null;
+}

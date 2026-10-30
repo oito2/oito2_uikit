@@ -13,22 +13,37 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//! Window chrome integration for `@oito2/ui`: client-side decorations and
-//! window controls on Linux, Windows and macOS. Window commands are added in
-//! phase F5; this crate registers the plugin and applies the decoration mode.
+//! Window chrome integration for `@oito2/ui`: the frame of each window (client-side
+//! decorations on Linux, no system frame on Windows, the overlaid title bar on macOS)
+//! and the native window menu.
 
 use tauri::{
-    Runtime,
+    Manager, Runtime,
     plugin::{Builder, TauriPlugin},
 };
 
+mod commands;
 mod csd;
 mod error;
+#[allow(unsafe_code)]
+mod menu;
 
-pub use csd::{DecorationMode, apply_decoration_mode};
+pub use csd::{DecorationMode, DecorationState, apply_decoration_mode};
 pub use error::{Error, Result};
+pub use menu::{show_window_menu, window_menu_supported};
 
-/// Builds the `oito2-window` plugin.
+/// Creates the plugin. It exposes the `set_decoration_mode`, `decoration_mode` and
+/// `show_window_menu` commands to the webview.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("oito2-window").build()
+    Builder::new("oito2-window")
+        .invoke_handler(tauri::generate_handler![
+            commands::set_decoration_mode,
+            commands::decoration_mode,
+            commands::show_window_menu
+        ])
+        .setup(|app, _api| {
+            app.manage(DecorationState::default());
+            Ok(())
+        })
+        .build()
 }

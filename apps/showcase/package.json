@@ -20,6 +20,7 @@
 		"@oito2/ui": "workspace:*",
 		"@oito2/ui-syntax": "workspace:*",
 		"@oito2/ui-themes": "workspace:*",
+		"@oito2/ui-window": "workspace:*",
 		"@tauri-apps/api": "catalog:"
 	},
 	"devDependencies": {

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-decoration-mode"
+description = "Enables the decoration_mode command without any pre-configured scope."
+commands.allow = ["decoration_mode"]
+
+[[permission]]
+identifier = "deny-decoration-mode"
+description = "Denies the decoration_mode command without any pre-configured scope."
+commands.deny = ["decoration_mode"]

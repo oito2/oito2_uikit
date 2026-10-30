@@ -313,6 +313,9 @@ importers:
       '@oito2/ui-themes':
         specifier: workspace:*
         version: link:../../packages/ui-themes
+      '@oito2/ui-window':
+        specifier: workspace:*
+        version: link:../../packages/ui-window
       '@tauri-apps/api':
         specifier: 'catalog:'
         version: 2.12.4
@@ -621,6 +624,13 @@ importers:
         version: 3.1.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vitest@5.0.5)
 
   packages/ui-window:
+    dependencies:
+      '@oito2/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@tauri-apps/api':
+        specifier: 'catalog:'
+        version: 2.12.4
     devDependencies:
       '@sveltejs/package':
         specifier: 'catalog:'

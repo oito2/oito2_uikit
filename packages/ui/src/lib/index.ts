@@ -167,3 +167,27 @@ export {
 	snapSliderValue,
 	type SliderMark
 } from './components/slider/slider-math.js';
+
+export {
+	defaultWindowState,
+	setWindowController,
+	useWindowController,
+	type WindowController,
+	type WindowControllerRef,
+	type WindowState
+} from './window/window-controller.js';
+export {
+	titleBarHeight,
+	windowControlLabel,
+	windowControlWidth,
+	type WindowControlLabels,
+	type WindowControlType
+} from './window/window-control.js';
+export { dragRegionAttribute, titleBarGestures } from './window/title-bar-gestures.js';
+export { default as WindowScope } from './window/WindowScope.svelte';
+export { default as WindowControl } from './window/WindowControl.svelte';
+export { default as WindowControls } from './window/WindowControls.svelte';
+export { default as TitleBar } from './window/TitleBar.svelte';
+export { default as WindowTitleBar } from './window/WindowTitleBar.svelte';
+export { default as DialogTitleBar } from './window/DialogTitleBar.svelte';
+export { default as HeaderBar } from './window/HeaderBar.svelte';
