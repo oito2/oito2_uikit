@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { flushSync } from 'svelte';
 import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
@@ -84,6 +85,20 @@ describe('Presence', () => {
 		await expect.element(page.getByTestId('panel')).not.toBeInTheDocument();
 		props.open = true;
 		await expect.element(page.getByTestId('panel')).toHaveAttribute('data-state', 'open');
+	});
+
+	it('removes an element after its exit animation while the main thread is busy', async () => {
+		const props = $state({ open: true, animated: true });
+		render(PresenceHarness, props);
+		await expect.element(page.getByTestId('panel')).toBeInTheDocument();
+		props.open = false;
+		flushSync();
+		// The main thread stays busy for longer than the 150 ms exit animation.
+		const until = performance.now() + 400;
+		while (performance.now() < until) {
+			// Blocks the main thread.
+		}
+		await expect.element(page.getByTestId('panel')).not.toBeInTheDocument();
 	});
 
 	it('removes an element without animation at once', async () => {

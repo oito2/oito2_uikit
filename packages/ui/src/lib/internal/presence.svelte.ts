@@ -58,25 +58,17 @@ export class Presence {
 			this.#present = false;
 			return;
 		}
-		// The closed state is applied first, so the exit animation is the one read below.
+		// The closed state is applied first, so the exit animation is among the ones read
+		// below. Waiting on the animations themselves, instead of on `animationend`, also
+		// covers an animation that already ended before this frame.
 		requestAnimationFrame(() => {
 			if (this.#open()) return;
-			const style = getComputedStyle(element);
-			const duration = Math.max(
-				...style.animationDuration.split(',').map((d) => Number.parseFloat(d) || 0)
-			);
-			if (style.animationName === 'none' || duration === 0) {
-				this.#present = false;
-				return;
-			}
-			const done = (event: AnimationEvent) => {
-				if (event.target !== element) return;
-				element.removeEventListener('animationend', done);
-				element.removeEventListener('animationcancel', done);
+			const running = element
+				.getAnimations()
+				.filter((animation) => animation.playState !== 'finished');
+			void Promise.allSettled(running.map((animation) => animation.finished)).then(() => {
 				if (!this.#open()) this.#present = false;
-			};
-			element.addEventListener('animationend', done);
-			element.addEventListener('animationcancel', done);
+			});
 		});
 	}
 }
