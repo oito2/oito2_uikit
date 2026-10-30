@@ -3161,10 +3161,14 @@ dependencies = [
 name = "tauri-plugin-oito2-settings"
 version = "0.1.0"
 dependencies = [
+ "gtk",
+ "objc2-app-kit",
  "serde",
+ "serde_json",
  "tauri",
  "tauri-plugin",
  "thiserror 2.0.21",
+ "windows",
 ]
 
 [[package]]

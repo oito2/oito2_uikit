@@ -295,10 +295,22 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Default permissions for the oito2-settings plugin. Empty until the plugin exposes commands.",
+          "description": "Enables the read_settings command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-read-settings",
+          "markdownDescription": "Enables the read_settings command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the read_settings command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-read-settings",
+          "markdownDescription": "Denies the read_settings command without any pre-configured scope."
+        },
+        {
+          "description": "Lets the webview read the system settings (desktop session, window button layout, accent color and contrast).\n#### This default permission set includes:\n\n- `allow-read-settings`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the oito2-settings plugin. Empty until the plugin exposes commands."
+          "markdownDescription": "Lets the webview read the system settings (desktop session, window button layout, accent color and contrast).\n#### This default permission set includes:\n\n- `allow-read-settings`"
         }
       ]
     }

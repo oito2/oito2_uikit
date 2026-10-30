@@ -13,8 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// The plugin exposes no commands yet; each phase adds its own to this list.
-const COMMANDS: &[&str] = &[];
+const COMMANDS: &[&str] = &["read_settings"];
 
 fn main() {
     tauri_plugin::Builder::new(COMMANDS).build();

@@ -13,5 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Public API of @oito2/ui-settings. Exports are added phase by phase.
-export {};
+export {
+	emptyRawSettings,
+	type ConfigValues,
+	type RawSettings,
+	type SettingValue
+} from './raw-settings.js';
+export { composeSystemSettings, sameSystemSettings } from './compose.js';
+export { settingsChangedEvent, tauriSettingsSource, type SettingsSource } from './source.js';
+export { loadSystemSettings } from './load.js';
+export { default as SystemSettingsScope } from './SystemSettingsScope.svelte';

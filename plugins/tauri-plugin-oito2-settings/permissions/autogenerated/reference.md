@@ -1,6 +1,10 @@
 ## Default Permission
 
-Default permissions for the oito2-settings plugin. Empty until the plugin exposes commands.
+Lets the webview read the system settings (desktop session, window button layout, accent color and contrast).
+
+#### This default permission set includes the following:
+
+- `allow-read-settings`
 
 ## Permission Table
 
@@ -10,4 +14,30 @@ Default permissions for the oito2-settings plugin. Empty until the plugin expose
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`oito2-settings:allow-read-settings`
+
+</td>
+<td>
+
+Enables the read_settings command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`oito2-settings:deny-read-settings`
+
+</td>
+<td>
+
+Denies the read_settings command without any pre-configured scope.
+
+</td>
+</tr>
 </table>

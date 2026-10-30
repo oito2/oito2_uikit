@@ -102,6 +102,7 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - Libraries must work outside Tauri (the showcase also ships as a web build). Guard native calls with `isTauri()` from `@tauri-apps/api/core`, and load Tauri-only modules with a dynamic `import()` behind that guard in library code.
 - Window actions use `getCurrentWindow()` from `@tauri-apps/api/window`; plugin calls use `invoke('plugin:<name>|<command>')` wrapped in a typed function of the plugin's `@oito2/ui-*` package.
 - Every window action or plugin command the showcase uses needs its permission in `src-tauri/capabilities/` (least privilege, see `TAURI.md`).
+- System settings reach components through `SystemScope`; apps wrap their content in `SystemSettingsScope` (`@oito2/ui-settings`), which reads `tauri-plugin-oito2-settings` and keeps the platform defaults outside Tauri. Plugins return raw values; the TypeScript side composes them, so the rules stay testable without the platform.
 - Title bars get their window through `WindowScope` (`@oito2/ui`), fed by `initWindow()` from `@oito2/ui-window`, which returns `null` outside Tauri; components never call `getCurrentWindow()` themselves.
 - `tauri-plugin-oito2-window` is the only crate that may use `unsafe`, and only in `src/menu.rs` (native window menu); every other crate keeps the workspace `unsafe_code = "forbid"`.
 - Tests mock IPC with `@tauri-apps/api/mocks` (`mockIPC`, `mockWindows`, `clearMocks`).

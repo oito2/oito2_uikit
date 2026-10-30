@@ -16,5 +16,5 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "Default permissions for the oito2-settings plugin. Empty until the plugin exposes commands."
-permissions = []
+description = "Lets the webview read the system settings (desktop session, window button layout, accent color and contrast)."
+permissions = ["allow-read-settings"]

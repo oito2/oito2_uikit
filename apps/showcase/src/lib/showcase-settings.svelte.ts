@@ -21,7 +21,7 @@ const storageKey = 'oito2-showcase-settings';
 /** The appearance the showcase is viewed with. */
 interface Stored {
 	mode: 'light' | 'dark' | 'system';
-	accent: AccentColor;
+	accent: AccentColor | 'system';
 	highContrast: boolean | 'system';
 	scheme: 'base' | ThemePreset;
 	desktop: SimulatedDesktop;
@@ -32,7 +32,7 @@ export type SimulatedDesktop = 'system' | 'gnome' | 'kde' | 'xfce' | 'cosmic' | 
 
 const defaults: Stored = {
 	mode: 'system',
-	accent: 'blue',
+	accent: 'system',
 	highContrast: 'system',
 	scheme: 'base',
 	desktop: 'system'

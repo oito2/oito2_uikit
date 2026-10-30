@@ -31,6 +31,7 @@
 		type WindowController
 	} from '@oito2/ui';
 	import { presetTheme, themePresetNames, themePresets } from '@oito2/ui-themes';
+	import { SystemSettingsScope } from '@oito2/ui-settings';
 	import { WindowResizeHandles, initWindow, type NativeWindowController } from '@oito2/ui-window';
 	import House from '@lucide/svelte/icons/house';
 	import { isTauri } from '@tauri-apps/api/core';
@@ -69,7 +70,9 @@
 	let native: NativeWindowController | null = $state(null);
 	const simulated = new SimulatedWindowController();
 	let simulating = $derived(!tauri && settings.desktop !== 'system');
-	let systemSettings = $derived(
+	// Tauri reads the real settings (SystemSettingsScope); the browser uses the defaults or
+	// the simulated desktop.
+	let webSettings = $derived(
 		simulating && settings.desktop !== 'system'
 			? simulatedSettings(settings.desktop)
 			: fallbackSystemSettings(Platform.current())
@@ -90,15 +93,15 @@
 	});
 </script>
 
-<ThemeProvider
-	class="showcase"
-	{mode}
-	accent={settings.accent}
-	highContrast={settings.highContrast}
-	light={source}
-	dark={source}
->
-	<SystemScope settings={systemSettings}>
+{#snippet app()}
+	<ThemeProvider
+		class="showcase"
+		{mode}
+		accent={settings.accent === 'system' ? undefined : settings.accent}
+		highContrast={settings.highContrast}
+		light={source}
+		dark={source}
+	>
 		<WindowScope {controller}>
 			<div class="frame">
 				<HeaderBar title="oito2_uikit Showcase">
@@ -127,6 +130,7 @@
 					<label>
 						Accent
 						<select bind:value={settings.accent} disabled={preset !== null}>
+							<option value="system">System</option>
 							{#each accents as accent (accent)}
 								<option value={accent}>{accent}</option>
 							{/each}
@@ -165,8 +169,14 @@
 			</div>
 			<WindowResizeHandles controller={native} />
 		</WindowScope>
-	</SystemScope>
-</ThemeProvider>
+	</ThemeProvider>
+{/snippet}
+
+{#if tauri}
+	<SystemSettingsScope>{@render app()}</SystemSettingsScope>
+{:else}
+	<SystemScope settings={webSettings}>{@render app()}</SystemScope>
+{/if}
 
 <style>
 	:global(html, body) {
