@@ -17,7 +17,7 @@ target/
 test-results/
 **/__screenshots__/**/*-actual.png
 **/__screenshots__/**/*-diff.png
-.vitest-attachments/
+.vitest/
 
 # Dart (tools/parity)
 .dart_tool/

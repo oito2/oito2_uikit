@@ -33,7 +33,15 @@ export default defineConfig({
 						headless: true,
 						provider: playwright(),
 						// Chromium stands in for WebView2, WebKit for WebKitGTK and WKWebView.
-						instances: [{ browser: 'chromium' }, { browser: 'webkit' }]
+						instances: [{ browser: 'chromium' }, { browser: 'webkit' }],
+						expect: {
+							toMatchScreenshot: {
+								comparatorName: 'pixelmatch',
+								// Font rasterization differs slightly between Linux machines; up to 0.5% of
+								// the pixels may differ before a golden fails.
+								comparatorOptions: { allowedMismatchedPixelRatio: 0.005 }
+							}
+						}
 					}
 				}
 			},
