@@ -27,11 +27,14 @@ dependencies:
   # The oito2_ui checkout linked (locally) or cloned (CI) into .references/.
   oito2_ui:
     path: ../../.references/oito2_ui/packages/oito2_ui
+  oito2_ui_themes:
+    path: ../../.references/oito2_ui/packages/oito2_ui_themes
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  # Imported for Typography; the version follows dependency_overrides.
+  # Imported directly; the versions follow dependency_overrides.
+  catppuccin_flutter: any
   material_ui: any
 
 # Outside its own workspace, oito2_ui would resolve newer versions than the ones
@@ -40,3 +43,7 @@ dependency_overrides:
   flutter_lucide: 1.59.0
   intl: 0.20.3
   material_ui: 1.7.0
+  catppuccin_flutter: 1.0.0
+  # oito2_ui_themes asks for the hosted oito2_ui; use the same local checkout.
+  oito2_ui:
+    path: ../../.references/oito2_ui/packages/oito2_ui

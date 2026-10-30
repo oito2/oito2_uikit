@@ -21,6 +21,9 @@ export default defineConfig({
 	plugins: [svelte()],
 	test: {
 		expect: { requireAssertions: true },
+		// Its modules import each other without file extensions, which only a bundler
+		// resolves, so Vitest must process it instead of loading it through Node.
+		server: { deps: { inline: ['@material/material-color-utilities'] } },
 		passWithNoTests: true,
 		projects: [
 			{

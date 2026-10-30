@@ -40,7 +40,8 @@
 			"types": "./dist/index.d.ts",
 			"svelte": "./dist/index.js",
 			"default": "./dist/index.js"
-		}
+		},
+		"./presets.css": "./dist/presets.css"
 	},
 	"scripts": {
 		"build": "svelte-package && publint",
@@ -49,6 +50,10 @@
 	},
 	"peerDependencies": {
 		"svelte": "^5.57.0"
+	},
+	"dependencies": {
+		"@catppuccin/palette": "catalog:",
+		"@oito2/ui": "workspace:*"
 	},
 	"devDependencies": {
 		"@sveltejs/package": "catalog:",

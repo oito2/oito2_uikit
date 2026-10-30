@@ -85,6 +85,7 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - Every component rule sits inside `@layer oito2 { ... }` in the component's scoped `<style>`, so unlayered app CSS always wins.
 - Read tokens through `var(--oito2-...)`; never hardcode a color, radius, spacing or size that has a token.
 - Token values live only in `packages/ui/src/lib/tokens/values.ts` (a module without imports). `tokens.css` is generated from it: after changing a value run `pnpm generate`; CI runs `pnpm generate:check`. Parity with oito2_ui is tested against `packages/ui/src/fixtures/parity/*.json`, exported by `tools/parity` (`flutter test` there).
+- Colors come from the active theme's custom properties: `--oito2-color-<role>` (Material 3 roles in kebab-case, plus `background`, `primary-text`, `error-text`, `success`, `warning`, `info` and `link`), `--oito2-chrome-<surface>` and `--oito2-syntax-<role>`. Text uses the text-safe roles (`on-surface`, `on-surface-variant`, `primary-text`, `error-text`, status colors); `primary` and `error` are fills.
 - Style states through data attributes (`data-state`, `data-disabled`, `data-orientation`, `data-highlighted`, `data-placement`).
 - Density: pointer sizes by default; touch sizes under `@media (pointer: coarse)` or `[data-oito2-density='touch']`.
 - Motion respects `prefers-reduced-motion`.
@@ -97,6 +98,7 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 - Window actions use `getCurrentWindow()` from `@tauri-apps/api/window`; plugin calls use `invoke('plugin:<name>|<command>')` wrapped in a typed function of the plugin's `@oito2/ui-*` package.
 - Every window action or plugin command the showcase uses needs its permission in `src-tauri/capabilities/` (least privilege, see `TAURI.md`).
 - Tests mock IPC with `@tauri-apps/api/mocks` (`mockIPC`, `mockWindows`, `clearMocks`).
+- `@material/material-color-utilities` (used by the color schemes) imports its own modules without file extensions, which only a bundler resolves. Every Vitest config inlines it (`test.server.deps.inline`), build scripts load the sources through Vite's module runner, and an app that renders `@oito2/ui` on a Node server (SSR) must add it to `ssr.noExternal`. Tauri apps, which are client-only SPAs, need nothing.
 
 ---
 
@@ -124,7 +126,7 @@ Every hand-written source file starts with the GPL-3.0 notice of `tools/template
 
 ## Quality
 
-Run from the repository root before reporting a task as done:
+Run from the repository root before reporting a task as done (Prettier reads `.prettierignore` from the current directory only, so always run it from the root):
 
 ```bash
 pnpm lint      # prettier --check + eslint

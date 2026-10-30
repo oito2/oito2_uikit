@@ -164,12 +164,18 @@ settings:
 
 catalogs:
   default:
+    '@catppuccin/palette':
+      specifier: 1.8.0
+      version: 1.8.0
     '@changesets/cli':
       specifier: 3.0.3
       version: 3.0.3
     '@eslint/js':
       specifier: 10.0.1
       version: 10.0.1
+    '@material/material-color-utilities':
+      specifier: 0.4.0
+      version: 0.4.0
     '@sveltejs/adapter-static':
       specifier: 4.0.0
       version: 4.0.0
@@ -280,6 +286,9 @@ importers:
       typescript-eslint:
         specifier: 'catalog:'
         version: 8.72.1(eslint@10.13.0)(typescript@6.0.3)
+      vite:
+        specifier: 'catalog:'
+        version: 8.3.5(@types/node@24.19.2)(yaml@2.9.1)
 
   apps/showcase:
     dependencies:
@@ -289,6 +298,9 @@ importers:
       '@oito2/ui-syntax':
         specifier: workspace:*
         version: link:../../packages/ui-syntax
+      '@oito2/ui-themes':
+        specifier: workspace:*
+        version: link:../../packages/ui-themes
       '@tauri-apps/api':
         specifier: 'catalog:'
         version: 2.12.4
@@ -322,6 +334,10 @@ importers:
         version: 8.3.5(@types/node@24.19.2)(yaml@2.9.1)
 
   packages/ui:
+    dependencies:
+      '@material/material-color-utilities':
+        specifier: 'catalog:'
+        version: 0.4.0
     devDependencies:
       '@sveltejs/package':
         specifier: 'catalog:'
@@ -538,6 +554,13 @@ importers:
         version: 3.1.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vitest@5.0.5)
 
   packages/ui-themes:
+    dependencies:
+      '@catppuccin/palette':
+        specifier: 'catalog:'
+        version: 1.8.0
+      '@oito2/ui':
+        specifier: workspace:*
+        version: link:../ui
     devDependencies:
       '@sveltejs/package':
         specifier: 'catalog:'
@@ -619,6 +642,9 @@ packages:
 
   '@cacheable/utils@2.5.0':
     resolution: {integrity: sha512-buipgOVDkkPXNR5+xBpDw7Zk2n1EvU7qBJCNUcL7rhQ//kfpOXPAvQ511Os0vpLYJ1pZnvudNytkQt2hst3wqA==}
+
+  '@catppuccin/palette@1.8.0':
+    resolution: {integrity: sha512-qXhwKiLzQomUygUJYB36YAFgs+dET5bIocfkiaFIatQF5Pwc7L112TlF9P8J5Oqs3x3XTjYSucG0ncHXSCuk7Q==}
 
   '@changesets/apply-release-plan@8.1.1':
     resolution: {integrity: sha512-nk2Hbq3M9NeHMdaIRBDvawKrQJzXB9sGyBUE5yWnIKtvdcNCPj75zBekJYr0gTT2ecJH3eFeTrc8eisPImcv0Q==}
@@ -784,6 +810,9 @@ packages:
   '@manypkg/tools@2.1.2':
     resolution: {integrity: sha512-6QEf6yqFbETdwGITKq57aYoPfX/3K8XFNwsAlx0C1M7o8cb79sv1M3w+tWuWvIcSbNqrLF7OD7YpZMVVz335hQ==}
     engines: {node: '>=20.0.0'}
+
+  '@material/material-color-utilities@0.4.0':
+    resolution: {integrity: sha512-dlq6VExJReb8dhjj3a/yTigr3ncNwoFmL5Iy2ENtbDX03EmNeOEdZ+vsaGrj7RTuO+mB7L58II4LCsl4NpM8uw==}
 
   '@oxc-project/types@0.155.0':
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
@@ -1983,6 +2012,8 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
+  '@catppuccin/palette@1.8.0': {}
+
   '@changesets/apply-release-plan@8.1.1':
     dependencies:
       '@changesets/config': 4.0.1
@@ -2190,6 +2221,8 @@ snapshots:
       jju: 1.4.0
       tinyglobby: 0.2.17
       yaml: 2.9.1
+
+  '@material/material-color-utilities@0.4.0': {}
 
   '@oxc-project/types@0.155.0': {}
 

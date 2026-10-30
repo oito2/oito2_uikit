@@ -105,3 +105,44 @@ export function fromHsl(color: Hsla): Rgba {
 	const channel = (value: number) => roundHalfAway((value + match) * 255);
 	return { r: channel(r), g: channel(g), b: channel(b), a: roundHalfAway(color.a * 255) };
 }
+
+/**
+ * A color with red, green, blue and alpha channels from 0 to 1. Unlike `Rgba`, a channel
+ * can sit between two 8-bit steps, as colors mixed with `lerpColor` do; `colorToHex`
+ * rounds it to the nearest step.
+ */
+export interface ColorValue {
+	readonly r: number;
+	readonly g: number;
+	readonly b: number;
+	readonly a: number;
+}
+
+/** A color as a hex string or as a `ColorValue`. */
+export type ColorInput = string | ColorValue;
+
+/** Converts a hex string or a `ColorValue` to a `ColorValue`. */
+export function toColorValue(color: ColorInput): ColorValue {
+	if (typeof color !== 'string') return color;
+	const { r, g, b, a } = parseHex(color);
+	return { r: r / 255, g: g / 255, b: b / 255, a: a / 255 };
+}
+
+/** Rounds each channel to the nearest 8-bit step. */
+export function toRgba(color: ColorValue): Rgba {
+	const channel = (value: number) => Math.min(255, Math.max(0, roundHalfAway(value * 255)));
+	return { r: channel(color.r), g: channel(color.g), b: channel(color.b), a: channel(color.a) };
+}
+
+/** Formats a `ColorValue` as uppercase `#RRGGBB`, or `#RRGGBBAA` when it isn't opaque. */
+export function colorToHex(color: ColorValue): string {
+	return formatHex(toRgba(color));
+}
+
+/** Returns the color `t` of the way from `a` to `b` (0 gives `a`, 1 gives `b`), per channel. */
+export function lerpColor(a: ColorInput, b: ColorInput, t: number): ColorValue {
+	const x = toColorValue(a);
+	const y = toColorValue(b);
+	const mix = (p: number, q: number) => Math.min(1, Math.max(0, p * (1 - t) + q * t));
+	return { r: mix(x.r, y.r), g: mix(x.g, y.g), b: mix(x.b, y.b), a: mix(x.a, y.a) };
+}

@@ -13,5 +13,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Public API of @oito2/ui-themes. Exports are added phase by phase.
-export {};
+// Public API of @oito2/ui-themes: the 13 named color presets of oito2.
+
+export {
+	draculaPalettes,
+	everforestPalettes,
+	nordPalette,
+	rosePinePalettes,
+	type DraculaPalette,
+	type EverforestPalette,
+	type RosePinePalette
+} from './palettes.js';
+export {
+	presetColorTheme,
+	presetRoles,
+	presetTheme,
+	themePresetNames,
+	themePresets,
+	type ThemePreset
+} from './presets.js';

@@ -18,6 +18,7 @@
 	"dependencies": {
 		"@oito2/ui": "workspace:*",
 		"@oito2/ui-syntax": "workspace:*",
+		"@oito2/ui-themes": "workspace:*",
 		"@tauri-apps/api": "catalog:"
 	},
 	"devDependencies": {

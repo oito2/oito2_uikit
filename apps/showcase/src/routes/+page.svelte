@@ -22,10 +22,11 @@
 <main>
 	<h1>oito2_uikit</h1>
 	<p>
-		The component pages arrive phase by phase. Phase F1 adds the foundation; the platform spikes
-		of phase F0 stay below.
+		The component pages arrive phase by phase. Phases F1 and F2 add the foundation and the color
+		schemes; the platform spikes of phase F0 stay below.
 	</p>
 	<ul>
+		<li><a href={resolve('/colors')}>Colors: every role of the active scheme</a></li>
 		<li>
 			<a href={resolve('/foundation')}
 				>Foundation: tokens, type scale, platform and formatting</a

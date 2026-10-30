@@ -17,8 +17,6 @@
 
 // Tokens
 export {
-	accentColors,
-	defaultAccent,
 	neutralPalettes,
 	radius,
 	sizes,
@@ -26,7 +24,6 @@ export {
 	statusPalettes,
 	surfacesOf,
 	typography,
-	type AccentColor,
 	type NeutralPalette,
 	type StatusPalette,
 	type TextStyle,
@@ -35,7 +32,6 @@ export {
 
 // Foundation
 export { formatHex, parseHex, type Rgba } from './foundation/color.js';
-export { Contrast } from './foundation/contrast.js';
 export {
 	desktopEnvironments,
 	detectDesktopEnvironment,
@@ -78,3 +74,8 @@ export {
 } from './l10n/locale.js';
 export { default as LocaleProvider } from './l10n/LocaleProvider.svelte';
 export { Format, useFormat, type ByteUnits, type FormatRef } from './format/format.js';
+
+// Color themes
+export * from './theme/index.js';
+export { setTheme, useTheme, type ThemeRef } from './theme/theme-context.js';
+export { default as ThemeProvider } from './theme/ThemeProvider.svelte';
