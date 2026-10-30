@@ -75,8 +75,10 @@ fn read_portal(connection: &gio::DBusConnection, key: &str) -> Option<glib::Vari
         let Ok(reply) = reply else { continue };
         // `ReadOne` answers `(v)`; `Read` answers `(v)` holding another `v`.
         let mut value = reply.try_child_value(0)?;
-        while let Some(inner) = value.as_variant() {
-            value = inner;
+        // `as_variant` asserts on values that aren't boxed variants, so the type is checked
+        // before each unboxing.
+        while value.type_() == glib::VariantTy::VARIANT {
+            value = value.as_variant()?;
         }
         return Some(value);
     }

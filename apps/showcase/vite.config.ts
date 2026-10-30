@@ -15,7 +15,7 @@
 
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, searchForWorkspaceRoot } from 'vite';
 
 // GitHub Pages serves the web build under /oito2_uikit; Tauri serves it from the root.
 const base = (process.env.BASE_PATH ?? '') as '' | `/${string}`;
@@ -38,6 +38,9 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		strictPort: true,
-		watch: { ignored: ['**/src-tauri/**'] }
+		watch: { ignored: ['**/src-tauri/**'] },
+		// The workspace packages are linked from outside the app, and their fonts are served
+		// from their own folders.
+		fs: { allow: [searchForWorkspaceRoot(process.cwd())] }
 	}
 });
