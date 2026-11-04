@@ -50,7 +50,11 @@ export {
 	colorThemeStyle,
 	colorThemeVariables,
 	componentColors,
-	type ComponentColors
+	infoColors,
+	infoTypes,
+	type ComponentColors,
+	type InfoColors,
+	type InfoType
 } from './css.js';
 export {
 	ensureSyntaxContrast,

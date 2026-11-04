@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Contrast } from '../foundation/contrast.js';
+import { colorToHex, lerpColor } from '../foundation/color.js';
+import { Contrast, ensureContrastColor } from '../foundation/contrast.js';
 import { colorSchemeRoles, type ColorTheme } from './color-theme.js';
 import { syntaxRoles } from './syntax-palette.js';
 
@@ -32,6 +33,11 @@ export interface ComponentColors {
 	readonly onPrimaryText: string;
 	/** The thumb of an off switch: the variant text tone when dark, the lowest surface when light. */
 	readonly offThumb: string;
+	/**
+	 * Text on a faint tint of the text-safe primary tone (12% over the surface or the
+	 * background), such as a selected subtle tab: that tone, adjusted to reach 4.5:1.
+	 */
+	readonly onPrimaryTint: string;
 }
 
 /** Returns the colors components derive from `theme`. */
@@ -41,6 +47,16 @@ export function componentColors(theme: ColorTheme): ComponentColors {
 	const onPrimaryText = Contrast.foregroundFor(text);
 	const offThumb =
 		theme.brightness === 'dark' ? scheme.onSurfaceVariant : scheme.surfaceContainerLowest;
+	const onPrimaryTint = colorToHex(
+		ensureContrastColor(
+			text,
+			[
+				colorToHex(lerpColor(scheme.surface, text, 0.12)),
+				colorToHex(lerpColor(theme.background, text, 0.12))
+			],
+			Contrast.textAA
+		)
+	);
 	const usePrimary =
 		Contrast.minRatio(scheme.primary, [
 			scheme.surface,
@@ -52,9 +68,66 @@ export function componentColors(theme: ColorTheme): ComponentColors {
 				selectedFill: scheme.primary,
 				onSelectedFill: scheme.onPrimary,
 				onPrimaryText,
-				offThumb
+				offThumb,
+				onPrimaryTint
 			}
-		: { selectedFill: text, onSelectedFill: onPrimaryText, onPrimaryText, offThumb };
+		: {
+				selectedFill: text,
+				onSelectedFill: onPrimaryText,
+				onPrimaryText,
+				offThumb,
+				onPrimaryTint
+			};
+}
+
+/** The kinds of message of `InfoBox` and `InfoBadge`. */
+export const infoTypes = ['information', 'success', 'warning', 'danger', 'important'] as const;
+
+/** The kind of message shown by `InfoBox` and `InfoBadge`. */
+export type InfoType = (typeof infoTypes)[number];
+
+/** The colors of one kind of message, over the theme surface. */
+export interface InfoColors {
+	/** The background of an info box: the kind color at 8% over the surface. */
+	readonly box: string;
+	/** The icon, title and border color of an info box, at 4.5:1 on `box`. */
+	readonly boxText: string;
+	/** The background of an info badge: the kind color at 14% over the surface. */
+	readonly badge: string;
+	/** The label color of an info badge, at 4.5:1 on `badge`. */
+	readonly badgeText: string;
+}
+
+/** Returns the colors of every kind of message in `theme`. */
+export function infoColors(theme: ColorTheme): Record<InfoType, InfoColors> {
+	const { semantic, colorScheme } = theme;
+	const base: Record<InfoType, string> = {
+		information: semantic.info,
+		success: semantic.success,
+		warning: semantic.warning,
+		danger: semantic.errorText,
+		important: semantic.primaryText
+	};
+	const tinted = (color: string, tint: number) => {
+		// The contrast is measured against the background as painted, on 8-bit steps.
+		const background = colorToHex(lerpColor(colorScheme.surface, color, tint));
+		return {
+			background,
+			foreground: colorToHex(ensureContrastColor(color, [background], Contrast.textAA))
+		};
+	};
+	const result = {} as Record<InfoType, InfoColors>;
+	for (const type of infoTypes) {
+		const box = tinted(base[type], 0.08);
+		const badge = tinted(base[type], 0.14);
+		result[type] = {
+			box: box.background,
+			boxText: box.foreground,
+			badge: badge.background,
+			badgeText: badge.foreground
+		};
+	}
+	return result;
 }
 
 function kebab(name: string): string {
@@ -65,7 +138,8 @@ function kebab(name: string): string {
  * Returns the CSS custom properties of `theme`, keyed by property name:
  * `--oito2-color-<role>` for the Material roles, the background and the semantic colors
  * (`--oito2-color-primary-text`, `--oito2-color-success`…), the component colors
- * (`--oito2-color-selected-fill`…), `--oito2-chrome-<surface>`
+ * (`--oito2-color-selected-fill`…), the message colors (`--oito2-color-info-box-warning`,
+ * `--oito2-color-info-badge-text-success`…), `--oito2-chrome-<surface>`
  * and `--oito2-syntax-<role>`, with lowercase hex values.
  */
 export function colorThemeVariables(theme: ColorTheme): Record<string, string> {
@@ -80,6 +154,9 @@ export function colorThemeVariables(theme: ColorTheme): Record<string, string> {
 		set(`--oito2-color-${kebab(name)}`, value);
 	for (const [name, value] of Object.entries(componentColors(theme)))
 		set(`--oito2-color-${kebab(name)}`, value);
+	for (const [type, colors] of Object.entries(infoColors(theme)))
+		for (const [name, value] of Object.entries(colors))
+			set(`--oito2-color-info-${kebab(name)}-${type}`, value);
 	for (const [name, value] of Object.entries(theme.chrome))
 		set(`--oito2-chrome-${kebab(name)}`, value);
 	for (const role of syntaxRoles) set(`--oito2-syntax-${kebab(role)}`, theme.syntax[role]);

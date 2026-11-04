@@ -191,3 +191,68 @@ export { default as TitleBar } from './window/TitleBar.svelte';
 export { default as WindowTitleBar } from './window/WindowTitleBar.svelte';
 export { default as DialogTitleBar } from './window/DialogTitleBar.svelte';
 export { default as HeaderBar } from './window/HeaderBar.svelte';
+
+export { default as BorderContainer } from './components/layout/BorderContainer.svelte';
+export * as Section from './components/layout/section/index.js';
+export { default as Tile } from './components/layout/Tile.svelte';
+export { default as TileList } from './components/layout/TileList.svelte';
+export { default as Watermark } from './components/layout/Watermark.svelte';
+export { default as SelectableContainer } from './components/surfaces/SelectableContainer.svelte';
+export { default as Banner } from './components/surfaces/Banner.svelte';
+export {
+	infoTypeIcons,
+	infoTypeLabel,
+	infoTypes,
+	type InfoType
+} from './components/info/info-type.js';
+export { default as InfoBox } from './components/info/InfoBox.svelte';
+export { default as InfoBadge } from './components/info/InfoBadge.svelte';
+export type { ExpandButtonPosition } from './components/expandable/expandable-state.svelte.js';
+export * as Expandable from './components/expandable/expandable/index.js';
+export * as Accordion from './components/expandable/accordion/index.js';
+export * as ExpansionPanel from './components/expandable/accordion/index.js';
+export {
+	pageIndicatorGeometry,
+	type PageIndicatorGeometry,
+	type PageIndicatorLayout,
+	type PageIndicatorMetrics
+} from './components/navigation/page-indicator-layout.js';
+export { default as PageIndicator } from './components/navigation/PageIndicator.svelte';
+export * as Tabs from './components/tabs/tabs/index.js';
+export type { TabsVariant } from './components/tabs/tabs-state.svelte.js';
+export {
+	navigationLayout,
+	navigationRailWidths,
+	type NavigationItem,
+	type NavigationLayout,
+	type NavigationLayoutOptions,
+	type NavigationRailStyle
+} from './components/navigation/navigation-state.svelte.js';
+export * as NavigationRail from './components/navigation/rail/index.js';
+export * as NavigationBar from './components/navigation/bar/index.js';
+export * as NavigationPage from './components/navigation/page/index.js';
+export {
+	paginationItems,
+	type PaginationItemsOptions
+} from './components/pagination/pagination-items.js';
+export { default as Pagination } from './components/pagination/Pagination.svelte';
+export { stepState, type StepState } from './components/steps/steps-state.svelte.js';
+export * as Steps from './components/steps/steps/index.js';
+export { tocActiveIndex, type TocEntry, type TocMeasure } from './components/toc/toc-active.js';
+export { default as TableOfContents } from './components/toc/TableOfContents.svelte';
+export { default as PanedView } from './components/split/PanedView.svelte';
+export {
+	fitSplitter,
+	moveDivider,
+	toggleDivider,
+	type SplitterLayout,
+	type SplitterPaneLimits
+} from './components/split/splitter-sizes.js';
+export * as Splitter from './components/split/splitter/index.js';
+export * as MasterDetail from './components/master-detail/master-detail/index.js';
+export { PageController } from './components/navigation/page-controller.svelte.js';
+export {
+	CarouselController,
+	type CarouselOptions
+} from './components/carousel/carousel-controller.svelte.js';
+export * as Carousel from './components/carousel/carousel/index.js';

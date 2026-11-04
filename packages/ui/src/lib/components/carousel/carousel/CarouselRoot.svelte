@@ -1,0 +1,157 @@
+<!--
+  Copyright (C) 2026  OITO2
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<!--
+  @component
+  A row of pages shown one at a time. Pages change by `Carousel.Prev` and `Carousel.Next`,
+  the dots of `Carousel.Indicators`, the Left and Right arrow keys (swapped in
+  right-to-left text) while the carousel has focus, or a swipe, also with a mouse. With
+  `loop` the buttons and arrows wrap around, jumping straight to the other end. With
+  `autoScroll` it moves to the next page every `interval` milliseconds while no pointer
+  hovers it, nothing inside it has focus and motion isn't reduced. Bind `page`, or set
+  `defaultPage` and listen to `onPageChange`; setting `page` scrolls to it.
+-->
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import { MediaQuery } from 'svelte/reactivity';
+	import { directionOf, navigationIntent } from '../../../internal/keyboard.js';
+	import { CarouselController, setCarousel } from '../carousel-controller.svelte.js';
+
+	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+		/** The current page, from 0. */
+		page?: number;
+		/** The first page of an uncontrolled carousel. Defaults to 0. */
+		defaultPage?: number;
+		/** Called with each new page. */
+		onPageChange?: (page: number) => void;
+		/** Whether going past the last page returns to the first, and back. Defaults to true. */
+		loop?: boolean;
+		/** Whether the carousel advances by itself. Defaults to false. */
+		autoScroll?: boolean;
+		/** The time each page stays when `autoScroll`, in milliseconds. Defaults to 4000. */
+		interval?: number;
+		/** The root element. */
+		ref?: HTMLDivElement | null;
+		/** The viewport, the buttons and the indicators. */
+		children?: Snippet;
+	}
+
+	let {
+		page = $bindable(),
+		defaultPage = 0,
+		onPageChange,
+		loop = true,
+		autoScroll = false,
+		interval = 4000,
+		ref = $bindable(null),
+		class: className,
+		children,
+		...rest
+	}: Props = $props();
+
+	const carousel = setCarousel(
+		new CarouselController({
+			page: () => page,
+			defaultPage: () => defaultPage,
+			onChange: (next) => {
+				page = next;
+				onPageChange?.(next);
+			},
+			loop: () => loop
+		})
+	);
+
+	const reduced = new MediaQuery('(prefers-reduced-motion: reduce)');
+	let hovered = $state(false);
+	let focused = $state(false);
+
+	// Restarts the timer whenever what it depends on changes, including the page, so a
+	// page changed by hand stays for a full interval.
+	$effect(() => {
+		void carousel.page;
+		if (!autoScroll || reduced.current || hovered || focused || carousel.count < 2) return;
+		const timer = setInterval(() => carousel.step(1, true), interval);
+		return () => clearInterval(timer);
+	});
+
+	/** Changes the page with the arrow keys and tracks focus and hover. */
+	const behavior: Attachment<HTMLDivElement> = (root) => {
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+			if ((event.target as Element | null)?.closest('[data-oito2-roving-group]')) return;
+			const intent = navigationIntent(event.key, {
+				orientation: 'horizontal',
+				dir: directionOf(root)
+			});
+			if (intent !== 'next' && intent !== 'previous') return;
+			event.preventDefault();
+			carousel.step(intent === 'next' ? 1 : -1);
+		};
+		const onFocusIn = () => (focused = true);
+		const onFocusOut = (event: FocusEvent) => {
+			if (!root.contains(event.relatedTarget as Node | null)) focused = false;
+		};
+		const onEnter = () => (hovered = true);
+		const onLeave = () => (hovered = false);
+		root.addEventListener('keydown', onKeyDown);
+		root.addEventListener('focusin', onFocusIn);
+		root.addEventListener('focusout', onFocusOut);
+		root.addEventListener('pointerenter', onEnter);
+		root.addEventListener('pointerleave', onLeave);
+		return () => {
+			root.removeEventListener('keydown', onKeyDown);
+			root.removeEventListener('focusin', onFocusIn);
+			root.removeEventListener('focusout', onFocusOut);
+			root.removeEventListener('pointerenter', onEnter);
+			root.removeEventListener('pointerleave', onLeave);
+		};
+	};
+</script>
+
+<!-- The carousel takes focus as a whole, so the arrow keys change its page. -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div
+	bind:this={ref}
+	role="region"
+	aria-roledescription="carousel"
+	tabindex="0"
+	class={['oito2-carousel', className]}
+	{@attach behavior}
+	{...rest}
+>
+	{@render children?.()}
+</div>
+
+<style>
+	@layer oito2 {
+		.oito2-carousel {
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			gap: var(--oito2-space-sm);
+			min-width: 0;
+			border-radius: var(--oito2-radius-large);
+		}
+
+		.oito2-carousel:focus-visible {
+			outline: var(--oito2-size-focus-border-width) solid var(--oito2-color-primary-text);
+			outline-offset: 0;
+		}
+	}
+</style>

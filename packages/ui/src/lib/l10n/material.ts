@@ -21,10 +21,26 @@ export interface MaterialStrings {
 	readonly close: string;
 	/** The label of a search field or of the button that shows one. */
 	readonly search: string;
+	/** The label of a button that shows the previous page. */
+	readonly previousPage: string;
+	/** The label of a button that shows the next page. */
+	readonly nextPage: string;
 }
 
-const english: MaterialStrings = { back: 'Back', close: 'Close', search: 'Search' };
-const portuguese: MaterialStrings = { back: 'Voltar', close: 'Fechar', search: 'Pesquisar' };
+const english: MaterialStrings = {
+	back: 'Back',
+	close: 'Close',
+	search: 'Search',
+	previousPage: 'Previous page',
+	nextPage: 'Next page'
+};
+const portuguese: MaterialStrings = {
+	back: 'Voltar',
+	close: 'Fechar',
+	search: 'Pesquisar',
+	previousPage: 'Página anterior',
+	nextPage: 'Próxima página'
+};
 
 /** Returns the standard button strings for `locale`: Portuguese for any `pt` locale, English otherwise. */
 export function materialStrings(locale: string): MaterialStrings {

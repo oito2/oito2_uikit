@@ -20,7 +20,9 @@
   A GNOME-style header bar: the window title bar of `WindowTitleBar` with `start`
   controls, a `title` and `end` controls, and an optional search. With `searchable`, a
   search button at the end swaps the title for a search field; Escape closes it and
-  returns focus to the button.
+  returns focus to the button. `tabs` puts a view switcher in place of the title, such
+  as a `Tabs.List` of a `Tabs.Root` around the bar and the pages; each tab is
+  `tabWidth` pixels wide.
 -->
 <script lang="ts">
 	import Search from '@lucide/svelte/icons/search';
@@ -50,6 +52,10 @@
 		searchLabel?: string;
 		/** The width of the search field in pixels. Defaults to 280. */
 		searchWidth?: number;
+		/** A view switcher in place of the title, usually a `Tabs.List`. */
+		tabs?: Snippet;
+		/** The width of each tab of `tabs`, in pixels. Defaults to 120. */
+		tabWidth?: number;
 	};
 
 	let {
@@ -62,6 +68,8 @@
 		searchPlaceholder,
 		searchLabel,
 		searchWidth = 280,
+		tabs,
+		tabWidth = 120,
 		...rest
 	}: Props = $props();
 
@@ -97,6 +105,10 @@
 				{#snippet leading()}<Search size={18} aria-hidden="true" />{/snippet}
 			</TextField>
 		</div>
+	{:else if tabs}
+		<div class="oito2-header-bar-tabs" style:--oito2-header-bar-tab-width="{tabWidth}px">
+			{@render tabs()}
+		</div>
 	{:else if typeof title === 'string'}
 		<h1 class="oito2-header-bar-title">{title}</h1>
 	{:else if title}
@@ -122,13 +134,30 @@
 	title={middle}
 	leading={start}
 	trailing={searchable || end ? trailing : undefined}
-	interactiveTitle={active}
+	interactiveTitle={active || tabs !== undefined}
 />
 
 <style>
 	@layer oito2 {
 		.oito2-header-bar-search {
 			max-width: 100%;
+		}
+
+		.oito2-header-bar-tabs {
+			display: flex;
+			max-width: 100%;
+			min-width: 0;
+		}
+
+		.oito2-header-bar-tabs :global(.oito2-tabs-list) {
+			min-width: 0;
+			padding-block: 0;
+		}
+
+		.oito2-header-bar-tabs
+			:global(.oito2-tabs-list[data-variant='pill'] > .oito2-tabs-trigger) {
+			flex: 0 1 auto;
+			width: var(--oito2-header-bar-tab-width);
 		}
 
 		.oito2-header-bar-title {
