@@ -20,11 +20,17 @@
   A date text field that accepts the locale's compact numeric date (such as `2/3/2026` in
   English or `03/02/2026` in Portuguese), with the format as its hint. Dates outside `min`
   and `max`, or refused by `isDateAllowed`, are out of range. The error shows after the
-  field loses focus or Enter is pressed; invalid text keeps the last valid value. Bind
-  `value` (a local date at midnight, or `null`).
+  field loses focus or Enter is pressed; invalid text keeps the last valid value. A button
+  at the end opens a `Calendar` in a popover, unless `pickerButton` is false. Bind `value`
+  (a local date at midnight, or `null`).
 -->
 <script lang="ts">
+	import CalendarIcon from '@lucide/svelte/icons/calendar';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import IconButton from '../button/IconButton.svelte';
+	import Calendar from '../calendar/Calendar.svelte';
+	import type { IconComponent } from '../icon.js';
+	import * as Popover from '../popover/popover/index.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import { dateTimeStrings } from '../../l10n/material.js';
 	import { dateOnly, formatCompactDate, parseCompactDate } from './date-time.js';
@@ -45,6 +51,8 @@
 		isDateAllowed?: (date: Date) => boolean;
 		/** Whether an empty field is valid. Defaults to true. */
 		acceptEmpty?: boolean;
+		/** Whether a button at the end opens a calendar. Defaults to true. */
+		pickerButton?: boolean;
 		/** The input element. */
 		ref?: HTMLInputElement | null;
 	}
@@ -57,6 +65,7 @@
 		max,
 		isDateAllowed,
 		acceptEmpty = true,
+		pickerButton = true,
 		placeholder,
 		ref = $bindable(null),
 		...rest
@@ -64,6 +73,8 @@
 
 	const locale = useLocale();
 	let strings = $derived(dateTimeStrings(locale.locale));
+	let open = $state(false);
+	let entry = $state<{ setValue: (value: Date) => void } | null>(null);
 
 	function parse(text: string): { value: Date | null } | { error: string } {
 		if (!text.trim())
@@ -78,20 +89,57 @@
 	}
 </script>
 
-<ParsedEntry
-	bind:ref
-	{value}
-	format={(date: Date) => formatCompactDate(date, locale.locale)}
-	{parse}
-	same={(a: Date | null, b: Date | null) =>
-		a === null ? b === null : b !== null && a.getTime() === b.getTime()}
-	onValueChange={(next: Date | null) => {
-		value = next;
-		onValueChange?.(next);
-	}}
-	{onErrorChange}
-	inputmode="numeric"
-	autocomplete="off"
-	placeholder={placeholder ?? strings.dateHelp}
-	{...rest}
-/>
+{#snippet calendarButton()}
+	<Popover.Trigger>
+		{#snippet child({ props })}
+			<IconButton
+				class="oito2-field-button"
+				icon={CalendarIcon as IconComponent}
+				label={strings.selectDate}
+				disabled={rest.disabled ?? false}
+				{...props}
+			/>
+		{/snippet}
+	</Popover.Trigger>
+{/snippet}
+
+<Popover.Root bind:open>
+	<Popover.Anchor>
+		<ParsedEntry
+			bind:this={entry}
+			bind:ref
+			{value}
+			format={(date: Date) => formatCompactDate(date, locale.locale)}
+			{parse}
+			same={(a: Date | null, b: Date | null) =>
+				a === null ? b === null : b !== null && a.getTime() === b.getTime()}
+			onValueChange={(next: Date | null) => {
+				value = next;
+				onValueChange?.(next);
+			}}
+			{onErrorChange}
+			inputmode="numeric"
+			autocomplete="off"
+			placeholder={placeholder ?? strings.dateHelp}
+			trailing={pickerButton ? calendarButton : undefined}
+			{...rest}
+		/>
+	</Popover.Anchor>
+	<Popover.Content
+		aria-label={strings.selectDate}
+		focusOnOpen={false}
+		class="oito2-date-picker-panel"
+	>
+		<Calendar
+			{value}
+			{min}
+			{max}
+			{isDateAllowed}
+			autofocus
+			onValueChange={(next) => {
+				entry?.setValue(next);
+				open = false;
+			}}
+		/>
+	</Popover.Content>
+</Popover.Root>

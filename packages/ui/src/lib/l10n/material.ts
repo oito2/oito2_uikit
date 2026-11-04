@@ -72,6 +72,14 @@ export interface DateTimeStrings {
 	readonly am: string;
 	/** The afternoon marker of 12-hour times. */
 	readonly pm: string;
+	/** The label of the button that shows the previous month. */
+	readonly previousMonth: string;
+	/** The label of the button that shows the next month. */
+	readonly nextMonth: string;
+	/** The word that marks today in a calendar. */
+	readonly today: string;
+	/** The name of a date picker. */
+	readonly selectDate: string;
 }
 
 const englishDateTime: DateTimeStrings = {
@@ -82,7 +90,11 @@ const englishDateTime: DateTimeStrings = {
 	timeInput: 'Enter time',
 	invalidTime: 'Enter a valid time',
 	am: 'AM',
-	pm: 'PM'
+	pm: 'PM',
+	previousMonth: 'Previous month',
+	nextMonth: 'Next month',
+	today: 'Today',
+	selectDate: 'Select date'
 };
 const portugueseDateTime: DateTimeStrings = {
 	dateInput: 'Inserir data',
@@ -92,7 +104,11 @@ const portugueseDateTime: DateTimeStrings = {
 	timeInput: 'Insira o horário',
 	invalidTime: 'Insira um horário válido',
 	am: 'AM',
-	pm: 'PM'
+	pm: 'PM',
+	previousMonth: 'Mês anterior',
+	nextMonth: 'Próximo mês',
+	today: 'Hoje',
+	selectDate: 'Selecione a data'
 };
 
 /** Returns the date and time entry strings for `locale`: Portuguese for any `pt` locale, English otherwise. */

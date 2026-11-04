@@ -24,6 +24,7 @@
 		Platform,
 		SystemScope,
 		ThemeProvider,
+		Toaster,
 		WindowScope,
 		accentColors,
 		fallbackSystemSettings,
@@ -167,6 +168,7 @@
 				</header>
 				<div class="content">{@render children()}</div>
 			</div>
+			<Toaster placement="bottom-end" />
 			<WindowResizeHandles controller={native} />
 		</WindowScope>
 	</ThemeProvider>

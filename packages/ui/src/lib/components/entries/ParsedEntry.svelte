@@ -23,7 +23,7 @@
   outside replaces the text while the field doesn't have focus.
 -->
 <script lang="ts" generics="T">
-	import { untrack } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import TextField from '../field/TextField.svelte';
 
@@ -40,6 +40,8 @@
 		onValueChange: (value: T | null) => void;
 		/** Called with the error when the text stops parsing, and `null` when it parses again. */
 		onErrorChange?: (error: string | null) => void;
+		/** Content after the text, such as a picker button. */
+		trailing?: Snippet;
 		/** The input element. */
 		ref?: HTMLInputElement | null;
 	}
@@ -51,6 +53,7 @@
 		same,
 		onValueChange,
 		onErrorChange,
+		trailing,
 		ref = $bindable(null),
 		class: className,
 		onblur,
@@ -102,6 +105,7 @@
 		bind:ref
 		bind:value={text}
 		invalid={showError && error !== null}
+		{trailing}
 		aria-describedby={[describedBy, showError && error ? `${id}-error` : undefined]
 			.filter(Boolean)
 			.join(' ') || undefined}

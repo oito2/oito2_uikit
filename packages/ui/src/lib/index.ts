@@ -307,3 +307,57 @@ export {
 } from './components/rating/rating-math.js';
 export { default as Rating } from './components/rating/Rating.svelte';
 export { default as AngleSlider } from './components/rating/AngleSlider.svelte';
+
+export {
+	PopoverController,
+	popoverPlacement,
+	type PopoverAlignment,
+	type PopoverPlacement
+} from './components/popover/popover-state.svelte.js';
+export * as Popover from './components/popover/popover/index.js';
+export * as HoverCard from './components/hover-card/hover-card/index.js';
+export * as ContextMenu from './components/context-menu/context-menu/index.js';
+export {
+	addDays,
+	addMonths,
+	daysInMonth,
+	firstDayOfWeek,
+	isoWeekNumber,
+	monthWeeks,
+	sameDay,
+	type DateRange
+} from './components/calendar/calendar-math.js';
+export { default as Calendar } from './components/calendar/Calendar.svelte';
+export { default as DatePicker } from './components/calendar/DatePicker.svelte';
+export {
+	formatHexColor,
+	hslToRgb,
+	hsvToRgb,
+	parseHexColor,
+	rgbToHsl,
+	rgbToHsv,
+	type ColorFormat,
+	type HslColor,
+	type HsvColor,
+	type RgbaColor
+} from './components/color-picker/color-math.js';
+export { default as ColorPicker } from './components/color-picker/ColorPicker.svelte';
+export { default as ColorPickerButton } from './components/color-picker/ColorPickerButton.svelte';
+export { settleSnap, type SheetSide } from './components/sheet/sheet-state.svelte.js';
+export * as Sheet from './components/sheet/sheet/index.js';
+export {
+	toast,
+	toaster,
+	ToasterStore,
+	type Toast,
+	type ToastHandle,
+	type ToasterPlacement
+} from './components/toast/toaster.svelte.js';
+export { default as Toaster } from './components/toast/Toaster.svelte';
+export { default as FloatingPanel } from './components/floating-panel/FloatingPanel.svelte';
+export { TourController, type TourStep } from './components/tour/tour-controller.svelte.js';
+export { default as Tour } from './components/tour/Tour.svelte';
+export { default as ShortcutLabel } from './components/shortcuts/ShortcutLabel.svelte';
+export { default as ShortcutRecorder } from './components/shortcuts/ShortcutRecorder.svelte';
+export { openCommandPalette, rankCommands } from './components/shortcuts/command-palette.svelte.js';
+export { default as CommandPalette } from './components/shortcuts/CommandPalette.svelte';
