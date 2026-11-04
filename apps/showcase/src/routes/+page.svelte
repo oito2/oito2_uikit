@@ -22,7 +22,7 @@
 <main>
 	<h1>oito2_uikit</h1>
 	<p>
-		The component pages arrive phase by phase. Phases F1 to F7 add the foundation, the color
+		The component pages arrive phase by phase. Phases F1 to F8 add the foundation, the color
 		schemes, the interaction infrastructure, the basic controls, the window chrome, the system
 		settings and the layout and navigation components; the platform spikes of phase F0 stay
 		below.
@@ -37,6 +37,11 @@
 		<li>
 			<a href={resolve('/layout')}
 				>Layout and navigation: containers, tabs, rails, split and paged views</a
+			>
+		</li>
+		<li>
+			<a href={resolve('/inputs')}
+				>Controls and entries: groups, search, tags, dates, numbers and ratings</a
 			>
 		</li>
 		<li>

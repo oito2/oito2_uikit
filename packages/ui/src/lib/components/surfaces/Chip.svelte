@@ -45,6 +45,8 @@
 		defaultSelected?: boolean;
 		/** Called with each new state of a filter chip. */
 		onSelectedChange?: (selected: boolean) => void;
+		/** Whether a selected filter chip shows a check mark. Defaults to true. */
+		showCheckmark?: boolean;
 		/** Called when the remove button of an input chip is clicked. */
 		onRemove?: () => void;
 		/** The accessible name of the remove button. Defaults to "Dismiss". */
@@ -61,6 +63,7 @@
 		selected = $bindable(),
 		defaultSelected = false,
 		onSelectedChange,
+		showCheckmark = true,
 		onRemove,
 		removeLabel,
 		disabled = false,
@@ -82,7 +85,7 @@
 	});
 	let on = $derived(variant === 'filter' && state.current);
 	let removable = $derived(variant === 'input' && onRemove !== undefined);
-	let LeadingIcon = $derived(on ? Check : Icon);
+	let LeadingIcon = $derived(on && showCheckmark ? Check : Icon);
 </script>
 
 {#snippet label()}

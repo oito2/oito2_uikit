@@ -256,3 +256,54 @@ export {
 	type CarouselOptions
 } from './components/carousel/carousel-controller.svelte.js';
 export * as Carousel from './components/carousel/carousel/index.js';
+
+export { default as Swap } from './components/controls/Swap.svelte';
+export { default as OptionButton } from './components/controls/OptionButton.svelte';
+export { default as ColorDisk } from './components/controls/ColorDisk.svelte';
+export { default as SplitButton } from './components/controls/SplitButton.svelte';
+export { toggleValues } from './components/choice/toggle-group/toggle-group-state.svelte.js';
+export * as ToggleGroup from './components/choice/toggle-group/index.js';
+export * as SegmentGroup from './components/choice/segment-group/index.js';
+export * as ChoiceChipBar from './components/choice/choice-chip-bar/index.js';
+export { default as SearchField } from './components/text/SearchField.svelte';
+export { default as SearchTitleField } from './components/text/SearchTitleField.svelte';
+export { default as PasswordField } from './components/text/PasswordField.svelte';
+export { default as CopyButton } from './components/text/CopyButton.svelte';
+export { default as CopyField } from './components/text/CopyField.svelte';
+export {
+	highlightRanges,
+	type HighlightOptions,
+	type TextRange
+} from './components/text/highlight-ranges.js';
+export { default as HighlightedText } from './components/text/HighlightedText.svelte';
+export { default as EditableLabel } from './components/text/EditableLabel.svelte';
+export { default as PinEntry } from './components/text/PinEntry.svelte';
+export { addTags, splitTags, type TagRules } from './components/text/tags.js';
+export { default as TagsField } from './components/text/TagsField.svelte';
+export { ComboboxState } from './components/combobox/combobox-state.svelte.js';
+export * as Combobox from './components/combobox/combobox/index.js';
+export * as Autocomplete from './components/combobox/combobox/index.js';
+export {
+	dateOnly,
+	formatCompactDate,
+	formatTime,
+	parseCompactDate,
+	parseTime,
+	uses12HourClock,
+	type TimeOfDay
+} from './components/entries/date-time.js';
+export { formatNumber, normalizeNumber, parseNumber } from './components/entries/number-format.js';
+export { default as DateEntry } from './components/entries/DateEntry.svelte';
+export { default as TimeEntry } from './components/entries/TimeEntry.svelte';
+export { default as DateTimeEntry } from './components/entries/DateTimeEntry.svelte';
+export { default as SegmentedEntry } from './components/entries/SegmentedEntry.svelte';
+export { default as NumberEntry } from './components/entries/NumberEntry.svelte';
+export {
+	alignRating,
+	angleOf,
+	ratingAt,
+	snapAngle,
+	wrapAngle
+} from './components/rating/rating-math.js';
+export { default as Rating } from './components/rating/Rating.svelte';
+export { default as AngleSlider } from './components/rating/AngleSlider.svelte';
