@@ -90,7 +90,6 @@
 </script>
 
 <main>
-	<h1>Extras</h1>
 	<p>The components of <code>@oito2/ui-extras</code>, phase F12.</p>
 
 	<section aria-labelledby="navigation-menu">
@@ -193,7 +192,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

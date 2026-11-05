@@ -166,7 +166,6 @@
 </script>
 
 <main>
-	<h1>Data, display and icons</h1>
 	<p>The lists, trees, avatars, timers, icons and utilities of phase F10.</p>
 
 	<section aria-labelledby="list-box">
@@ -369,7 +368,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

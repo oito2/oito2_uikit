@@ -53,7 +53,6 @@
 </script>
 
 <main>
-	<h1>Files</h1>
 	<p>
 		The file components of <code>@oito2/ui-files</code>, phase F13, here with the
 		{isTauri() ? 'Tauri adapter (dialog and fs plugins)' : 'browser adapter'}.
@@ -110,7 +109,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

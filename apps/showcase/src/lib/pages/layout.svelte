@@ -85,7 +85,6 @@
 {#snippet star()}<Star size={20} aria-hidden="true" />{/snippet}
 
 <main>
-	<h1>Layout and navigation</h1>
 	<p>
 		Containers, tabs, rails, paged and split views of phase F7. Resize the window to see the
 		navigation page and the master-detail page change layout.
@@ -360,7 +359,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	h3,
 	p {

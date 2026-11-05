@@ -110,7 +110,6 @@
 </script>
 
 <main>
-	<h1>Controls and entries</h1>
 	<p>The advanced controls and inputs of phase F8.</p>
 
 	<section aria-labelledby="buttons">
@@ -272,7 +271,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

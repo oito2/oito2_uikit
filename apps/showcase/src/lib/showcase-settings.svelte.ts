@@ -25,7 +25,17 @@ interface Stored {
 	highContrast: boolean | 'system';
 	scheme: 'base' | ThemePreset;
 	desktop: SimulatedDesktop;
+	compact: boolean;
+	rtl: boolean;
+	language: ShowcaseLanguage;
+	density: ShowcaseDensity;
 }
+
+/** The language of the components: the system's, English or Brazilian Portuguese. */
+export type ShowcaseLanguage = 'system' | 'en' | 'pt-BR';
+
+/** The control sizes: the platform's (automatic), the pointer ones or the touch ones. */
+export type ShowcaseDensity = 'auto' | 'pointer' | 'touch';
 
 /** The desktops the browser build can imitate, or the real platform (\`system\`). */
 export type SimulatedDesktop = 'system' | 'gnome' | 'kde' | 'xfce' | 'cosmic' | 'windows' | 'macos';
@@ -35,7 +45,11 @@ const defaults: Stored = {
 	accent: 'system',
 	highContrast: 'system',
 	scheme: 'base',
-	desktop: 'system'
+	desktop: 'system',
+	compact: false,
+	rtl: false,
+	language: 'system',
+	density: 'auto'
 };
 
 // Reads the stored settings; private windows and blocked storage fall back to the defaults.
@@ -55,6 +69,10 @@ export class ShowcaseSettings {
 	highContrast = $state(defaults.highContrast);
 	scheme = $state(defaults.scheme);
 	desktop = $state(defaults.desktop);
+	compact = $state(defaults.compact);
+	rtl = $state(defaults.rtl);
+	language = $state(defaults.language);
+	density = $state(defaults.density);
 
 	constructor() {
 		const stored = load();
@@ -63,6 +81,16 @@ export class ShowcaseSettings {
 		this.highContrast = stored.highContrast;
 		this.scheme = stored.scheme;
 		this.desktop = stored.desktop;
+		this.compact = stored.compact;
+		this.rtl = stored.rtl;
+		this.language = stored.language;
+		this.density = stored.density;
+	}
+
+	/** The locale the components use: the chosen one, or the browser's for `system`. */
+	get locale(): string {
+		if (this.language !== 'system') return this.language;
+		return globalThis.navigator?.language ?? 'en';
 	}
 
 	/** Writes the settings to local storage, ignoring storage errors. */
@@ -73,7 +101,11 @@ export class ShowcaseSettings {
 				accent: this.accent,
 				highContrast: this.highContrast,
 				scheme: this.scheme,
-				desktop: this.desktop
+				desktop: this.desktop,
+				compact: this.compact,
+				rtl: this.rtl,
+				language: this.language,
+				density: this.density
 			};
 			globalThis.localStorage?.setItem(storageKey, JSON.stringify(value));
 		} catch {

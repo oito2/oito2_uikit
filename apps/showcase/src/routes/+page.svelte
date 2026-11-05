@@ -15,76 +15,26 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
+<!-- The start page: what the showcase holds, shown while no page is selected. -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { showcasePages } from '#lib/catalog.js';
 </script>
 
 <main>
-	<h1>oito2_uikit</h1>
 	<p>
-		The component pages arrive phase by phase. Phases F1 to F13 add the foundation, the color
-		schemes, the interaction infrastructure, the basic controls, the window chrome, the system
-		settings, the layout, navigation, input, overlay and data components, the code block and the
-		extras; the platform spikes of phase F0 stay below.
+		The components of the oito2 design system for Svelte 5 and Tauri v2. Choose a page from the
+		list, or search it by name.
 	</p>
 	<ul>
-		<li><a href={resolve('/colors')}>Colors: every role of the active scheme</a></li>
-		<li>
-			<a href={resolve('/material')}
-				>Material theme: buttons, toggles, fields and containers</a
-			>
-		</li>
-		<li>
-			<a href={resolve('/layout')}
-				>Layout and navigation: containers, tabs, rails, split and paged views</a
-			>
-		</li>
-		<li>
-			<a href={resolve('/inputs')}
-				>Controls and entries: groups, search, tags, dates, numbers and ratings</a
-			>
-		</li>
-		<li>
-			<a href={resolve('/overlays')}
-				>Overlays, pickers and shortcuts: popovers, sheets, toasts, calendar, colors</a
-			>
-		</li>
-		<li>
-			<a href={resolve('/data')}
-				>Data, display and icons: list box, trees, avatars, marquee, timers, icons</a
-			>
-		</li>
-		<li>
-			<a href={resolve('/code')}>Code: highlighted code blocks in 27 languages</a>
-		</li>
-		<li>
-			<a href={resolve('/extras')}
-				>Extras: QR code, signature pad, image cropper, navigation menu</a
-			>
-		</li>
-		<li>
-			<a href={resolve('/files')}>Files: upload, drop zone and download</a>
-		</li>
-		<li>
-			<a href={resolve('/window')}>Window chrome: title bars, window controls, header bar</a>
-		</li>
-		<li>
-			<a href={resolve('/interaction')}
-				>Interaction: shortcuts, focus helpers and collections</a
-			>
-		</li>
-		<li>
-			<a href={resolve('/foundation')}
-				>Foundation: tokens, type scale, platform and formatting</a
-			>
-		</li>
-		<li><a href={resolve('/spikes/baseline')}>Baseline: CSS, DOM, JavaScript and fonts</a></li>
-		<li><a href={resolve('/spikes/chrome')}>Window chrome: title bar, drag and resize</a></li>
+		{#each showcasePages as entry (entry.slug)}
+			<li><a href={resolve('/[slug]', { slug: entry.slug })}>{entry.title}</a></li>
+		{/each}
 	</ul>
 </main>
 
 <style>
 	main {
-		padding: 20px;
+		padding: var(--oito2-space-xl);
 	}
 </style>

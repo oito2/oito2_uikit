@@ -75,7 +75,6 @@
 </script>
 
 <main>
-	<h1>Interaction</h1>
 	<p>
 		Phase F3 adds the interaction infrastructure: keyboard shortcuts and command scopes, focus
 		helpers, and the list and tree collections the components build on.
@@ -154,7 +153,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

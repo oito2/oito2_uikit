@@ -132,7 +132,6 @@
 
 <Commands {commands}>
 	<main>
-		<h1>Overlays, pickers and shortcuts</h1>
 		<p>The overlays, pickers and keyboard shortcut components of phase F9.</p>
 		<div class="row">
 			<Button onclick={() => tour.start()}>Take the tour</Button>
@@ -292,7 +291,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

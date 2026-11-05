@@ -34,7 +34,6 @@
 </script>
 
 <main>
-	<h1>Code</h1>
 	<p>
 		The code block of <code>@oito2/ui-syntax</code>: highlight.js grammars colored with the
 		syntax roles of the active scheme, in JetBrains Mono.
@@ -81,7 +80,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

@@ -35,7 +35,6 @@
 </script>
 
 <main>
-	<h1>Window chrome</h1>
 	<p>
 		The title bar of the window above follows the desktop: in the browser, pick one in the
 		Desktop menu. The bars below show every window control style; hover the buttons, and
@@ -89,7 +88,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

@@ -90,11 +90,10 @@
 </script>
 
 <main>
-	<h1>Material theme</h1>
 	<p>
 		The Material 3 primitives restyled like the oito2_ui theme, with the active scheme. The
-		<a href={resolve('/colors')}>colors</a> and the
-		<a href={resolve('/foundation')}>fonts and tokens</a>
+		<a href={resolve('/[slug]', { slug: 'colors' })}>colors</a> and the
+		<a href={resolve('/[slug]', { slug: 'foundation' })}>fonts and tokens</a>
 		have their own pages.
 	</p>
 
@@ -386,7 +385,6 @@
 		padding: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2,
 	p {
 		margin: 0 0 var(--oito2-space-sm);

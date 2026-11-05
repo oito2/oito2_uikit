@@ -19,37 +19,45 @@
 	import '@oito2/ui/styles.css';
 	import '@oito2/ui-syntax/fonts.css';
 	import {
+		Button,
 		HeaderBar,
 		IconButton,
+		LocaleProvider,
+		MasterDetail,
+		NavigationRail,
 		Platform,
+		SearchField,
 		SystemScope,
 		ThemeProvider,
 		Toaster,
 		WindowScope,
-		accentColors,
 		fallbackSystemSettings,
 		pageTransition,
-		type AccentColor,
+		type IconComponent,
 		type WindowController
 	} from '@oito2/ui';
-	import { presetTheme, themePresetNames, themePresets } from '@oito2/ui-themes';
+	import { presetTheme, themePresets } from '@oito2/ui-themes';
 	import { SystemSettingsScope } from '@oito2/ui-settings';
 	import { WindowResizeHandles, initWindow, type NativeWindowController } from '@oito2/ui-window';
-	import House from '@lucide/svelte/icons/house';
+	import Code from '@lucide/svelte/icons/code';
+	import Settings from '@lucide/svelte/icons/settings';
 	import { isTauri } from '@tauri-apps/api/core';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { LayoutProps } from './$types';
-	import { ShowcaseSettings, type SimulatedDesktop } from '#lib/showcase-settings.svelte.js';
+	import { findPage, searchPages, showcasePages, type ShowcaseGroup } from '#lib/catalog.js';
+	import { ShowcaseSettings } from '#lib/showcase-settings.svelte.js';
 	import { SimulatedWindowController, simulatedSettings } from '#lib/simulated-window.svelte.js';
+	import SettingsDialog from '#lib/shell/SettingsDialog.svelte';
+	import SourceDialog from '#lib/shell/SourceDialog.svelte';
+	import ThemeActions from '#lib/shell/ThemeActions.svelte';
 	import { spikeRequest } from '#lib/spikes/bridge.js';
 
 	let { children }: LayoutProps = $props();
 
 	const settings = new ShowcaseSettings();
-	const accents = Object.keys(accentColors) as AccentColor[];
 
 	// A preset fixes the brightness; the base scheme follows the mode setting.
 	let preset = $derived(settings.scheme === 'base' ? null : themePresets[settings.scheme]);
@@ -59,15 +67,6 @@
 	$effect(() => settings.save());
 
 	const tauri = isTauri();
-	const desktops: { value: SimulatedDesktop; label: string }[] = [
-		{ value: 'system', label: 'Browser' },
-		{ value: 'gnome', label: 'GNOME' },
-		{ value: 'kde', label: 'KDE Plasma' },
-		{ value: 'xfce', label: 'Xfce' },
-		{ value: 'cosmic', label: 'COSMIC' },
-		{ value: 'windows', label: 'Windows' },
-		{ value: 'macos', label: 'macOS' }
-	];
 
 	// In Tauri the real window drives the title bar; the browser build can imitate a desktop.
 	let native: NativeWindowController | null = $state(null);
@@ -94,90 +93,175 @@
 		const spike = await spikeRequest();
 		if (spike) await goto(resolve(`/spikes/${spike}?report`));
 	});
+
+	// The page the address selects, and whether the address is a spike page outside the shell.
+	let spike = $derived(page.route.id?.startsWith('/spikes') ?? false);
+	let slug = $derived(page.params.slug ?? null);
+	let current = $derived(findPage(slug));
+
+	let query = $state('');
+	let found = $derived(searchPages(query));
+	const groups: ShowcaseGroup[] = ['Components', 'Theme'];
+
+	// The compact rail shows longer labels as the window widens.
+	let windowWidth = $state(1280);
+	let railStyle = $derived(
+		windowWidth >= 1000 ? 'labelledExtended' : windowWidth >= 500 ? 'labelled' : 'compact'
+	) as 'labelledExtended' | 'labelled' | 'compact';
+
+	let settingsOpen = $state(false);
+	let sourceOpen = $state(false);
+
+	/** Shows the page `next`, or the start page for `null`. */
+	function select(next: string | null): void {
+		if (next === slug) return;
+		void goto(next === null ? resolve('/') : resolve('/[slug]', { slug: next }));
+	}
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} />
+
+{#snippet detail()}
+	<div class="content">
+		{#key page.url.pathname}
+			<div class="page" in:pageTransition>{@render children()}</div>
+		{/key}
+	</div>
+{/snippet}
+
+{#snippet sourceAction()}
+	{#if current}
+		<IconButton
+			icon={Code as IconComponent}
+			label="View source"
+			onclick={() => (sourceOpen = true)}
+		/>
+	{/if}
+{/snippet}
+
 {#snippet app()}
-	<ThemeProvider
-		class="showcase"
-		{mode}
-		accent={settings.accent === 'system' ? undefined : settings.accent}
-		highContrast={settings.highContrast}
-		light={source}
-		dark={source}
-	>
-		<WindowScope {controller}>
-			<div class="frame">
-				<HeaderBar title="oito2_uikit Showcase">
-					{#snippet start()}
-						<IconButton icon={House} label="Home" onclick={() => goto(resolve('/'))} />
-					{/snippet}
-				</HeaderBar>
-				<header class="appearance">
-					<label>
-						Scheme
-						<select bind:value={settings.scheme}>
-							<option value="base">oito2</option>
-							{#each themePresetNames as name (name)}
-								<option value={name}>{themePresets[name].label}</option>
-							{/each}
-						</select>
-					</label>
-					<label>
-						Mode
-						<select bind:value={settings.mode} disabled={preset !== null}>
-							<option value="system">System</option>
-							<option value="light">Light</option>
-							<option value="dark">Dark</option>
-						</select>
-					</label>
-					<label>
-						Accent
-						<select bind:value={settings.accent} disabled={preset !== null}>
-							<option value="system">System</option>
-							{#each accents as accent (accent)}
-								<option value={accent}>{accent}</option>
-							{/each}
-						</select>
-					</label>
-					<label>
-						Contrast
-						<select
-							value={String(settings.highContrast)}
-							onchange={(event) => {
-								const value = event.currentTarget.value;
-								settings.highContrast =
-									value === 'system' ? 'system' : value === 'true';
-							}}
-						>
-							<option value="system">System</option>
-							<option value="false">Normal</option>
-							<option value="true">High</option>
-						</select>
-					</label>
-					{#if !tauri}
-						<label>
-							Desktop
-							<select bind:value={settings.desktop}>
-								{#each desktops as desktop (desktop.value)}
-									<option value={desktop.value}>{desktop.label}</option>
+	<LocaleProvider locale={settings.locale}>
+		<ThemeProvider
+			class="showcase"
+			{mode}
+			accent={settings.accent === 'system' ? undefined : settings.accent}
+			highContrast={settings.highContrast}
+			light={source}
+			dark={source}
+			dir={settings.rtl ? 'rtl' : 'ltr'}
+			data-oito2-density={settings.density === 'auto' ? undefined : settings.density}
+		>
+			<WindowScope {controller}>
+				<div class="frame">
+					<HeaderBar title="oito2_uikit">
+						{#snippet end()}
+							<ThemeActions {settings} />
+							{#if settings.compact}
+								<IconButton
+									icon={Settings as IconComponent}
+									label="Settings"
+									onclick={() => (settingsOpen = true)}
+								/>
+							{/if}
+						{/snippet}
+					</HeaderBar>
+					{#if spike}
+						<div class="content">{@render children()}</div>
+					{:else if settings.compact}
+						<div class="compact">
+							<NavigationRail.Root
+								value={slug ?? undefined}
+								onValueChange={(next) => select(next)}
+								{railStyle}
+							>
+								{#each showcasePages as entry (entry.slug)}
+									<NavigationRail.Item
+										value={entry.slug}
+										label={entry.title}
+										icon={entry.icon}
+									/>
 								{/each}
-							</select>
-						</label>
+							</NavigationRail.Root>
+							<div class="compact-page">
+								{#if current}
+									<div class="compact-header">
+										<h1>{current.title}</h1>
+										{@render sourceAction()}
+									</div>
+								{/if}
+								{@render detail()}
+							</div>
+						</div>
+					{:else}
+						<MasterDetail.Root
+							value={slug}
+							onValueChange={select}
+							defaultPaneSize={280}
+							minPaneSize={175}
+							class="shell"
+						>
+							<MasterDetail.Master>
+								<MasterDetail.MasterHeader>
+									<div class="search">
+										<SearchField
+											bind:value={query}
+											placeholder="Search"
+											aria-label="Search pages"
+										/>
+									</div>
+								</MasterDetail.MasterHeader>
+								<MasterDetail.List>
+									{#each groups as group (group)}
+										{@const entries = found.filter(
+											(entry) => entry.group === group
+										)}
+										{#if entries.length > 0}
+											<li class="group">{group}</li>
+											{#each entries as entry (entry.slug)}
+												<MasterDetail.Tile
+													value={entry.slug}
+													title={entry.title}
+												>
+													{#snippet leading()}<entry.icon
+															aria-hidden="true"
+														/>{/snippet}
+												</MasterDetail.Tile>
+											{/each}
+										{/if}
+									{/each}
+									{#snippet empty()}<p class="none">
+											No page matches “{query}”.
+										</p>{/snippet}
+								</MasterDetail.List>
+								<MasterDetail.MasterFooter>
+									<div class="footer">
+										<Button
+											variant="text"
+											icon={Settings as IconComponent}
+											onclick={() => (settingsOpen = true)}>Settings</Button
+										>
+									</div>
+								</MasterDetail.MasterFooter>
+							</MasterDetail.Master>
+							<MasterDetail.Detail>
+								<MasterDetail.DetailHeader
+									title={current?.title ?? 'oito2_uikit'}
+									level={1}
+								>
+									{#snippet actions()}{@render sourceAction()}{/snippet}
+								</MasterDetail.DetailHeader>
+								{@render detail()}
+							</MasterDetail.Detail>
+						</MasterDetail.Root>
 					{/if}
-					{#if simulating && simulated.lastAction}
-						<span class="action">Window action: {simulated.lastAction}</span>
-					{/if}
-				</header>
-				<div class="content">
-					{#key page.url.pathname}
-						<div in:pageTransition>{@render children()}</div>
-					{/key}
 				</div>
-			</div>
-			<Toaster placement="bottom-end" />
-			<WindowResizeHandles controller={native} />
-		</WindowScope>
-	</ThemeProvider>
+				<SettingsDialog {settings} bind:open={settingsOpen} {tauri} />
+				{#if current}<SourceDialog page={current} bind:open={sourceOpen} />{/if}
+				<Toaster placement="bottom-end" />
+				<WindowResizeHandles controller={native} />
+			</WindowScope>
+		</ThemeProvider>
+	</LocaleProvider>
 {/snippet}
 
 {#if tauri}
@@ -195,11 +279,17 @@
 		height: 100vh;
 	}
 
-	/* The title bar stays at the top; the page scrolls below it. */
+	/* The title bar stays at the top; the shell fills the rest of the window. */
 	.frame {
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+	}
+
+	.frame > :global(.shell),
+	.compact {
+		flex: 1;
+		min-height: 0;
 	}
 
 	/* Hides the horizontal overflow of the page transition's slide. */
@@ -210,23 +300,52 @@
 		overflow-x: hidden;
 	}
 
-	.action {
+	.page {
+		min-width: 0;
+	}
+
+	.search {
+		padding: var(--oito2-space-sm);
+	}
+
+	.group {
+		padding: var(--oito2-space-sm) var(--oito2-space-sm) var(--oito2-space-xxs);
+		color: var(--oito2-color-on-surface-variant);
+		font: var(--oito2-type-label-medium);
+		letter-spacing: var(--oito2-type-label-medium-tracking);
+		list-style: none;
+	}
+
+	.none {
+		margin: 0;
+		padding: var(--oito2-space-md);
 		color: var(--oito2-color-on-surface-variant);
 	}
 
-	.appearance {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--oito2-space-md) var(--oito2-space-lg);
-		padding: var(--oito2-space-sm) var(--oito2-space-page);
-		background: var(--oito2-chrome-mainbar);
-		border-bottom: 1px solid var(--oito2-color-outline-variant);
+	.footer {
+		padding: var(--oito2-space-xs) var(--oito2-space-sm);
 	}
 
-	.appearance label {
+	.compact {
+		display: flex;
+	}
+
+	.compact-page {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.compact-header {
 		display: flex;
 		align-items: center;
-		gap: var(--oito2-space-xs);
+		justify-content: space-between;
+		padding: var(--oito2-space-sm) var(--oito2-space-xl) 0;
+	}
+
+	.compact-header h1 {
+		margin: 0;
+		font: var(--oito2-type-title-large);
 	}
 </style>

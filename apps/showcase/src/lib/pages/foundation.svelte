@@ -36,8 +36,6 @@
 </script>
 
 <main>
-	<h1>Foundation</h1>
-
 	<section>
 		<h2>Platform</h2>
 		<dl>
@@ -126,13 +124,8 @@
 		gap: var(--oito2-space-xl);
 	}
 
-	h1,
 	h2 {
 		margin: 0 0 var(--oito2-space-sm);
-	}
-
-	h1 {
-		font: var(--oito2-type-headline-medium);
 	}
 
 	h2 {

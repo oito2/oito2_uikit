@@ -25,7 +25,6 @@
 </script>
 
 <main>
-	<h1>Colors</h1>
 	<p>
 		{theme.current.brightness}{theme.current.highContrast ? ', high contrast' : ''}. Ratios are
 		against the page background.
@@ -74,11 +73,6 @@
 <style>
 	main {
 		padding: var(--oito2-space-page);
-	}
-
-	h1 {
-		font: var(--oito2-type-headline-medium);
-		margin: 0;
 	}
 
 	h2 {
