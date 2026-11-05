@@ -26,6 +26,14 @@ import { KeyChord, Shortcut } from '../shortcuts/shortcut.js';
 const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Waits for the finite animations on the page, such as the toasts sliding in, to end. */
+async function settleAnimations(): Promise<void> {
+	const finite = document
+		.getAnimations()
+		.filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity);
+	await Promise.all(finite.map((animation) => animation.finished.catch(() => {})));
+}
+
 describe('Popover', () => {
 	it('moves focus in, keeps an inner popover inside it and returns focus on Escape', async () => {
 		render(OverlaysF9Harness, { show: 'popover' });
@@ -336,6 +344,7 @@ describe('pickers gallery', () => {
 			render(PickersGallery, { mode: scheme.mode, highContrast: scheme.highContrast });
 			await document.fonts.ready;
 			await wait(400);
+			await settleAnimations();
 			const result = await axe.run(page.getByTestId('gallery').element());
 			const violations = result.violations.map(
 				(v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`
@@ -347,6 +356,7 @@ describe('pickers gallery', () => {
 			render(PickersGallery, { mode: scheme.mode, highContrast: scheme.highContrast });
 			await document.fonts.ready;
 			await wait(400);
+			await settleAnimations();
 			await expect(page.getByTestId('gallery')).toMatchScreenshot(`pickers-${scheme.name}`);
 		});
 	}
