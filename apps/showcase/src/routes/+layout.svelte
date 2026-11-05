@@ -18,6 +18,7 @@
 <script lang="ts">
 	import '@oito2/ui/styles.css';
 	import '@oito2/ui-syntax/fonts.css';
+	import '#lib/showcase.css';
 	import {
 		Button,
 		HeaderBar,
@@ -122,7 +123,9 @@
 <svelte:window bind:innerWidth={windowWidth} />
 
 {#snippet detail()}
-	<div class="content">
+	<!-- The page scrolls here; it takes the focus so the keyboard can scroll pages without controls. -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="content" tabindex="0">
 		{#key page.url.pathname}
 			<div class="page" in:pageTransition>{@render children()}</div>
 		{/key}
@@ -302,6 +305,11 @@
 
 	.page {
 		min-width: 0;
+	}
+
+	.content:focus-visible {
+		outline: 2px solid var(--oito2-color-primary-text);
+		outline-offset: -2px;
 	}
 
 	.search {

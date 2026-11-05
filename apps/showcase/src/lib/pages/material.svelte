@@ -249,9 +249,19 @@
 			<span>Last action: {lastAction}</span>
 		</div>
 		<div class="row">
-			<Select.Root collection={fruits} defaultValue="cherry" placeholder="Choose a fruit" />
-			<Select.Root collection={fruits} placeholder="Choose a fruit" />
-			<Select.Root collection={fruits} placeholder="Disabled" disabled />
+			<Select.Root
+				collection={fruits}
+				defaultValue="cherry"
+				placeholder="Choose a fruit"
+				label="Fruit"
+			/>
+			<Select.Root collection={fruits} placeholder="Choose a fruit" label="Another fruit" />
+			<Select.Root
+				collection={fruits}
+				placeholder="Disabled"
+				label="Disabled fruit"
+				disabled
+			/>
 		</div>
 	</section>
 

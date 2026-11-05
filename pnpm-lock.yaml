@@ -254,6 +254,9 @@ catalogs:
     svelte-check:
       specifier: 4.7.7
       version: 4.7.7
+    svelte2tsx:
+      specifier: 0.7.62
+      version: 0.7.62
     typescript:
       specifier: 6.0.3
       version: 6.0.3
@@ -304,6 +307,9 @@ importers:
       svelte:
         specifier: 'catalog:'
         version: 5.57.3(@typescript-eslint/types@8.72.1)
+      svelte2tsx:
+        specifier: 'catalog:'
+        version: 0.7.62(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3

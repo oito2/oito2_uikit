@@ -1,0 +1,81 @@
+/*
+ * Copyright (C) 2026  OITO2
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/* The layout every showcase page shares: a padded column of sections, rows of examples
+   that wrap, and a dashed stage for positioned examples. */
+.showcase-page {
+	display: grid;
+	gap: var(--oito2-space-xl);
+	padding: var(--oito2-space-xl);
+	min-width: 0;
+}
+
+.showcase-page > p,
+.showcase-page section > p {
+	margin: 0;
+	max-width: 72ch;
+	color: var(--oito2-color-on-surface-variant);
+}
+
+.showcase-page section {
+	display: grid;
+	gap: var(--oito2-space-md);
+	min-width: 0;
+}
+
+.showcase-page h2 {
+	margin: 0;
+	font: var(--oito2-type-title-large);
+	letter-spacing: var(--oito2-type-title-large-tracking);
+}
+
+.showcase-page h3 {
+	margin: 0;
+	font: var(--oito2-type-title-medium);
+	letter-spacing: var(--oito2-type-title-medium-tracking);
+}
+
+.showcase-page .row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--oito2-space-md);
+}
+
+.showcase-page .row.top {
+	align-items: flex-start;
+}
+
+.showcase-page .column {
+	display: grid;
+	align-content: start;
+	gap: var(--oito2-space-sm);
+	min-width: 0;
+}
+
+.showcase-page .stage {
+	position: relative;
+	min-height: 180px;
+	padding: var(--oito2-space-md);
+	border: 1px dashed var(--oito2-color-outline);
+	border-radius: var(--oito2-radius-large);
+}
+
+.showcase-page .note {
+	color: var(--oito2-color-on-surface-variant);
+	font: var(--oito2-type-body-small);
+}

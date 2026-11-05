@@ -34,6 +34,7 @@ catalog:
   qrcode-generator: 2.0.4
   svelte: 5.57.3
   svelte-check: 4.7.7
+  svelte2tsx: 0.7.62
   typescript: 6.0.3
   typescript-eslint: 8.72.1
   vite: 8.3.5

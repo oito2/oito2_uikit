@@ -20,6 +20,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { findPage, loadPage } from '#lib/catalog.js';
+	import ApiReference from '#lib/shell/ApiReference.svelte';
 
 	let entry = $derived(findPage(page.params.slug));
 </script>
@@ -27,6 +28,7 @@
 {#if entry}
 	{#await loadPage(entry.slug) then Page}
 		<Page />
+		{#if entry.api.length > 0}<ApiReference names={entry.api} />{/if}
 	{/await}
 {:else}
 	<main class="missing">
