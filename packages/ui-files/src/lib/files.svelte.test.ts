@@ -237,10 +237,16 @@ describe('Tauri adapter', () => {
 			onHover: (dragging) => hovers.push(dragging),
 			onDrop: (files) => drops.push(files)
 		});
-		await wait(50);
 		const ratio = window.devicePixelRatio || 1;
 		const at = (x: number, y: number) => ({ x: x * ratio, y: y * ratio });
-		await emit('tauri://drag-over', { position: at(50, 50) });
+		// The adapter starts listening asynchronously; a drag over the element is repeated
+		// until it answers, and reported only once.
+		await expect
+			.poll(async () => {
+				await emit('tauri://drag-over', { position: at(50, 50) });
+				return hovers.length;
+			})
+			.toBe(1);
 		await emit('tauri://drag-over', { position: at(400, 50) });
 		await emit('tauri://drag-drop', { paths: ['/tmp/a.png'], position: at(400, 50) });
 		await emit('tauri://drag-drop', {
