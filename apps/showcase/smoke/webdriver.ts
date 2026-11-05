@@ -96,12 +96,14 @@ try {
 	if (!(await run("return '__TAURI_INTERNALS__' in window;"))) {
 		throw new Error('the Tauri bridge is missing');
 	}
-	const heading = await poll('the Button page', async () => {
-		const text = (await run(
-			"return document.querySelector('h1')?.textContent?.trim() ?? '';"
-		)) as string;
-		return text === 'Button' ? text : undefined;
-	});
+	// The title bar is the first level-one heading; the page title is another one.
+	const heading = await poll('the Button page', async () =>
+		(await run(
+			"return [...document.querySelectorAll('h1')].some((h) => h.textContent.trim() === 'Button');"
+		)) === true
+			? 'Button'
+			: undefined
+	);
 	console.log(`smoke test passed: opened the ${heading} page`);
 } catch (error) {
 	console.error(error);
