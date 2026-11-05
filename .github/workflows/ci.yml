@@ -124,8 +124,15 @@ jobs:
           $version = (Get-ItemProperty $key).pv
           Invoke-WebRequest "https://msedgedriver.microsoft.com/$version/edgedriver_win64.zip" -OutFile edgedriver.zip
           Expand-Archive edgedriver.zip -DestinationPath "$env:RUNNER_TEMP\edgedriver"
+          Write-Output "WebView2 runtime $version"
+          # Runs the Edge driver with a verbose log, printed when the smoke test fails.
+          Set-Content "$env:RUNNER_TEMP\edgedriver\verbose.cmd" "@`"%~dp0msedgedriver.exe`" --verbose --log-path=`"%RUNNER_TEMP%\msedgedriver.log`" %*"
       - name: Smoke test (Windows)
         if: runner.os == 'Windows'
         working-directory: apps/showcase
         shell: pwsh
-        run: node smoke/webdriver.ts ..\..\target\debug\oito2-uikit-showcase.exe --native-driver "$env:RUNNER_TEMP\edgedriver\msedgedriver.exe"
+        run: node smoke/webdriver.ts ..\..\target\debug\oito2-uikit-showcase.exe --native-driver "$env:RUNNER_TEMP\edgedriver\verbose.cmd"
+      - name: Edge driver log
+        if: failure() && runner.os == 'Windows'
+        shell: pwsh
+        run: Get-Content "$env:RUNNER_TEMP\msedgedriver.log" -Tail 200 -ErrorAction SilentlyContinue

@@ -30,7 +30,6 @@ if (!application) {
 }
 
 const server = 'http://127.0.0.1:4444';
-const element = 'element-6066-11e4-a52e-4f735466cecf';
 
 // Sends a WebDriver command and returns its value, throwing on a WebDriver error.
 async function command(method: string, path: string, body?: unknown): Promise<unknown> {
@@ -94,11 +93,8 @@ try {
 		throw new Error('the Tauri bridge is missing');
 	}
 
-	const link = (await command('POST', `/session/${session}/element`, {
-		using: 'css selector',
-		value: 'a[href$="/button"]'
-	})) as Record<string, string>;
-	await command('POST', `/session/${session}/element/${link[element]}/click`, {});
+	// Clicks through the page script: WebKitWebDriver does not find the link by selector.
+	await run('document.querySelector(\'a[href$="/button"]\').click(); return null;');
 	const heading = await poll('the Button page', async () => {
 		const text = (await run(
 			"return document.querySelector('h1')?.textContent?.trim() ?? '';"
