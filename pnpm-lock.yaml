@@ -224,6 +224,9 @@ catalogs:
     highlight.js:
       specifier: 11.12.0
       version: 11.12.0
+    jsqr:
+      specifier: 1.4.0
+      version: 1.4.0
     playwright:
       specifier: 1.64.1
       version: 1.64.1
@@ -236,6 +239,9 @@ catalogs:
     publint:
       specifier: 0.3.25
       version: 0.3.25
+    qrcode-generator:
+      specifier: 2.0.4
+      version: 2.0.4
     svelte:
       specifier: 5.57.3
       version: 5.57.3
@@ -310,6 +316,9 @@ importers:
       '@oito2/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@oito2/ui-extras':
+        specifier: workspace:*
+        version: link:../../packages/ui-extras
       '@oito2/ui-settings':
         specifier: workspace:*
         version: link:../../packages/ui-settings
@@ -404,6 +413,16 @@ importers:
         version: 3.1.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vitest@5.0.5)
 
   packages/ui-extras:
+    dependencies:
+      '@lucide/svelte':
+        specifier: 'catalog:'
+        version: 1.59.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))
+      '@oito2/ui':
+        specifier: workspace:*
+        version: link:../ui
+      qrcode-generator:
+        specifier: 'catalog:'
+        version: 2.0.4
     devDependencies:
       '@sveltejs/package':
         specifier: 'catalog:'
@@ -414,6 +433,12 @@ importers:
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 5.0.5(playwright@1.64.1)(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))(vitest@5.0.5)
+      axe-core:
+        specifier: 'catalog:'
+        version: 4.14.0
+      jsqr:
+        specifier: 'catalog:'
+        version: 1.4.0
       playwright:
         specifier: 'catalog:'
         version: 1.64.1
@@ -1566,6 +1591,9 @@ packages:
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
 
+  jsqr@1.4.0:
+    resolution: {integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==}
+
   keyv@5.6.0:
     resolution: {integrity: sha512-CYDD3SOtsHtyXeEORYRx2qBtpDJFjRTGXUtmNEMGyzYOKj1TE3tycdlho7kA1Ufx9OYWZzg52QFBGALTirzDSw==}
 
@@ -1808,6 +1836,9 @@ packages:
   qified@0.10.1:
     resolution: {integrity: sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA==}
     engines: {node: '>=20'}
+
+  qrcode-generator@2.0.4:
+    resolution: {integrity: sha512-mZSiP6RnbHl4xL2Ap5HfkjLnmxfKcPWpWe/c+5XxCuetEenqmNFf1FH/ftXPCtFG5/TDobjsjz6sSNL0Sr8Z9g==}
 
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
@@ -2929,6 +2960,8 @@ snapshots:
 
   jsonc-parser@3.3.1: {}
 
+  jsqr@1.4.0: {}
+
   keyv@5.6.0:
     dependencies:
       '@keyv/serialize': 1.1.1
@@ -3112,6 +3145,8 @@ snapshots:
   qified@0.10.1:
     dependencies:
       hookified: 2.2.0
+
+  qrcode-generator@2.0.4: {}
 
   readdirp@4.1.2: {}
 

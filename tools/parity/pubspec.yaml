@@ -31,6 +31,8 @@ dependencies:
     path: ../../.references/oito2_ui/packages/oito2_ui_themes
   oito2_ui_syntax:
     path: ../../.references/oito2_ui/packages/oito2_ui_syntax
+  oito2_ui_extras:
+    path: ../../.references/oito2_ui/packages/oito2_ui_extras
 
 dev_dependencies:
   flutter_test:
@@ -48,7 +50,8 @@ dependency_overrides:
   material_ui: 1.7.0
   catppuccin_flutter: 1.0.0
   re_highlight: 0.0.3
-  # oito2_ui_themes and oito2_ui_syntax ask for the hosted oito2_ui; use the
-  # same local checkout.
+  qr: 4.0.0
+  # oito2_ui_themes, oito2_ui_syntax and oito2_ui_extras ask for the hosted
+  # oito2_ui; use the same local checkout.
   oito2_ui:
     path: ../../.references/oito2_ui/packages/oito2_ui

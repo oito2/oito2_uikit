@@ -13,5 +13,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Public API of @oito2/ui-extras. Exports are added phase by phase.
-export {};
+// Public API of @oito2/ui-extras.
+
+export {
+	qrErrorLevels,
+	qrModules,
+	qrPath,
+	qrQuietZone,
+	type QrErrorLevel,
+	type QrModules
+} from './qr/qr.js';
+export { default as QrCode } from './qr/QrCode.svelte';
+export {
+	SignatureController,
+	paintStrokes,
+	type SignatureImageOptions,
+	type SignaturePoint,
+	type SignatureSize
+} from './signature/signature-controller.svelte.js';
+export { default as SignaturePad } from './signature/SignaturePad.svelte';
+export {
+	CropController,
+	loadCropImage,
+	type CropImage,
+	type CropOffset,
+	type CropSize
+} from './crop/crop-controller.svelte.js';
+export { default as ImageCropper } from './crop/ImageCropper.svelte';
+export { default as CropPreview } from './crop/CropPreview.svelte';
+export { NavigationMenuState } from './navigation-menu/navigation-menu-state.svelte.js';
+export * as NavigationMenu from './navigation-menu/navigation-menu/index.js';
