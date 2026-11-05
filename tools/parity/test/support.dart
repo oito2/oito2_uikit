@@ -33,12 +33,13 @@ Color color(String value) =>
     Color(0xFF000000 | int.parse(value.substring(1), radix: 16));
 
 /// Writes [data] as tab-indented JSON to [name] in the output directory,
-/// which defaults to packages/ui/src/fixtures/parity and can be changed
-/// with the PARITY_OUT environment variable. Returns the written file.
-File writeFixture(String name, Object data) {
+/// which defaults to packages/[package]/src/fixtures/parity and can be
+/// changed with the PARITY_OUT environment variable. Returns the written
+/// file.
+File writeFixture(String name, Object data, {String package = 'ui'}) {
   final out = Directory(
     Platform.environment['PARITY_OUT'] ??
-        '../../packages/ui/src/fixtures/parity',
+        '../../packages/$package/src/fixtures/parity',
   )..createSync(recursive: true);
   return File(
     '${out.path}/$name',

@@ -22,10 +22,10 @@
 <main>
 	<h1>oito2_uikit</h1>
 	<p>
-		The component pages arrive phase by phase. Phases F1 to F10 add the foundation, the color
+		The component pages arrive phase by phase. Phases F1 to F11 add the foundation, the color
 		schemes, the interaction infrastructure, the basic controls, the window chrome, the system
-		settings, the layout, navigation, input, overlay and data components; the platform spikes of
-		phase F0 stay below.
+		settings, the layout, navigation, input, overlay and data components and the code block; the
+		platform spikes of phase F0 stay below.
 	</p>
 	<ul>
 		<li><a href={resolve('/colors')}>Colors: every role of the active scheme</a></li>
@@ -53,6 +53,9 @@
 			<a href={resolve('/data')}
 				>Data, display and icons: list box, trees, avatars, marquee, timers, icons</a
 			>
+		</li>
+		<li>
+			<a href={resolve('/code')}>Code: highlighted code blocks in 27 languages</a>
 		</li>
 		<li>
 			<a href={resolve('/window')}>Window chrome: title bars, window controls, header bar</a>

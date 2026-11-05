@@ -13,5 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Public API of @oito2/ui-syntax. Exports are added phase by phase.
-export {};
+// Public API of @oito2/ui-syntax.
+
+export type { SyntaxPalette, SyntaxRole } from '@oito2/ui/theme';
+export { defaultLanguages } from './languages.js';
+export { HighlighterTheme, roleOfScope, scopeRoles, type ScopeStyle } from './highlighter-theme.js';
+export {
+	Highlighter,
+	type HighlightOptions,
+	type HighlightedCode,
+	type SyntaxRun
+} from './highlighter.js';
+export { default as CodeBlock } from './CodeBlock.svelte';

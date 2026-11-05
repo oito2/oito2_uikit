@@ -45,16 +45,22 @@
 	},
 	"scripts": {
 		"build": "svelte-package && publint",
-		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
 		"test": "vitest run"
 	},
 	"peerDependencies": {
 		"svelte": "^5.57.0"
 	},
+	"dependencies": {
+		"@oito2/ui": "workspace:*",
+		"highlight.js": "catalog:"
+	},
 	"devDependencies": {
+		"@oito2/ui-themes": "workspace:*",
 		"@sveltejs/package": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
+		"axe-core": "catalog:",
 		"playwright": "catalog:",
 		"publint": "catalog:",
 		"svelte": "catalog:",
