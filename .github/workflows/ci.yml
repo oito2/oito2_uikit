@@ -108,4 +108,4 @@ jobs:
         run: pnpm tauri build --debug --no-bundle
       - name: Smoke test
         working-directory: apps/showcase
-        run: xvfb-run --auto-servernum node smoke/webdriver.ts ../../target/debug/oito2-uikit-showcase
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" node smoke/webdriver.ts ../../target/debug/oito2-uikit-showcase

@@ -109,7 +109,7 @@ try {
 	console.error(error);
 	if (session) {
 		const state = await command('POST', `/session/${session}/execute/sync`, {
-			script: 'return [location.href, document.body?.innerText.slice(0, 500)];',
+			script: 'return { url: location.href, width: innerWidth, height: innerHeight, headings: [...document.querySelectorAll("h1")].map((h) => h.textContent.trim()) };',
 			args: []
 		}).catch((reason: unknown) => reason);
 		console.error('page state:', state);
