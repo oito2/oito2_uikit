@@ -16,7 +16,7 @@
 		"format": "prettier --write .",
 		"generate": "node tools/generate-css/generate.ts",
 		"generate:check": "node tools/generate-css/generate.ts --check",
-		"docs": "node tools/generate-docs/generate.ts",
+		"docs:generate": "node tools/generate-docs/generate.ts",
 		"docs:check": "node tools/generate-docs/generate.ts --check",
 		"showcase": "pnpm --filter @oito2/showcase",
 		"tauri": "pnpm --filter @oito2/showcase tauri",

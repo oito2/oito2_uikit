@@ -73,7 +73,9 @@ try {
 		capabilities: {
 			alwaysMatch: {
 				browserName: 'wry',
-				'tauri:options': { application: resolve(application) }
+				// webviewOptions makes msedgedriver drive the app's WebView2 instead of starting
+				// the app as the Edge browser; other platforms ignore it.
+				'tauri:options': { application: resolve(application), webviewOptions: {} }
 			}
 		}
 	})) as { sessionId: string };

@@ -315,7 +315,7 @@ const json = `${JSON.stringify({ packages: api }, null, '\t')}\n`;
 if (process.argv.includes('--check')) {
 	const current = existsSync(output) ? readFileSync(output, 'utf8') : '';
 	if (current !== json) {
-		console.error(`${relative(root, output)} is out of date; run pnpm docs.`);
+		console.error(`${relative(root, output)} is out of date; run pnpm docs:generate.`);
 		process.exit(1);
 	}
 	console.log('The API reference is up to date.');

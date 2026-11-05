@@ -6564,7 +6564,6 @@
 								"type": "CarouselController | null",
 								"optional": true,
 								"doc": "The controller of this carousel, for changing its page from outside; bind it to read it.",
-								"default": "null",
 								"bindable": true
 							},
 							{
