@@ -32,6 +32,8 @@ pub(crate) fn requested_decoration_mode() -> DecorationMode {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_oito2_window::init())
         .plugin(tauri_plugin_oito2_settings::init())
         .setup(|app| {

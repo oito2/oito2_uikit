@@ -13,5 +13,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Public API of @oito2/ui-files. Exports are added phase by phase.
-export {};
+// Public API of @oito2/ui-files.
+
+export {
+	acceptAttribute,
+	baseName,
+	extensionOf,
+	fileMatchesTypes,
+	isPreviewableImage,
+	mimeTypeOf,
+	webFile,
+	type FileTypeGroup,
+	type PickedFile
+} from './files.js';
+export {
+	FileUploadController,
+	type FileRejection,
+	type FileUploadControllerOptions,
+	type RejectedFile
+} from './upload-controller.svelte.js';
+export {
+	defaultFilesAdapter,
+	type DropTargetHandlers,
+	type FilesAdapter
+} from './adapters/adapter.js';
+export { webFilesAdapter } from './adapters/web.js';
+export { dialogFilters, pathFile, tauriFilesAdapter } from './adapters/tauri.js';
+export { Downloads } from './downloads.js';
+export { default as FileDropZone } from './FileDropZone.svelte';
+export { default as FileUpload } from './FileUpload.svelte';
+export { default as DownloadTrigger } from './DownloadTrigger.svelte';

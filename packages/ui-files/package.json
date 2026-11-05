@@ -44,16 +44,24 @@
 	},
 	"scripts": {
 		"build": "svelte-package && publint",
-		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
 		"test": "vitest run"
 	},
 	"peerDependencies": {
 		"svelte": "^5.57.0"
 	},
+	"dependencies": {
+		"@lucide/svelte": "catalog:",
+		"@oito2/ui": "workspace:*",
+		"@tauri-apps/api": "catalog:",
+		"@tauri-apps/plugin-dialog": "catalog:",
+		"@tauri-apps/plugin-fs": "catalog:"
+	},
 	"devDependencies": {
 		"@sveltejs/package": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
+		"axe-core": "catalog:",
 		"playwright": "catalog:",
 		"publint": "catalog:",
 		"svelte": "catalog:",

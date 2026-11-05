@@ -19,6 +19,7 @@
 		"@lucide/svelte": "catalog:",
 		"@oito2/ui": "workspace:*",
 		"@oito2/ui-extras": "workspace:*",
+		"@oito2/ui-files": "workspace:*",
 		"@oito2/ui-settings": "workspace:*",
 		"@oito2/ui-syntax": "workspace:*",
 		"@oito2/ui-themes": "workspace:*",
