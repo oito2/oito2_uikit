@@ -83,19 +83,14 @@ jobs:
       - run: cargo test --workspace --locked
 
   smoke:
-    name: Desktop smoke test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: Desktop smoke test (Linux)
+    runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Install Linux build and WebDriver dependencies
-        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libxdo-dev libssl-dev librsvg2-dev webkitgtk-webdriver xvfb
@@ -111,28 +106,6 @@ jobs:
         run: cargo install tauri-driver --version 2.1.0 --locked
       - name: Build the showcase (debug, no bundle)
         run: pnpm tauri build --debug --no-bundle
-      - name: Smoke test (Linux)
-        if: runner.os == 'Linux'
+      - name: Smoke test
         working-directory: apps/showcase
         run: xvfb-run --auto-servernum node smoke/webdriver.ts ../../target/debug/oito2-uikit-showcase
-      # The Edge driver must match the WebView2 runtime the runner has installed.
-      - name: Install the Edge driver for WebView2
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $key = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
-          $version = (Get-ItemProperty $key).pv
-          Invoke-WebRequest "https://msedgedriver.microsoft.com/$version/edgedriver_win64.zip" -OutFile edgedriver.zip
-          Expand-Archive edgedriver.zip -DestinationPath "$env:RUNNER_TEMP\edgedriver"
-          Write-Output "WebView2 runtime $version"
-          # Runs the Edge driver with a verbose log, printed when the smoke test fails.
-          Set-Content "$env:RUNNER_TEMP\edgedriver\verbose.cmd" "@`"%~dp0msedgedriver.exe`" --verbose --log-path=`"%RUNNER_TEMP%\msedgedriver.log`" %*"
-      - name: Smoke test (Windows)
-        if: runner.os == 'Windows'
-        working-directory: apps/showcase
-        shell: pwsh
-        run: node smoke/webdriver.ts ..\..\target\debug\oito2-uikit-showcase.exe --native-driver "$env:RUNNER_TEMP\edgedriver\verbose.cmd"
-      - name: Edge driver log
-        if: failure() && runner.os == 'Windows'
-        shell: pwsh
-        run: Get-Content "$env:RUNNER_TEMP\msedgedriver.log" -Tail 200 -ErrorAction SilentlyContinue

@@ -84,17 +84,18 @@ try {
 	const run = (script: string) =>
 		command('POST', `/session/${session}/execute/sync`, { script, args: [] });
 
+	// Clicks the Button link from the page script once the catalogue has rendered:
+	// WebKitWebDriver does not find the link by selector.
 	await poll('the catalogue', async () =>
-		(await run('return document.querySelector(\'a[href$="/button"]\') !== null;'))
+		(await run(
+			'const link = document.querySelector(\'a[href$="/button"]\'); link?.click(); return link ? true : null;'
+		)) === true
 			? true
 			: undefined
 	);
 	if (!(await run("return '__TAURI_INTERNALS__' in window;"))) {
 		throw new Error('the Tauri bridge is missing');
 	}
-
-	// Clicks through the page script: WebKitWebDriver does not find the link by selector.
-	await run('document.querySelector(\'a[href$="/button"]\').click(); return null;');
 	const heading = await poll('the Button page', async () => {
 		const text = (await run(
 			"return document.querySelector('h1')?.textContent?.trim() ?? '';"
@@ -104,6 +105,13 @@ try {
 	console.log(`smoke test passed: opened the ${heading} page`);
 } catch (error) {
 	console.error(error);
+	if (session) {
+		const state = await command('POST', `/session/${session}/execute/sync`, {
+			script: 'return [location.href, document.body?.innerText.slice(0, 500)];',
+			args: []
+		}).catch((reason: unknown) => reason);
+		console.error('page state:', state);
+	}
 	process.exitCode = 1;
 } finally {
 	if (session) await command('DELETE', `/session/${session}`).catch(() => {});
