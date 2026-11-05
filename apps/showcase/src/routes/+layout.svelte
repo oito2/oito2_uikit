@@ -28,6 +28,7 @@
 		WindowScope,
 		accentColors,
 		fallbackSystemSettings,
+		pageTransition,
 		type AccentColor,
 		type WindowController
 	} from '@oito2/ui';
@@ -38,6 +39,7 @@
 	import { isTauri } from '@tauri-apps/api/core';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { LayoutProps } from './$types';
 	import { ShowcaseSettings, type SimulatedDesktop } from '#lib/showcase-settings.svelte.js';
@@ -166,7 +168,11 @@
 						<span class="action">Window action: {simulated.lastAction}</span>
 					{/if}
 				</header>
-				<div class="content">{@render children()}</div>
+				<div class="content">
+					{#key page.url.pathname}
+						<div in:pageTransition>{@render children()}</div>
+					{/key}
+				</div>
 			</div>
 			<Toaster placement="bottom-end" />
 			<WindowResizeHandles controller={native} />
@@ -196,10 +202,12 @@
 		height: 100%;
 	}
 
+	/* Hides the horizontal overflow of the page transition's slide. */
 	.content {
 		flex: 1;
 		min-height: 0;
 		overflow: auto;
+		overflow-x: hidden;
 	}
 
 	.action {

@@ -123,6 +123,13 @@ export { default as Commands } from './shortcuts/Commands.svelte';
 
 export { focusBorder, type FocusBorderOptions } from './attachments/focus-border.js';
 export { edgeFocus, type EdgeFocusOptions } from './attachments/edge-focus.js';
+export {
+	draggable,
+	type DraggableOptions,
+	type DraggablePosition
+} from './attachments/draggable.js';
+export { undershoot, type UndershootOptions } from './attachments/undershoot.js';
+export { pageTransition, type PageTransitionParams } from './transitions/page-transition.js';
 
 export type { IconComponent, IconProps } from './components/icon.js';
 export { default as Button } from './components/button/Button.svelte';
@@ -361,3 +368,40 @@ export { default as ShortcutLabel } from './components/shortcuts/ShortcutLabel.s
 export { default as ShortcutRecorder } from './components/shortcuts/ShortcutRecorder.svelte';
 export { openCommandPalette, rankCommands } from './components/shortcuts/command-palette.svelte.js';
 export { default as CommandPalette } from './components/shortcuts/CommandPalette.svelte';
+
+export * as ListBox from './components/list-box/list-box/index.js';
+export { ListBoxState } from './components/list-box/list-box-state.svelte.js';
+export {
+	TreeController,
+	type TreeControllerOptions
+} from './components/tree/tree-controller.svelte.js';
+export { treeCheckStates, type TreeCheckState } from './components/tree/tree-check.js';
+export { default as TreeView } from './components/tree/TreeView.svelte';
+export { jsonTree, jsonValueText, type JsonEntry } from './components/tree/json-tree.js';
+export { default as JsonTreeView } from './components/tree/JsonTreeView.svelte';
+export {
+	avatarColor,
+	avatarStatusLabel,
+	initials,
+	type AvatarShape,
+	type AvatarStatus
+} from './components/avatar/avatar.js';
+export { default as Avatar } from './components/avatar/Avatar.svelte';
+export { default as AvatarGroup } from './components/avatar/AvatarGroup.svelte';
+export { default as Marquee } from './components/marquee/Marquee.svelte';
+export {
+	formatDuration,
+	TimerController,
+	type TimerControllerOptions
+} from './components/timer/timer-controller.svelte.js';
+export { default as TimerText } from './components/timer/TimerText.svelte';
+export {
+	animatedIcons,
+	type AnimatedIconData,
+	type IconShape,
+	type AnimatedIconName,
+	type AnimationMode
+} from './icons/animated-icons.js';
+export { default as AnimatedIcon } from './icons/AnimatedIcon.svelte';
+export { default as PlaceholderIcon } from './icons/PlaceholderIcon.svelte';
+export { default as DiagonalClip } from './components/layout/DiagonalClip.svelte';

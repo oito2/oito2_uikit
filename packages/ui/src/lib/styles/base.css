@@ -50,4 +50,69 @@
 	[data-oito2-focus-border='off'] {
 		outline: none;
 	}
+
+	/* The edge shadows of the undershoot attachment: sticky pseudo-elements that stay at the
+	   edges of the scrolling element and fade in while content lies beyond them. */
+	[data-oito2-undershoot]::before,
+	[data-oito2-undershoot]::after {
+		content: '';
+		position: sticky;
+		z-index: 1;
+		display: block;
+		flex: none;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 150ms ease;
+		--oito2-undershoot-shadow: color-mix(in srgb, var(--oito2-color-shadow) 12%, transparent);
+	}
+
+	[data-oito2-undershoot='vertical']::before {
+		top: 0;
+		height: var(--oito2-undershoot-extent);
+		margin-bottom: calc(-1 * var(--oito2-undershoot-extent));
+		background: linear-gradient(to bottom, var(--oito2-undershoot-shadow), transparent);
+	}
+
+	[data-oito2-undershoot='vertical']::after {
+		bottom: 0;
+		height: var(--oito2-undershoot-extent);
+		margin-top: calc(-1 * var(--oito2-undershoot-extent));
+		background: linear-gradient(to top, var(--oito2-undershoot-shadow), transparent);
+	}
+
+	[data-oito2-undershoot='horizontal']::before {
+		inset-inline-start: 0;
+		align-self: stretch;
+		width: var(--oito2-undershoot-extent);
+		margin-inline-end: calc(-1 * var(--oito2-undershoot-extent));
+		background: linear-gradient(to right, var(--oito2-undershoot-shadow), transparent);
+	}
+
+	[data-oito2-undershoot='horizontal']::after {
+		inset-inline-end: 0;
+		align-self: stretch;
+		width: var(--oito2-undershoot-extent);
+		margin-inline-start: calc(-1 * var(--oito2-undershoot-extent));
+		background: linear-gradient(to left, var(--oito2-undershoot-shadow), transparent);
+	}
+
+	[data-oito2-undershoot='horizontal']:dir(rtl)::before {
+		background: linear-gradient(to left, var(--oito2-undershoot-shadow), transparent);
+	}
+
+	[data-oito2-undershoot='horizontal']:dir(rtl)::after {
+		background: linear-gradient(to right, var(--oito2-undershoot-shadow), transparent);
+	}
+
+	[data-oito2-undershoot-start]::before,
+	[data-oito2-undershoot-end]::after {
+		opacity: 1;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		[data-oito2-undershoot]::before,
+		[data-oito2-undershoot]::after {
+			transition: none;
+		}
+	}
 }
