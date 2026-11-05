@@ -136,12 +136,12 @@ describe('Steps', () => {
 		render(NavigationHarness, props);
 		await expect.element(page.getByText('Step two')).toBeVisible();
 		await expect
-			.element(page.getByRole('button', { name: 'Profile, Step 2 of 3, Current' }))
+			.element(page.getByRole('button', { name: 'Profile Step 2 of 3, Current' }))
 			.toHaveAttribute('aria-current', 'step');
 		await expect
 			.element(page.getByRole('group', { name: 'Done, Step 3 of 3' }))
 			.toBeInTheDocument();
-		await page.getByRole('button', { name: 'Account, Step 1 of 3, Completed' }).click();
+		await page.getByRole('button', { name: 'Account Step 1 of 3, Completed' }).click();
 		expect(props.step).toBe(0);
 		await page.getByRole('button', { name: 'Next' }).click();
 		expect(props.step).toBe(1);
@@ -157,7 +157,11 @@ describe('Carousel', () => {
 		await expect
 			.element(page.getByRole('group', { name: 'Part 2 of 3' }))
 			.not.toHaveAttribute('aria-hidden');
-		el(page.getByTestId('carousel')).focus();
+		(
+			el(page.getByTestId('carousel')).querySelector(
+				'.oito2-carousel-viewport'
+			) as HTMLElement
+		).focus();
 		await userEvent.keyboard('{ArrowLeft}');
 		expect(props.slide).toBe(0);
 		await userEvent.keyboard('{ArrowLeft}');

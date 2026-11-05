@@ -12,7 +12,7 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
-		"test": "echo 'no showcase tests yet'",
+		"test": "playwright test",
 		"tauri": "tauri"
 	},
 	"dependencies": {
@@ -27,11 +27,13 @@
 		"@tauri-apps/api": "catalog:"
 	},
 	"devDependencies": {
+		"@playwright/test": "catalog:",
 		"@sveltejs/adapter-static": "catalog:",
 		"@sveltejs/kit": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@tauri-apps/cli": "catalog:",
 		"@types/node": "catalog:",
+		"axe-core": "catalog:",
 		"svelte": "catalog:",
 		"svelte-check": "catalog:",
 		"typescript": "catalog:",

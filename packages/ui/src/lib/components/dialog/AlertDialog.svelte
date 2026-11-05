@@ -22,6 +22,8 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { useLocale } from '../../l10n/locale.js';
+	import { materialStrings } from '../../l10n/material.js';
 	import Button from '../button/Button.svelte';
 	import * as Dialog from './dialog/index.js';
 
@@ -34,10 +36,10 @@
 		title: string | Snippet;
 		/** The consequences of the action. */
 		description?: string | Snippet;
-		/** The label of the confirm button. */
-		confirmLabel: string;
-		/** The label of the cancel button. */
-		cancelLabel: string;
+		/** The label of the confirm button. Defaults to the localized "OK". */
+		confirmLabel?: string;
+		/** The label of the cancel button. Defaults to the localized "Cancel". */
+		cancelLabel?: string;
 		/** Called when the action is confirmed. */
 		onConfirm?: () => void;
 		/** Called when the action is cancelled, with a button or Escape. */
@@ -54,6 +56,9 @@
 		onConfirm,
 		onCancel
 	}: Props = $props();
+
+	const locale = useLocale();
+	let strings = $derived(materialStrings(locale.locale));
 </script>
 
 {#snippet text(content: string | Snippet)}
@@ -72,14 +77,14 @@
 		<Dialog.Title>{@render text(title)}</Dialog.Title>
 		{#if description}<Dialog.Description>{@render text(description)}</Dialog.Description>{/if}
 		<Dialog.Actions>
-			<Dialog.Close>{cancelLabel}</Dialog.Close>
+			<Dialog.Close>{cancelLabel ?? strings.cancel}</Dialog.Close>
 			<Button
 				data-autofocus
 				onclick={() => {
 					onConfirm?.();
 					open = false;
 					onOpenChange?.(false);
-				}}>{confirmLabel}</Button
+				}}>{confirmLabel ?? strings.ok}</Button
 			>
 		</Dialog.Actions>
 	</Dialog.Content>

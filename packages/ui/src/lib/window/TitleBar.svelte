@@ -46,6 +46,8 @@
 	interface Props extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children'> {
 		/** The title, usually text. */
 		title?: string | Snippet;
+		/** The heading level of a text `title`. Defaults to 1, the main title of the window. */
+		headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 		/** Content at the start, after the leading window controls. */
 		leading?: Snippet;
 		/** Content at the end, before the trailing window controls, such as icon buttons. */
@@ -78,6 +80,7 @@
 
 	let {
 		title,
+		headingLevel = 1,
 		leading,
 		trailing,
 		barStyle = 'normal',
@@ -133,7 +136,10 @@
 		</div>
 		<div class="title" {...interactiveTitle ? {} : drag}>
 			{#if title}
-				{#if typeof title === 'string'}<h1>{title}</h1>{:else}{@render text(title)}{/if}
+				{#if typeof title === 'string'}<svelte:element
+						this={`h${headingLevel}`}
+						class="heading">{title}</svelte:element
+					>{:else}{@render text(title)}{/if}
 			{/if}
 		</div>
 		<div class="end" {...drag}>
@@ -217,7 +223,7 @@
 			justify-content: center;
 		}
 
-		h1 {
+		.heading {
 			margin: 0;
 			overflow: hidden;
 			font: inherit;

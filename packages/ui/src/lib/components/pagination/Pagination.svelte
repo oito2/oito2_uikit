@@ -37,6 +37,8 @@
 	interface Props extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
 		/** The current page, from 1. */
 		page?: number;
+		/** The page of an uncontrolled pagination at first. Defaults to 1. */
+		defaultPage?: number;
 		/** The number of pages. */
 		pageCount: number;
 		/** Called with the page to show. */
@@ -60,7 +62,8 @@
 	}
 
 	let {
-		page = $bindable(1),
+		defaultPage = 1,
+		page = $bindable(defaultPage),
 		pageCount,
 		onPageChange,
 		siblingCount = 1,

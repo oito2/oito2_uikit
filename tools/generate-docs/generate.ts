@@ -241,7 +241,11 @@ function resolveModule(from: string, specifier: string): string {
 
 /** Returns the kind and TSDoc of the export `name` declared in the module `file`. */
 function readOther(file: string, name: string): ApiOther {
-	const text = readFileSync(file, 'utf8');
+	const raw = readFileSync(file, 'utf8');
+	// A type exported from the module script of a component is read from its svelte2tsx code.
+	const text = file.endsWith('.svelte')
+		? svelte2tsx(raw, { filename: file, isTsFile: true, mode: 'ts' }).code
+		: raw;
 	const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
 	let entry: ApiOther = { kind: 'constant', source: relative(root, file), doc: '' };
 	const visit = (node: ts.Node) => {

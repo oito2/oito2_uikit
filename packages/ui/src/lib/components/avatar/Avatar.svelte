@@ -52,6 +52,8 @@
 		status?: AvatarStatus | null;
 		/** The background behind the initials or icon; defaults to a color picked from `name`. */
 		background?: string | null;
+		/** The accessible name; defaults to `name` and the status. Without either the avatar is decorative. */
+		label?: string;
 		/** The element. */
 		ref?: HTMLSpanElement | null;
 	}
@@ -64,6 +66,7 @@
 		shape = 'circle',
 		status = null,
 		background = null,
+		label: labelProp,
 		ref = $bindable(null),
 		class: className,
 		...rest
@@ -77,9 +80,10 @@
 	let fill = $derived(background ?? avatarColor(name));
 	let ink = $derived(fill === null ? null : avatarForeground(fill));
 	let label = $derived(
-		[name?.trim() || null, status ? avatarStatusLabel(status, locale.strings) : null]
-			.filter((part) => part !== null)
-			.join(', ')
+		labelProp ??
+			[name?.trim() || null, status ? avatarStatusLabel(status, locale.strings) : null]
+				.filter((part) => part !== null)
+				.join(', ')
 	);
 	let dot = $derived(Math.min(16, Math.max(8, size * 0.28)));
 

@@ -2146,7 +2146,7 @@
 					"Trigger": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/tooltip/TooltipTrigger.svelte",
-						"doc": "The element a tooltip describes. Pass `child` to render your own element with the props\nit receives (the handlers, `aria-describedby` and an attachment), so the tooltip binds to\na button directly; otherwise `children` are wrapped in an inline element.",
+						"doc": "The element a tooltip describes. Pass `child` to render your own element with the props\nit receives (the handlers, `aria-describedby` and an attachment), so the tooltip binds to\na button directly; otherwise `children` are wrapped in an inline element. The wrapper\nopens the tooltip when the keyboard focuses the first focusable element inside it, which\nthe tooltip then describes, or takes the focus itself when there is none, such as around\ntext or a disabled button.",
 						"props": [
 							{
 								"name": "child",
@@ -2451,15 +2451,15 @@
 						"name": "confirmLabel",
 						"kind": "prop",
 						"type": "string",
-						"optional": false,
-						"doc": "The label of the confirm button."
+						"optional": true,
+						"doc": "The label of the confirm button. Defaults to the localized \"OK\"."
 					},
 					{
 						"name": "cancelLabel",
 						"kind": "prop",
 						"type": "string",
-						"optional": false,
-						"doc": "The label of the cancel button."
+						"optional": true,
+						"doc": "The label of the cancel button. Defaults to the localized \"Cancel\"."
 					},
 					{
 						"name": "onConfirm",
@@ -2480,7 +2480,7 @@
 			"ScrollArea": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/scroll/ScrollArea.svelte",
-				"doc": "A scrolling region with the oito2 scroll bars instead of the system ones: thin\nrounded thumbs (6 pixels, 10 while hovered) in the text color at 30% (45% hovered, 60%\ndragged), which show while the content scrolls or the pointer is over the region, or\nalways with `thumbVisibility`. The thumbs can be dragged and the tracks clicked to page.",
+				"doc": "A scrolling region with the oito2 scroll bars instead of the system ones: thin\nrounded thumbs (6 pixels, 10 while hovered) in the text color at 30% (45% hovered, 60%\ndragged), which show while the content scrolls or the pointer is over the region, or\nalways with `thumbVisibility`. The thumbs can be dragged and the tracks clicked to page.\nWhile the content overflows, the scrolling area takes the keyboard focus, so the arrow\nkeys and Page Up/Down scroll it.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 				"props": [
 					{
@@ -3493,6 +3493,14 @@
 						"doc": "The title, usually text."
 					},
 					{
+						"name": "headingLevel",
+						"kind": "prop",
+						"type": "1 | 2 | 3 | 4 | 5 | 6",
+						"optional": true,
+						"doc": "The heading level of a text `title`. Defaults to 1, the main title of the window.",
+						"default": "1"
+					},
+					{
 						"name": "leading",
 						"kind": "snippet",
 						"type": "Snippet",
@@ -3664,6 +3672,14 @@
 						"type": "string | Snippet",
 						"optional": true,
 						"doc": "The title, usually text."
+					},
+					{
+						"name": "headingLevel",
+						"kind": "prop",
+						"type": "1 | 2 | 3 | 4 | 5 | 6",
+						"optional": true,
+						"doc": "The heading level of a text `title`. Defaults to 1, the main title of the window.",
+						"default": "1"
 					},
 					{
 						"name": "start",
@@ -3968,7 +3984,7 @@
 					{
 						"name": "alignX",
 						"kind": "prop",
-						"type": "Alignment",
+						"type": "WatermarkAlignment",
 						"optional": true,
 						"doc": "The horizontal position of the watermark, following the text direction. Defaults to `end`.",
 						"default": "'end'"
@@ -3976,7 +3992,7 @@
 					{
 						"name": "alignY",
 						"kind": "prop",
-						"type": "Alignment",
+						"type": "WatermarkAlignment",
 						"optional": true,
 						"doc": "The vertical position of the watermark. Defaults to `center`.",
 						"default": "'center'"
@@ -4006,6 +4022,11 @@
 						"doc": "The content drawn over the watermark."
 					}
 				]
+			},
+			"WatermarkAlignment": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/components/layout/Watermark.svelte",
+				"doc": "Where a watermark sits, along each axis."
 			},
 			"SelectableContainer": {
 				"kind": "component",
@@ -4868,6 +4889,13 @@
 						"doc": "Builds the label of a dot from its 1-based page and the count. Defaults to \"Page 2 of 5\"."
 					},
 					{
+						"name": "label",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The accessible name of the group of interactive dots, such as \"Slides\"."
+					},
+					{
 						"name": "ref",
 						"kind": "prop",
 						"type": "HTMLDivElement | null",
@@ -5505,8 +5533,16 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The current page, from 1.",
-						"default": "1",
+						"default": "defaultPage",
 						"bindable": true
+					},
+					{
+						"name": "defaultPage",
+						"kind": "prop",
+						"type": "number",
+						"optional": true,
+						"doc": "The page of an uncontrolled pagination at first. Defaults to 1.",
+						"default": "1"
 					},
 					{
 						"name": "pageCount",
@@ -5944,6 +5980,11 @@
 						"doc": "The main content."
 					}
 				]
+			},
+			"PaneSide": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/components/split/PanedView.svelte",
+				"doc": "The side of a `PanedView` its pane is on; `start` and `end` follow the text direction."
 			},
 			"fitSplitter": {
 				"kind": "function",
@@ -6454,7 +6495,7 @@
 			"CarouselController": {
 				"kind": "class",
 				"source": "packages/ui/src/lib/components/carousel/carousel-controller.svelte.ts",
-				"doc": "Controls a carousel: the slides, the current page and page changes. `Carousel.Root`\ncreates one and shares it with its parts."
+				"doc": "Controls a carousel: the slides, the current page and page changes. `Carousel.Root`\ncreates one, shares it with its parts and exposes it through its bindable `controller`."
 			},
 			"CarouselOptions": {
 				"kind": "interface",
@@ -6516,6 +6557,15 @@
 								"optional": true,
 								"doc": "The time each page stays when `autoScroll`, in milliseconds. Defaults to 4000.",
 								"default": "4000"
+							},
+							{
+								"name": "controller",
+								"kind": "prop",
+								"type": "CarouselController | null",
+								"optional": true,
+								"doc": "The controller of this carousel, for changing its page from outside; bind it to read it.",
+								"default": "null",
+								"bindable": true
 							},
 							{
 								"name": "ref",
@@ -8725,8 +8775,16 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The value, from 0 to `max`.",
-						"default": "0",
+						"default": "defaultValue",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "number",
+						"optional": true,
+						"doc": "The value of an uncontrolled rating at first. Defaults to 0.",
+						"default": "0"
 					},
 					{
 						"name": "onValueChange",
@@ -8805,8 +8863,16 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The angle in degrees, from 0 to under 360.",
-						"default": "0",
+						"default": "defaultValue",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "number",
+						"optional": true,
+						"doc": "The angle of an uncontrolled dial at first. Defaults to 0.",
+						"default": "0"
 					},
 					{
 						"name": "onValueChange",
@@ -10705,6 +10771,13 @@
 						"optional": true,
 						"doc": "The background behind the initials or icon; defaults to a color picked from `name`.",
 						"default": "null"
+					},
+					{
+						"name": "label",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The accessible name; defaults to `name` and the status. Without either the avatar is decorative."
 					},
 					{
 						"name": "ref",

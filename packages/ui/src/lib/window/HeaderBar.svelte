@@ -36,6 +36,8 @@
 	type Props = Omit<ComponentProps<typeof WindowTitleBar>, 'leading' | 'trailing' | 'title'> & {
 		/** The title, usually text. */
 		title?: string | Snippet;
+		/** The heading level of a text `title`. Defaults to 1, the main title of the window. */
+		headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 		/** Controls at the start, such as a back button. */
 		start?: Snippet;
 		/** Controls at the end, such as a main menu. */
@@ -60,6 +62,7 @@
 
 	let {
 		title,
+		headingLevel = 1,
 		start,
 		end,
 		searchable = false,
@@ -110,7 +113,9 @@
 			{@render tabs()}
 		</div>
 	{:else if typeof title === 'string'}
-		<h1 class="oito2-header-bar-title">{title}</h1>
+		<svelte:element this={`h${headingLevel}`} class="oito2-header-bar-title"
+			>{title}</svelte:element
+		>
 	{:else if title}
 		{@render title()}
 	{/if}

@@ -21,20 +21,22 @@
   page. The watermark is hidden from assistive technologies and ignores the pointer. It
   covers the area the content takes; give the element a size to watermark a whole page.
 -->
+<script lang="ts" module>
+	/** Where a watermark sits, along each axis. */
+	export type WatermarkAlignment = 'start' | 'center' | 'end';
+</script>
+
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-
-	/** Where a watermark sits, along each axis. */
-	type Alignment = 'start' | 'center' | 'end';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The decorative content. */
 		watermark: Snippet;
 		/** The horizontal position of the watermark, following the text direction. Defaults to `end`. */
-		alignX?: Alignment;
+		alignX?: WatermarkAlignment;
 		/** The vertical position of the watermark. Defaults to `center`. */
-		alignY?: Alignment;
+		alignY?: WatermarkAlignment;
 		/** The watermark opacity, from 0 to 1. Defaults to 0.1. */
 		opacity?: number;
 		/** The element. */

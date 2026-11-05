@@ -203,7 +203,10 @@ export { default as BorderContainer } from './components/layout/BorderContainer.
 export * as Section from './components/layout/section/index.js';
 export { default as Tile } from './components/layout/Tile.svelte';
 export { default as TileList } from './components/layout/TileList.svelte';
-export { default as Watermark } from './components/layout/Watermark.svelte';
+export {
+	default as Watermark,
+	type WatermarkAlignment
+} from './components/layout/Watermark.svelte';
 export { default as SelectableContainer } from './components/surfaces/SelectableContainer.svelte';
 export { default as Banner } from './components/surfaces/Banner.svelte';
 export {
@@ -247,7 +250,7 @@ export { stepState, type StepState } from './components/steps/steps-state.svelte
 export * as Steps from './components/steps/steps/index.js';
 export { tocActiveIndex, type TocEntry, type TocMeasure } from './components/toc/toc-active.js';
 export { default as TableOfContents } from './components/toc/TableOfContents.svelte';
-export { default as PanedView } from './components/split/PanedView.svelte';
+export { default as PanedView, type PaneSide } from './components/split/PanedView.svelte';
 export {
 	fitSplitter,
 	moveDivider,

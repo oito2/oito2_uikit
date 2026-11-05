@@ -87,3 +87,7 @@
 		{/each}
 	{/if}
 </MenuPanel>
+<!-- Closed, the options still render out of sight, so the trigger knows the label of the chosen one. -->
+{#if children && !select.open}
+	<div hidden>{@render children()}</div>
+{/if}

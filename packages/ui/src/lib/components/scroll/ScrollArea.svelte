@@ -21,6 +21,8 @@
   rounded thumbs (6 pixels, 10 while hovered) in the text color at 30% (45% hovered, 60%
   dragged), which show while the content scrolls or the pointer is over the region, or
   always with `thumbVisibility`. The thumbs can be dragged and the tracks clicked to page.
+  While the content overflows, the scrolling area takes the keyboard focus, so the arrow
+  keys and Page Up/Down scroll it.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -161,7 +163,9 @@
 	data-visible={thumbVisibility || scrolling || dragging ? '' : undefined}
 	{...rest}
 >
-	<div class="viewport" {@attach track}>
+	<!-- The viewport joins the tab order only while it scrolls, like a native scroller. -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="viewport" tabindex={vertical || horizontal ? 0 : undefined} {@attach track}>
 		<div class="content">{@render children?.()}</div>
 	</div>
 	{#if vertical}
@@ -218,6 +222,11 @@
 
 		.viewport::-webkit-scrollbar {
 			display: none;
+		}
+
+		.viewport:focus-visible {
+			outline: 2px solid var(--oito2-color-primary-text);
+			outline-offset: -2px;
 		}
 
 		[data-direction='vertical'] .viewport {

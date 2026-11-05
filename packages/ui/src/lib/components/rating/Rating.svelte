@@ -34,6 +34,8 @@
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The value, from 0 to `max`. */
 		value?: number;
+		/** The value of an uncontrolled rating at first. Defaults to 0. */
+		defaultValue?: number;
 		/** Called with each new value. */
 		onValueChange?: (value: number) => void;
 		/** The number of stars. Defaults to 5. */
@@ -53,7 +55,8 @@
 	}
 
 	let {
-		value = $bindable(0),
+		defaultValue = 0,
+		value = $bindable(defaultValue),
 		onValueChange,
 		max = 5,
 		allowHalf = false,
@@ -150,9 +153,17 @@
 		{@render stars()}
 	</div>
 {:else}
+	<!-- A read-only rating stays focusable and announces its value; a disabled one leaves the tab order. -->
 	<div
 		bind:this={ref}
-		role="img"
+		role="slider"
+		tabindex={disabled ? undefined : 0}
+		aria-valuemin={0}
+		aria-valuemax={max}
+		aria-valuenow={value}
+		aria-valuetext={describe(value)}
+		aria-readonly={readonly && !disabled ? true : undefined}
+		aria-disabled={disabled || undefined}
 		aria-label={describe(value)}
 		class={['oito2-rating', className]}
 		data-disabled={disabled ? '' : undefined}

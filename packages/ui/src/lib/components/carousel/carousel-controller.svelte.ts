@@ -28,7 +28,7 @@ export interface CarouselOptions {
 
 /**
  * Controls a carousel: the slides, the current page and page changes. `Carousel.Root`
- * creates one and shares it with its parts.
+ * creates one, shares it with its parts and exposes it through its bindable `controller`.
  */
 export class CarouselController {
 	readonly #options: CarouselOptions;

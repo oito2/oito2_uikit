@@ -182,6 +182,9 @@ catalogs:
     '@material/material-color-utilities':
       specifier: 0.4.0
       version: 0.4.0
+    '@playwright/test':
+      specifier: 1.64.1
+      version: 1.64.1
     '@sveltejs/adapter-static':
       specifier: 4.0.0
       version: 4.0.0
@@ -350,6 +353,9 @@ importers:
         specifier: 'catalog:'
         version: 2.12.4
     devDependencies:
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.64.1
       '@sveltejs/adapter-static':
         specifier: 'catalog:'
         version: 4.0.0(@sveltejs/kit@3.1.0(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1)))(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1)))
@@ -365,6 +371,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      axe-core:
+        specifier: 'catalog:'
+        version: 4.14.0
       svelte:
         specifier: 'catalog:'
         version: 5.57.3(@typescript-eslint/types@8.72.1)
@@ -949,6 +958,11 @@ packages:
 
   '@oxc-project/types@0.155.0':
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
+
+  '@playwright/test@1.64.1':
+    resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   '@pnpm/deps.graph-sequencer@1100.0.1':
     resolution: {integrity: sha512-pOr5+q1fLYKwFN3LAJuGZEnfXDcQ73zqgDHMtGy+K+uIoUqyY+6MeDCWFwfu+4EFuq76I5EPFofoNAI+Bmmq4A==}
@@ -2393,6 +2407,10 @@ snapshots:
   '@material/material-color-utilities@0.4.0': {}
 
   '@oxc-project/types@0.155.0': {}
+
+  '@playwright/test@1.64.1':
+    dependencies:
+      playwright: 1.64.1
 
   '@pnpm/deps.graph-sequencer@1100.0.1': {}
 

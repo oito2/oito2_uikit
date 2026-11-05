@@ -8,6 +8,7 @@ build/
 target/
 gen/
 test-results/
+playwright-report/
 **/__screenshots__/
 CHANGELOG.md
 

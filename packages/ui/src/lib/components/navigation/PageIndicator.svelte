@@ -52,6 +52,8 @@
 		minTargetSize?: number;
 		/** Builds the label of a dot from its 1-based page and the count. Defaults to "Page 2 of 5". */
 		pageLabel?: (page: number, length: number) => string;
+		/** The accessible name of the group of interactive dots, such as "Slides". */
+		label?: string;
 		/** The indicator element. */
 		ref?: HTMLDivElement | null;
 	}
@@ -66,6 +68,7 @@
 		layout = 'fixed',
 		minTargetSize = 24,
 		pageLabel,
+		label,
 		ref = $bindable(null),
 		class: className,
 		...rest
@@ -74,7 +77,7 @@
 	const locale = useLocale();
 	let width = $state(Number.POSITIVE_INFINITY);
 	let active = $derived(interactive ?? onPageChange !== undefined);
-	let label = $derived(pageLabel ?? ((p: number, n: number) => locale.strings.pageOf(p, n)));
+	let pageText = $derived(pageLabel ?? ((p: number, n: number) => locale.strings.pageOf(p, n)));
 	let current = $derived(Math.min(Math.max(0, page), Math.max(0, length - 1)));
 	let geometry = $derived(
 		pageIndicatorGeometry({
@@ -127,7 +130,7 @@
 		<div
 			class="dots"
 			role={active ? 'group' : 'img'}
-			aria-label={active ? undefined : label(current + 1, length)}
+			aria-label={active ? label : pageText(current + 1, length)}
 			data-interactive={active ? '' : undefined}
 			style:gap="{geometry.gap}px"
 			{@attach active ? keyboard : undefined}
@@ -138,7 +141,7 @@
 					this={active ? 'button' : 'span'}
 					type={active ? 'button' : undefined}
 					tabindex={active ? (selected ? 0 : -1) : undefined}
-					aria-label={active ? label(index + 1, length) : undefined}
+					aria-label={active ? pageText(index + 1, length) : undefined}
 					aria-current={active && selected ? 'step' : undefined}
 					aria-hidden={active ? undefined : 'true'}
 					class="box"
@@ -156,7 +159,7 @@
 			{/each}
 		</div>
 	{:else}
-		<span class="text" role="img" aria-label={label(current + 1, length)}>
+		<span class="text" role="img" aria-label={pageText(current + 1, length)}>
 			{current + 1} / {length}
 		</span>
 	{/if}

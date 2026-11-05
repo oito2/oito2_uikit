@@ -32,6 +32,8 @@
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The angle in degrees, from 0 to under 360. */
 		value?: number;
+		/** The angle of an uncontrolled dial at first. Defaults to 0. */
+		defaultValue?: number;
 		/** Called with each new angle. */
 		onValueChange?: (value: number) => void;
 		/** Called with the final angle when a drag ends and after each key press. */
@@ -55,7 +57,8 @@
 	}
 
 	let {
-		value = $bindable(0),
+		defaultValue = 0,
+		value = $bindable(defaultValue),
 		onValueChange,
 		onValueCommit,
 		step = 1,
@@ -184,12 +187,20 @@
 		{@render dial()}
 	</div>
 {:else}
+	<!-- A read-only dial stays focusable and announces its angle; a disabled one leaves the tab order. -->
 	<div
 		bind:this={ref}
-		role="img"
+		role="slider"
+		tabindex={disabled ? undefined : 0}
+		aria-valuemin={0}
+		aria-valuemax={359}
+		aria-valuenow={value}
+		aria-valuetext={label(value)}
+		aria-readonly={readonly && !disabled ? true : undefined}
+		aria-disabled={disabled || undefined}
 		aria-label={label(value)}
 		class={['oito2-angle-slider', className]}
-		data-disabled=""
+		data-disabled={disabled ? '' : undefined}
 		style:--oito2-angle-size="{size}px"
 		{...rest}
 	>

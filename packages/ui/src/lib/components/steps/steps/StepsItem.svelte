@@ -60,10 +60,9 @@
 					? locale.strings.stepError
 					: undefined
 	);
-	let label = $derived(
-		[title, locale.strings.stepOf(index + 1, steps.count), stateLabel]
-			.filter(Boolean)
-			.join(', ')
+	/** The position and state, read after the visible title and description. */
+	let position = $derived(
+		[locale.strings.stepOf(index + 1, steps.count), stateLabel].filter(Boolean).join(', ')
 	);
 </script>
 
@@ -76,8 +75,8 @@
 {/snippet}
 
 {#snippet text()}
-	<span class="text" aria-hidden="true">
-		<span class="title" data-state={state}>{title}</span>
+	<span class="text">
+		<span class="title" data-state={state}>{title}<span class="hidden"> {position}</span></span>
 		{#if description}<span class="description">{description}</span>{/if}
 	</span>
 {/snippet}
@@ -87,7 +86,7 @@
 		this={reachable ? 'button' : 'div'}
 		type={reachable ? 'button' : undefined}
 		role={reachable ? undefined : 'group'}
-		aria-label={label}
+		aria-label={reachable ? undefined : `${title}, ${position}`}
 		aria-current={state === 'current' ? 'step' : undefined}
 		class="header"
 		data-interactive={reachable ? '' : undefined}
@@ -138,6 +137,16 @@
 
 <style>
 	@layer oito2 {
+		/* Text for assistive technologies only. */
+		.hidden {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
+		}
+
 		.oito2-steps-item[data-orientation='horizontal'] {
 			flex: none;
 			max-width: min(160px, calc(100% / var(--oito2-steps-count)));

@@ -125,9 +125,12 @@
 </script>
 
 <div class={['oito2-carousel-frame', className]} style:height="{height}px" {...rest}>
+	<!-- The slides take the keyboard focus as a whole, so the arrow keys change the page. -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div
 		bind:this={ref}
 		class="oito2-carousel-viewport"
+		tabindex="0"
 		aria-live={carousel.count > 0 ? 'polite' : undefined}
 		data-dragging={dragging ? '' : undefined}
 		{@attach track}
@@ -150,6 +153,10 @@
 			overscroll-behavior-x: contain;
 			scroll-snap-type: x mandatory;
 			scrollbar-width: none;
+		}
+
+		.oito2-carousel-viewport:focus-visible {
+			outline: none;
 		}
 
 		.oito2-carousel-viewport::-webkit-scrollbar {

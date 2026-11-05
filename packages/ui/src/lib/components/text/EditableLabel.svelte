@@ -23,7 +23,8 @@
   restores the text. Without `onSubmit` the label is read-only.
 -->
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { useLocale } from '../../l10n/locale.js';
 
@@ -56,15 +57,26 @@
 	let input = $state<HTMLInputElement | null>(null);
 	let readOnly = $derived(onSubmit === undefined);
 
-	/** Starts editing with the whole text selected. */
-	async function start() {
+	/** Starts editing; the field shows up with the whole text selected. */
+	function start() {
 		if (readOnly || editing) return;
-		draft = text;
 		editing = true;
-		await tick();
-		input?.focus();
-		input?.select();
 	}
+
+	/**
+	 * Fills the field with the current text, focuses it and selects the text, whether editing
+	 * started from the label or from a bound `editing`.
+	 */
+	const open: Attachment<HTMLInputElement> = (field) => {
+		// Runs once per field: reading the draft here must not rerun it as the user types.
+		untrack(() => {
+			draft = text;
+			// The value lands before the selection, so typing replaces the whole text.
+			field.value = draft;
+		});
+		field.focus();
+		field.select();
+	};
 
 	/** Ends editing, submitting a non-empty change when `keep`, and refocuses the label. */
 	async function finish(keep: boolean) {
@@ -84,6 +96,7 @@
 	<input
 		bind:this={input}
 		bind:value={draft}
+		{@attach open}
 		class={['oito2-editable-label-input', className]}
 		aria-label={text || placeholder}
 		onkeydown={(event) => {
@@ -119,7 +132,7 @@
 		onkeydown={(event) => {
 			if (event.key === 'Enter' || event.key === 'F2') {
 				event.preventDefault();
-				void start();
+				start();
 			}
 		}}
 		{...rest}

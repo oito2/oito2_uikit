@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { getContext, hasContext, setContext, type Component } from 'svelte';
+import { getContext, hasContext, setContext } from 'svelte';
+import type { IconComponent } from '../components/icon.js';
 import type { OperatingSystem } from '../foundation/platform.js';
 import type { Shortcut } from './shortcut.js';
 
@@ -35,7 +36,7 @@ export interface Command {
 	/** The palette group, such as "Navigation" or "View". */
 	readonly group?: string;
 	/** An icon component shown in the command palette. */
-	readonly icon?: Component;
+	readonly icon?: IconComponent;
 	/** Extra words the palette search matches. */
 	readonly keywords?: readonly string[];
 	/**

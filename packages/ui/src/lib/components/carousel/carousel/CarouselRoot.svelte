@@ -46,6 +46,8 @@
 		autoScroll?: boolean;
 		/** The time each page stays when `autoScroll`, in milliseconds. Defaults to 4000. */
 		interval?: number;
+		/** The controller of this carousel, for changing its page from outside; bind it to read it. */
+		controller?: CarouselController | null;
 		/** The root element. */
 		ref?: HTMLDivElement | null;
 		/** The viewport, the buttons and the indicators. */
@@ -59,6 +61,7 @@
 		loop = true,
 		autoScroll = false,
 		interval = 4000,
+		controller = $bindable(),
 		ref = $bindable(null),
 		class: className,
 		children,
@@ -76,6 +79,11 @@
 			loop: () => loop
 		})
 	);
+
+	// Hands the controller to a bound `controller` prop.
+	$effect.pre(() => {
+		if (controller !== carousel) controller = carousel;
+	});
 
 	const reduced = new MediaQuery('(prefers-reduced-motion: reduce)');
 	let hovered = $state(false);
@@ -124,13 +132,11 @@
 	};
 </script>
 
-<!-- The carousel takes focus as a whole, so the arrow keys change its page. -->
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<!-- The arrow keys pressed anywhere inside, such as on the focused slides, change the page. -->
 <div
 	bind:this={ref}
 	role="region"
 	aria-roledescription="carousel"
-	tabindex="0"
 	class={['oito2-carousel', className]}
 	{@attach behavior}
 	{...rest}
@@ -149,7 +155,7 @@
 			border-radius: var(--oito2-radius-large);
 		}
 
-		.oito2-carousel:focus-visible {
+		.oito2-carousel:global(:has(> * > .oito2-carousel-viewport:focus-visible)) {
 			outline: var(--oito2-size-focus-border-width) solid var(--oito2-color-primary-text);
 			outline-offset: 0;
 		}

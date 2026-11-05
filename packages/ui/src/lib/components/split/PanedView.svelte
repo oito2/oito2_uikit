@@ -23,6 +23,11 @@
   shrinks below `minPaneSize` and never leaves less than `minPageSize` for the page.
   Bind `paneSize`, or set `defaultPaneSize` and listen to `onPaneSizeChange`.
 -->
+<script lang="ts" module>
+	/** The side of a `PanedView` its pane is on; `start` and `end` follow the text direction. */
+	export type PaneSide = 'start' | 'end' | 'top' | 'bottom';
+</script>
+
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -30,9 +35,6 @@
 	import ResizeHandle from '../../internal/ResizeHandle.svelte';
 	import { directionOf } from '../../internal/keyboard.js';
 	import { useLocale } from '../../l10n/locale.js';
-
-	/** The side of a `PanedView` its pane is on; `start` and `end` follow the text direction. */
-	type PaneSide = 'start' | 'end' | 'top' | 'bottom';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The side content, such as a list. */

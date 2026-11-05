@@ -31,6 +31,10 @@ export interface MaterialStrings {
 	readonly clearText: string;
 	/** The label of a button that copies to the clipboard. */
 	readonly copy: string;
+	/** The label of a button that accepts a dialog. */
+	readonly ok: string;
+	/** The label of a button that dismisses a dialog without acting. */
+	readonly cancel: string;
 }
 
 const english: MaterialStrings = {
@@ -41,7 +45,9 @@ const english: MaterialStrings = {
 	nextPage: 'Next page',
 	searchField: 'Search',
 	clearText: 'Clear text',
-	copy: 'Copy'
+	copy: 'Copy',
+	ok: 'OK',
+	cancel: 'Cancel'
 };
 const portuguese: MaterialStrings = {
 	back: 'Voltar',
@@ -51,7 +57,9 @@ const portuguese: MaterialStrings = {
 	nextPage: 'Próxima página',
 	searchField: 'Pesquisa',
 	clearText: 'Limpar texto',
-	copy: 'Copiar'
+	copy: 'Copiar',
+	ok: 'OK',
+	cancel: 'Cancelar'
 };
 
 /** The strings of the date and time entries, as Flutter's `MaterialLocalizations` words them. */
