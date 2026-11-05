@@ -118,7 +118,6 @@ plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
 | `*.svelte.test.ts` | Chromium and WebKit | Components (`vitest-browser-svelte` `render`, `page` locators) |
 | `*.browser.test.ts` | Chromium and WebKit | DOM/CSS behavior without a component (fonts, focus utilities) |
 | `apps/showcase/tests/*.spec.ts` | Chromium and WebKit (`@playwright/test`, on the built showcase) | Every showcase page (light/LTR/en and dark/RTL/pt-BR: no errors, no horizontal overflow, axe) and the shell |
-| `apps/showcase/smoke/webdriver.ts` | The desktop build through `tauri-driver` (CI, Linux) | Smoke test of the Tauri app |
 
 - Chromium stands in for WebView2, WebKit for WebKitGTK and WKWebView. A test that passes in only one engine is a bug, not a flaky test.
 - Visual goldens use Vitest's `toMatchScreenshot`; reference images live in `__screenshots__/` next to the test and are committed. Regenerate them only on purpose (`vitest run --update`).
