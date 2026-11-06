@@ -19,27 +19,34 @@
   @component
   A field-like button that shows a date, or a date range with `range`, and opens a
   `Calendar` in a popover to change it. Enter, Space or Alt+Down opens the calendar, which
-  takes focus; a pick closes it. Bind `value`, or `rangeValue` in range mode.
+  takes focus; a pick closes it. Bind `value`, or set `defaultValue` and listen to
+  `onValueChange`; in range mode bind `rangeValue`, or set `defaultRangeValue` and listen
+  to `onRangeChange`.
 -->
 <script lang="ts">
 	import CalendarIcon from '@lucide/svelte/icons/calendar';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { useLocale } from '../../l10n/locale.js';
-	import { dateTimeStrings } from '../../l10n/material.js';
 	import { formatCompactDate } from '../entries/date-time.js';
 	import * as Popover from '../popover/popover/index.js';
 	import Calendar from './Calendar.svelte';
 	import type { DateRange } from './calendar-math.js';
 
-	interface Props extends Omit<HTMLButtonAttributes, 'children' | 'value'> {
+	interface Props extends Omit<HTMLButtonAttributes, 'children' | 'value' | 'defaultValue'> {
 		/** The picked date, in single mode. */
 		value?: Date | null;
+		/** The picked date of an uncontrolled picker at first, in single mode. Defaults to none. */
+		defaultValue?: Date | null;
 		/** Called with each picked date. */
 		onValueChange?: (value: Date) => void;
 		/** Whether the picker picks a range. */
 		range?: boolean;
 		/** The picked range, in range mode. */
 		rangeValue?: DateRange | null;
+		/** The picked range of an uncontrolled picker at first, in range mode. Defaults to none. */
+		defaultRangeValue?: DateRange | null;
 		/** Called with each picked range. */
 		onRangeChange?: (range: DateRange) => void;
 		/** The earliest date that can be picked. */
@@ -57,10 +64,12 @@
 	}
 
 	let {
-		value = $bindable(null),
+		value = $bindable(),
+		defaultValue = null,
 		onValueChange,
 		range = false,
-		rangeValue = $bindable(null),
+		rangeValue = $bindable(),
+		defaultRangeValue = null,
 		onRangeChange,
 		min,
 		max,
@@ -74,18 +83,37 @@
 		...rest
 	}: Props = $props();
 
+	const single = new Controllable<Date | null>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			if (next) onValueChange?.(next);
+		}
+	});
+	const ranged = new Controllable<DateRange | null>({
+		value: () => rangeValue,
+		defaultValue: () => defaultRangeValue,
+		onChange: (next) => {
+			rangeValue = next;
+			if (next) onRangeChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
-	let strings = $derived(dateTimeStrings(locale.locale));
+	let strings = $derived(locale.strings);
 	let open = $state(false);
 	let display = $derived.by(() => {
+		const picked = single.current;
+		const pickedRange = ranged.current;
 		if (range)
-			return rangeValue
+			return pickedRange
 				? locale.strings.dateRange(
-						formatCompactDate(rangeValue.start, locale.locale),
-						formatCompactDate(rangeValue.end, locale.locale)
+						formatCompactDate(pickedRange.start, locale.locale),
+						formatCompactDate(pickedRange.end, locale.locale)
 					)
 				: '';
-		return value ? formatCompactDate(value, locale.locale) : '';
+		return picked ? formatCompactDate(picked, locale.locale) : '';
 	});
 </script>
 
@@ -101,14 +129,14 @@
 				aria-label={ariaLabel
 					? `${ariaLabel}: ${display || placeholder || strings.dateHelp}`
 					: undefined}
-				{...rest}
-				{...props}
-				onkeydown={(event) => {
-					if (event.altKey && event.key === 'ArrowDown') {
-						event.preventDefault();
-						open = true;
+				{...mergeProps(mergeProps(rest, props), {
+					onkeydown: (event: KeyboardEvent) => {
+						if (event.altKey && event.key === 'ArrowDown') {
+							event.preventDefault();
+							open = true;
+						}
 					}
-				}}
+				})}
 			>
 				<span class="text">{display || placeholder || strings.dateHelp}</span>
 				<CalendarIcon size={18} aria-hidden="true" />
@@ -121,22 +149,20 @@
 		class="oito2-date-picker-panel"
 	>
 		<Calendar
-			{value}
+			value={single.current}
 			{range}
-			{rangeValue}
+			rangeValue={ranged.current}
 			{min}
 			{max}
 			{isDateAllowed}
 			{showWeekNumbers}
 			autofocus
 			onValueChange={(next) => {
-				value = next;
-				onValueChange?.(next);
+				single.current = next;
 				open = false;
 			}}
 			onRangeChange={(next) => {
-				rangeValue = next;
-				onRangeChange?.(next);
+				ranged.current = next;
 				open = false;
 			}}
 		/>

@@ -25,13 +25,14 @@
   or the start arrow at the start of the input, moves to the last tag; the arrows move
   between tags, and Backspace or Delete removes the focused one. With `suggestions`,
   matching items not yet added show below the input. With `clearable`, a button at the
-  end removes every tag. Bind `value`.
+  end removes every tag. Bind `value`, or set `defaultValue` and listen to `onValueChange`.
 -->
 <script lang="ts" generics="T">
 	import X from '@lucide/svelte/icons/x';
 	import { tick } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { ListCollection } from '../../collections/list-collection.js';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf } from '../../internal/keyboard.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import IconButton from '../button/IconButton.svelte';
@@ -40,9 +41,11 @@
 	import type { IconComponent } from '../icon.js';
 	import { addTags, splitTags } from './tags.js';
 
-	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'> {
 		/** The tags, in order. */
 		value?: readonly string[];
+		/** The tags of an uncontrolled field at first. Defaults to none. */
+		defaultValue?: readonly string[];
 		/** Called with the new list after tags are added or removed. */
 		onValueChange?: (value: readonly string[]) => void;
 		/** The strings that end a tag while typing or pasting; when empty only Enter does. Defaults to a comma. */
@@ -70,7 +73,8 @@
 	}
 
 	let {
-		value = $bindable([]),
+		value = $bindable(),
+		defaultValue = [],
 		onValueChange,
 		delimiters = [','],
 		maxTags,
@@ -87,24 +91,33 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<readonly string[]>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	const field = useField();
 	const id = $props.id();
 	let text = $state('');
 	let root = $state<HTMLDivElement | null>(null);
 	let off = $derived(disabled ?? field?.disabled ?? false);
-	let full = $derived(maxTags !== undefined && value.length >= maxTags);
+	let tags = $derived(model.current);
+	let full = $derived(maxTags !== undefined && tags.length >= maxTags);
 
 	function setTags(next: readonly string[]) {
-		value = next;
-		onValueChange?.(next);
+		model.current = next;
 	}
 
 	/** Adds the accepted tags of `raw` and returns the refused texts. */
 	function add(raw: Iterable<string>): string[] {
 		if (off) return [...raw];
-		const result = addTags(value, raw, { allowDuplicates, maxTags, validator });
-		if (result.tags.length > value.length) setTags(result.tags);
+		const result = addTags(tags, raw, { allowDuplicates, maxTags, validator });
+		if (result.tags.length > tags.length) setTags(result.tags);
 		return result.refused;
 	}
 
@@ -114,7 +127,7 @@
 	/** Removes the tag at `index` and focuses the previous one, or the input. */
 	async function remove(index: number) {
 		if (off) return;
-		setTags(value.filter((_, i) => i !== index));
+		setTags(tags.filter((_, i) => i !== index));
 		await tick();
 		const previous = tagElements()[index - 1];
 		if (previous) previous.focus();
@@ -150,7 +163,7 @@
 			event.preventDefault();
 			if (add([text]).length === 0) text = '';
 		} else if (
-			value.length > 0 &&
+			tags.length > 0 &&
 			atStart &&
 			(event.key === back || (event.key === 'Backspace' && text === ''))
 		) {
@@ -172,7 +185,7 @@
 
 	let inputProps = $derived({
 		id: field?.controlId,
-		placeholder: value.length === 0 ? placeholder : undefined,
+		placeholder: tags.length === 0 ? placeholder : undefined,
 		readonly: off || full,
 		'aria-label': label,
 		'aria-describedby': describedBy(field, undefined)
@@ -194,7 +207,7 @@
 	{...rest}
 >
 	<span id="{id}-hint" hidden>{locale.strings.removeTagHint}</span>
-	{#each value as tag, index (`${index}:${tag}`)}
+	{#each tags as tag, index (`${index}:${tag}`)}
 		<!-- The remove button is for the pointer; Delete and Backspace remove a focused tag. -->
 		<span class="tag">
 			<span
@@ -223,7 +236,7 @@
 		<Combobox.Root
 			collection={suggestions}
 			bind:inputValue={text}
-			exclude={value}
+			exclude={tags}
 			onSelect={(item) => {
 				add([suggestions.getLabel(item)]);
 				text = '';
@@ -249,7 +262,7 @@
 			onkeydown={onInputKey}
 		/>
 	{/if}
-	{#if clearable && !off && value.length > 0}
+	{#if clearable && !off && tags.length > 0}
 		<IconButton
 			class="oito2-field-button oito2-tags-clear"
 			icon={X as IconComponent}

@@ -25,6 +25,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import type { IconComponent } from '../icon.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import * as Tooltip from '../tooltip/index.js';
 
 	interface Props extends Omit<HTMLButtonAttributes, 'children'> {
@@ -73,8 +74,7 @@
 				class={['oito2-icon-button', className]}
 				data-state={selected === undefined ? undefined : selected ? 'on' : 'off'}
 				data-disabled={disabled ? '' : undefined}
-				{...rest}
-				{...props}
+				{...mergeProps(rest, props)}
 			>
 				{#if children}
 					{@render children()}

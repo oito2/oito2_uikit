@@ -22,6 +22,9 @@ import { ptBR } from './pt-br.js';
 
 type Method = (...args: (string | number)[]) => string;
 
+/** Strings of components oito2_ui doesn't have, or labels it leaves unnamed. */
+const ownStrings = ['colorFormat', 'previousStep', 'nextStep', 'code', 'zoom'];
+
 describe.each([
 	['en', en],
 	['pt-BR', ptBR]
@@ -30,6 +33,12 @@ describe.each([
 
 	it('has every getter with the same text', () => {
 		for (const [name, text] of Object.entries(expected.getters)) {
+			expect(strings[name as keyof Localizations], name).toBe(text);
+		}
+	});
+
+	it('has every Material string with the same text', () => {
+		for (const [name, text] of Object.entries(expected.material)) {
 			expect(strings[name as keyof Localizations], name).toBe(text);
 		}
 	});
@@ -47,6 +56,8 @@ describe.each([
 
 	it('has no strings oito2_ui lacks', () => {
 		const names = new Set([
+			...ownStrings,
+			...Object.keys(expected.material),
 			...Object.keys(expected.getters),
 			...expected.calls.map((call) => call.name)
 		]);

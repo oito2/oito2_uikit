@@ -22,10 +22,13 @@
   at the pointer, in `step` increments. The arrow keys turn it by `step`, Page Up and Page
   Down by `pageStep`, and Home goes back to 0; the value wraps around. `markers` draws
   ticks at those angles. Assistive technologies read it as a slider. `onValueCommit`
-  receives the final angle when a drag ends and after each key press.
+  receives the final angle when a drag ends and after each key press. Bind `value`, or set
+  `defaultValue` and listen to `onValueChange`.
 -->
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import { angleOf, snapAngle } from './rating-math.js';
 
@@ -57,8 +60,8 @@
 	}
 
 	let {
+		value = $bindable(),
 		defaultValue = 0,
-		value = $bindable(defaultValue),
 		onValueChange,
 		onValueCommit,
 		step = 1,
@@ -73,11 +76,23 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<number>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	let enabled = $derived(!readonly && !disabled);
 	let dragging = false;
+	// The last angle picked by the current drag or key press, reported on commit.
+	let latest = 0;
+	let current = $derived(model.current);
 	let radius = $derived(size / 2);
-	let knob = $derived(at(value, radius - 12));
+	let knob = $derived(at(current, radius - 12));
 
 	/** Formats `degrees` with a degree sign, with one decimal only when fractional. */
 	function label(degrees: number): string {
@@ -88,11 +103,10 @@
 		}).format(degrees)}°`;
 	}
 
+	/** Snaps `degrees` to `step`, keeps it as the angle to commit and reports it. */
 	function set(degrees: number) {
-		const next = snapAngle(degrees, step);
-		if (next === value) return;
-		value = next;
-		onValueChange?.(next);
+		latest = snapAngle(degrees, step);
+		model.current = latest;
 	}
 
 	/** Points the dial at the pointer, ignoring points within 2 pixels of the center. */
@@ -114,11 +128,12 @@
 			PageUp: pageStep,
 			PageDown: -pageStep
 		};
+		latest = current;
 		if (event.key === 'Home') set(0);
-		else if (event.key in by) set(value + (by[event.key] ?? 0));
+		else if (event.key in by) set(current + (by[event.key] ?? 0));
 		else return;
 		event.preventDefault();
-		onValueCommit?.(value);
+		onValueCommit?.(latest);
 	}
 
 	/** The point `distance` from the center toward `degrees`. */
@@ -138,7 +153,7 @@
 			{@const point = at(marker, radius - 7)}
 			<circle class="tick" cx={point.x} cy={point.y} r="1.5" />
 		{/each}
-		<g transform="rotate({value} {radius} {radius})">
+		<g transform="rotate({current} {radius} {radius})">
 			<rect
 				class="hand"
 				x={radius - 1}
@@ -151,7 +166,7 @@
 		{#if !showValue}<circle class="hand" cx={radius} cy={radius} r="3" />{/if}
 		<circle class="hand" cx={knob.x} cy={knob.y} r="6" />
 	</svg>
-	{#if showValue}<span class="value">{label(value)}</span>{/if}
+	{#if showValue}<span class="value">{label(current)}</span>{/if}
 {/snippet}
 
 {#if enabled}
@@ -161,28 +176,30 @@
 		tabindex="0"
 		aria-valuemin={0}
 		aria-valuemax={359}
-		aria-valuenow={value}
-		aria-valuetext={label(value)}
+		aria-valuenow={current}
+		aria-valuetext={label(current)}
 		class={['oito2-angle-slider', className]}
 		style:--oito2-angle-size="{size}px"
-		onpointerdown={(event) => {
-			if (event.button !== 0) return;
-			event.currentTarget.focus();
-			event.currentTarget.setPointerCapture(event.pointerId);
-			dragging = true;
-			pointAt(event);
-		}}
-		onpointermove={(event) => {
-			if (dragging) pointAt(event);
-		}}
-		onpointerup={() => {
-			if (!dragging) return;
-			dragging = false;
-			onValueCommit?.(value);
-		}}
-		onpointercancel={() => (dragging = false)}
-		{onkeydown}
-		{...rest}
+		{...mergeProps(rest, {
+			onpointerdown: (event: PointerEvent & { currentTarget: HTMLDivElement }) => {
+				if (event.button !== 0) return;
+				event.currentTarget.focus();
+				event.currentTarget.setPointerCapture(event.pointerId);
+				dragging = true;
+				latest = current;
+				pointAt(event);
+			},
+			onpointermove: (event: PointerEvent) => {
+				if (dragging) pointAt(event);
+			},
+			onpointerup: () => {
+				if (!dragging) return;
+				dragging = false;
+				onValueCommit?.(latest);
+			},
+			onpointercancel: () => (dragging = false),
+			onkeydown
+		})}
 	>
 		{@render dial()}
 	</div>
@@ -194,11 +211,11 @@
 		tabindex={disabled ? undefined : 0}
 		aria-valuemin={0}
 		aria-valuemax={359}
-		aria-valuenow={value}
-		aria-valuetext={label(value)}
+		aria-valuenow={current}
+		aria-valuetext={label(current)}
 		aria-readonly={readonly && !disabled ? true : undefined}
 		aria-disabled={disabled || undefined}
-		aria-label={label(value)}
+		aria-label={label(current)}
 		class={['oito2-angle-slider', className]}
 		data-disabled={disabled ? '' : undefined}
 		style:--oito2-angle-size="{size}px"

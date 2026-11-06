@@ -27,7 +27,7 @@
   system monospace fonts otherwise.
 -->
 <script lang="ts">
-	import { CopyButton } from '@oito2/ui';
+	import { CopyButton, useLocale } from '@oito2/ui';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { Highlighter } from './highlighter.js';
 
@@ -44,7 +44,10 @@
 		showLineNumbers?: boolean;
 		/** Whether the copy button shows. Defaults to true. */
 		showCopyButton?: boolean;
-		/** The accessible name of the code area, such as the file name. */
+		/**
+		 * The accessible name of the code area, such as the file name. Defaults to the
+		 * localized "Code".
+		 */
 		label?: string;
 		/** The element. */
 		ref?: HTMLDivElement | null;
@@ -63,6 +66,7 @@
 		...rest
 	}: Props = $props();
 
+	const locale = useLocale();
 	let highlighted = $derived(highlighter.highlight(code, { language, autoDetect }));
 	let lineCount = $derived(code.split('\n').length);
 </script>
@@ -77,8 +81,8 @@
 	<div
 		class="oito2-code-block-scroll"
 		tabindex="0"
-		role={label ? 'region' : undefined}
-		aria-label={label}
+		role="region"
+		aria-label={label ?? locale.strings.code}
 		data-copy-button={showCopyButton ? '' : undefined}
 	>
 		{#if showLineNumbers}

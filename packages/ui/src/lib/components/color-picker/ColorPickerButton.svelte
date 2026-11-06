@@ -18,19 +18,23 @@
 <!--
   @component
   An outlined button with a color swatch and its hex value that opens a `ColorPicker` in a
-  popover. Bind `value`. `label` names the button and the popover, such as what the color
+  popover. Bind `value`, or set `defaultValue` and listen to `onValueChange`. `label` names the button and the popover, such as what the color
   is for.
 -->
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import Button from '../button/Button.svelte';
 	import * as Popover from '../popover/popover/index.js';
 	import ColorPicker from './ColorPicker.svelte';
 	import { parseHexColor, formatHexColor } from './color-math.js';
 
-	interface Props extends Omit<HTMLButtonAttributes, 'children' | 'value'> {
+	interface Props extends Omit<HTMLButtonAttributes, 'children' | 'value' | 'defaultValue'> {
 		/** The color, as a hex string. */
 		value?: string;
+		/** The color of an uncontrolled button at first, as a hex string. Defaults to `#3584E4`. */
+		defaultValue?: string;
 		/** Called with each new color. */
 		onValueChange?: (value: string) => void;
 		/** Whether the picker offers opacity. Defaults to true. */
@@ -42,7 +46,8 @@
 	}
 
 	let {
-		value = $bindable('#3584E4'),
+		value = $bindable(),
+		defaultValue = '#3584E4',
 		onValueChange,
 		showAlpha = true,
 		swatches = [],
@@ -51,8 +56,17 @@
 		...rest
 	}: Props = $props();
 
-	let parsed = $derived(parseHexColor(value));
-	let hex = $derived(parsed ? formatHexColor(parsed, showAlpha) : value);
+	const model = new Controllable<string>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
+	let parsed = $derived(parseHexColor(model.current));
+	let hex = $derived(parsed ? formatHexColor(parsed, showAlpha) : model.current);
 </script>
 
 <Popover.Root>
@@ -63,8 +77,7 @@
 				{disabled}
 				aria-label={label ? `${label}: ${hex}` : undefined}
 				class="oito2-color-picker-button"
-				{...rest}
-				{...props}
+				{...mergeProps(rest, props)}
 			>
 				<span class="content">
 					<span class="swatch" style:--oito2-swatch={hex} aria-hidden="true"></span>
@@ -74,7 +87,11 @@
 		{/snippet}
 	</Popover.Trigger>
 	<Popover.Content aria-label={label}>
-		<ColorPicker bind:value {onValueChange} {showAlpha} {swatches} />
+		<ColorPicker
+			bind:value={() => model.current, (next) => (model.current = next ?? model.current)}
+			{showAlpha}
+			{swatches}
+		/>
 	</Popover.Content>
 </Popover.Root>
 

@@ -824,7 +824,7 @@
 			"Checkbox": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/toggles/Checkbox.svelte",
-				"doc": "A check box: 20 pixels with a pointer and 24 with touch, in a target as large as a\nbutton. It is checked, unchecked or, with `tristate` or a `mixed` value, mixed. Bind\n`checked`, or set `defaultChecked` and listen to `onCheckedChange`. With `name` it\nsubmits `value` in a form while checked.",
+				"doc": "A check box: 20 pixels with a pointer and 24 with touch, in a target as large as a\nbutton. It is checked, unchecked or, with `tristate` or a `mixed` value, mixed. Bind\n`checked`, or set `defaultChecked` and listen to `onCheckedChange`. With `name` it\nsubmits `value` in a form while checked and enabled.",
 				"extends": "Omit<HTMLButtonAttributes, 'children' | 'value'>",
 				"props": [
 					{
@@ -1001,6 +1001,13 @@
 								"type": "string",
 								"optional": true,
 								"doc": "The form field name; the selected value is submitted under it."
+							},
+							{
+								"name": "form",
+								"kind": "prop",
+								"type": "string",
+								"optional": true,
+								"doc": "The id of the form the value is submitted with, when the control is outside it."
 							},
 							{
 								"name": "orientation",
@@ -2101,7 +2108,7 @@
 					"Root": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/tooltip/TooltipRoot.svelte",
-						"doc": "A tooltip: a short label in the inverse surface color that shows next to its trigger\nafter the pointer rests on it for `delay` milliseconds, or at once when the trigger gets\nkeyboard focus. Compose it with `Tooltip.Trigger` and `Tooltip.Content`.",
+						"doc": "A tooltip: a short label in the inverse surface color that shows next to its trigger\nafter the pointer rests on it for `delay` milliseconds, or at once when the trigger gets\nkeyboard focus. Compose it with `Tooltip.Trigger` and `Tooltip.Content`. Bind `open`, or\nset `defaultOpen` and listen to `onOpenChange`.",
 						"props": [
 							{
 								"name": "open",
@@ -2110,6 +2117,14 @@
 								"optional": true,
 								"doc": "Whether the tooltip shows.",
 								"bindable": true
+							},
+							{
+								"name": "defaultOpen",
+								"kind": "prop",
+								"type": "boolean",
+								"optional": true,
+								"doc": "Whether an uncontrolled tooltip starts open.",
+								"default": "false"
 							},
 							{
 								"name": "onOpenChange",
@@ -2530,7 +2545,7 @@
 					"Root": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/menu/menu/MenuRoot.svelte",
-						"doc": "A menu of actions opened from a button. Compose it with `Menu.Trigger` and\n`Menu.Content`, which holds `Menu.Item`, `Menu.CheckboxItem`, `Menu.RadioGroup` with\n`Menu.RadioItem`, `Menu.Group`, `Menu.Label`, `Menu.Separator` and `Menu.Sub`\nsubmenus. It follows the WAI-ARIA menu button pattern: the arrows move between items,\ntyping finds an item, Escape closes.",
+						"doc": "A menu of actions opened from a button. Compose it with `Menu.Trigger` and\n`Menu.Content`, which holds `Menu.Item`, `Menu.CheckboxItem`, `Menu.RadioGroup` with\n`Menu.RadioItem`, `Menu.Group`, `Menu.Label`, `Menu.Separator` and `Menu.Sub`\nsubmenus. It follows the WAI-ARIA menu button pattern: the arrows move between items,\ntyping finds an item, Escape closes. Bind `open`, or set `defaultOpen` and listen to\n`onOpenChange`.",
 						"props": [
 							{
 								"name": "open",
@@ -2539,6 +2554,14 @@
 								"optional": true,
 								"doc": "Whether the menu is open.",
 								"bindable": true
+							},
+							{
+								"name": "defaultOpen",
+								"kind": "prop",
+								"type": "boolean",
+								"optional": true,
+								"doc": "Whether an uncontrolled menu starts open.",
+								"default": "false"
 							},
 							{
 								"name": "onOpenChange",
@@ -2952,7 +2975,7 @@
 					"Root": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/select/select/SelectRoot.svelte",
-						"doc": "A select: a button that shows the chosen option and opens a list of options to choose\nfrom. Give it a `collection` to render the options and their groups by itself, or\ncompose `Select.Trigger`, `Select.Value` and `Select.Content` with `Select.Item`,\n`Select.Group` and `Select.Label`. Bind `value`, or set `defaultValue` and listen to\n`onValueChange`. With `name` it submits the value in a form.",
+						"doc": "A select: a button that shows the chosen option and opens a list of options to choose\nfrom. Give it a `collection` to render the options and their groups by itself, or\ncompose `Select.Trigger`, `Select.Value` and `Select.Content` with `Select.Item`,\n`Select.Group` and `Select.Label`. Bind `value`, or set `defaultValue` and listen to\n`onValueChange`; likewise `open`, `defaultOpen` and `onOpenChange` for the list. With\n`name` it submits the value in a form.",
 						"props": [
 							{
 								"name": "value",
@@ -2976,6 +2999,29 @@
 								"type": "(value: string | null) => void",
 								"optional": true,
 								"doc": "Called with each new value."
+							},
+							{
+								"name": "open",
+								"kind": "prop",
+								"type": "boolean",
+								"optional": true,
+								"doc": "Whether the list of options is open.",
+								"bindable": true
+							},
+							{
+								"name": "defaultOpen",
+								"kind": "prop",
+								"type": "boolean",
+								"optional": true,
+								"doc": "Whether the list of an uncontrolled select starts open.",
+								"default": "false"
+							},
+							{
+								"name": "onOpenChange",
+								"kind": "event",
+								"type": "(open: boolean) => void",
+								"optional": true,
+								"doc": "Called when the list opens or closes."
 							},
 							{
 								"name": "collection",
@@ -3295,6 +3341,13 @@
 						"type": "string",
 						"optional": true,
 						"doc": "The form field name; a range submits two values under it."
+					},
+					{
+						"name": "form",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The id of the form the value is submitted with, when the control is outside it."
 					}
 				]
 			},
@@ -4823,7 +4876,7 @@
 			"PageIndicator": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/navigation/PageIndicator.svelte",
-				"doc": "Dots showing the current page of a carousel or a paged view. The current page is a\nwider pill in the text-safe primary tone. With `onPageChange` (or `interactive`) each\ndot is a button; the current one is the group's Tab stop, and the arrow keys, Home and\nEnd change the page. When the dots don't fit the width, it shows \"page / length\" instead.",
+				"doc": "Dots showing the current page of a carousel or a paged view. The current page is a\nwider pill in the text-safe primary tone. With `onPageChange` (or `interactive`) each\ndot is a button; the current one is the group's Tab stop, and the arrow keys, Home and\nEnd change the page. When the dots don't fit the width, it shows \"page / length\" instead.\nBind `page`, or set `defaultPage` and listen to `onPageChange`.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 				"props": [
 					{
@@ -4839,8 +4892,15 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The current page, from 0.",
-						"default": "0",
 						"bindable": true
+					},
+					{
+						"name": "defaultPage",
+						"kind": "prop",
+						"type": "number",
+						"optional": true,
+						"doc": "The page of an uncontrolled indicator at first. Defaults to 0.",
+						"default": "0"
 					},
 					{
 						"name": "onPageChange",
@@ -5531,7 +5591,7 @@
 			"Pagination": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/pagination/Pagination.svelte",
-				"doc": "Page navigation: previous and next buttons around page number buttons with ellipses,\nand an optional page size selector. Narrower than `compactWidth` it shows only the\nbuttons around \"Page 3 of 10\". Pages count from 1. Bind `page`, or listen to\n`onPageChange`.",
+				"doc": "Page navigation: previous and next buttons around page number buttons with ellipses,\nand an optional page size selector. Narrower than `compactWidth` it shows only the\nbuttons around \"Page 3 of 10\". Pages count from 1. Bind `page`, or set `defaultPage`\nand listen to `onPageChange`; likewise `pageSize`, `defaultPageSize` and\n`onPageSizeChange`.",
 				"extends": "Omit<HTMLAttributes<HTMLElement>, 'children'>",
 				"props": [
 					{
@@ -5540,7 +5600,6 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The current page, from 1.",
-						"default": "defaultPage",
 						"bindable": true
 					},
 					{
@@ -5588,6 +5647,13 @@
 						"optional": true,
 						"doc": "The current page size; one of `pageSizes`.",
 						"bindable": true
+					},
+					{
+						"name": "defaultPageSize",
+						"kind": "prop",
+						"type": "number",
+						"optional": true,
+						"doc": "The page size of an uncontrolled pagination at first. Without it the selector\nshows the first of `pageSizes`."
 					},
 					{
 						"name": "pageSizes",
@@ -7323,8 +7389,8 @@
 			"SearchField": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/text/SearchField.svelte",
-				"doc": "A search text field with a search icon and a clear button that shows while it has text.\nEscape clears the text; Escape again on the empty field calls `onEscape`. The hint and\nthe clear button label follow the active locale.",
-				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'type'>",
+				"doc": "A search text field with a search icon and a clear button that shows while it has text.\nEscape clears the text; Escape again on the empty field calls `onEscape`. The hint and\nthe clear button label follow the active locale. Bind `value`, or set `defaultValue`\nand listen to `onValueChange`.",
+				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'defaultValue' | 'type'>",
 				"props": [
 					{
 						"name": "value",
@@ -7332,8 +7398,15 @@
 						"type": "string",
 						"optional": true,
 						"doc": "The text.",
-						"default": "''",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The text of an uncontrolled field at first. Defaults to empty.",
+						"default": "''"
 					},
 					{
 						"name": "onValueChange",
@@ -7469,8 +7542,8 @@
 			"PasswordField": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/text/PasswordField.svelte",
-				"doc": "A password text field with a button that shows or hides the text and a warning below it\nwhile Caps Lock is on. Password managers fill it through `autocomplete`; use\n`new-password` for a field that sets a new password. Inside a `Field.Root` it takes the\nfield's label, description and error.",
-				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'type'>",
+				"doc": "A password text field with a button that shows or hides the text and a warning below it\nwhile Caps Lock is on. Password managers fill it through `autocomplete`; use\n`new-password` for a field that sets a new password. Inside a `Field.Root` it takes the\nfield's label, description and error. Bind `value`, or set `defaultValue` and listen\nto `onValueChange`; likewise `visible`, `defaultVisible` and `onVisibleChange`.",
+				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'defaultValue' | 'type'>",
 				"props": [
 					{
 						"name": "value",
@@ -7478,8 +7551,22 @@
 						"type": "string",
 						"optional": true,
 						"doc": "The text.",
-						"default": "''",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The text of an uncontrolled field at first. Defaults to empty.",
+						"default": "''"
+					},
+					{
+						"name": "onValueChange",
+						"kind": "event",
+						"type": "(value: string) => void",
+						"optional": true,
+						"doc": "Called whenever the text changes."
 					},
 					{
 						"name": "visible",
@@ -7487,8 +7574,22 @@
 						"type": "boolean",
 						"optional": true,
 						"doc": "Whether the text shows instead of dots.",
-						"default": "false",
 						"bindable": true
+					},
+					{
+						"name": "defaultVisible",
+						"kind": "prop",
+						"type": "boolean",
+						"optional": true,
+						"doc": "Whether the text of an uncontrolled field shows at first. Defaults to false.",
+						"default": "false"
+					},
+					{
+						"name": "onVisibleChange",
+						"kind": "event",
+						"type": "(visible: boolean) => void",
+						"optional": true,
+						"doc": "Called when the text is shown or hidden."
 					},
 					{
 						"name": "capsLockWarning",
@@ -7711,8 +7812,8 @@
 			"PinEntry": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/text/PinEntry.svelte",
-				"doc": "A code entry drawn as `length` one-character cells, such as a PIN or a one-time code.\nOne input sits under the cells, so typing, deleting, pasting a whole code and one-time\ncode autofill work as in any field; a pasted code fills the cells in order. When the\nlast cell is filled it calls `onComplete` and gives up the focus. With `numeric` only\ndigits are kept; otherwise spaces are dropped.",
-				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'type'>",
+				"doc": "A code entry drawn as `length` one-character cells, such as a PIN or a one-time code.\nOne input sits under the cells, so typing, deleting, pasting a whole code and one-time\ncode autofill work as in any field; a pasted code fills the cells in order. When the\nlast cell is filled it calls `onComplete` and gives up the focus. With `numeric` only\ndigits are kept; otherwise spaces are dropped. Bind `value`, or set `defaultValue` and\nlisten to `onValueChange`.",
+				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'defaultValue' | 'type'>",
 				"props": [
 					{
 						"name": "value",
@@ -7720,8 +7821,15 @@
 						"type": "string",
 						"optional": true,
 						"doc": "The code.",
-						"default": "''",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The code of an uncontrolled entry at first. Defaults to empty.",
+						"default": "''"
 					},
 					{
 						"name": "length",
@@ -7798,8 +7906,8 @@
 			"TagsField": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/text/TagsField.svelte",
-				"doc": "A field of tags shown as chips, with a text input after them. Enter or a `delimiters`\ncharacter adds the typed text, trimmed, as a tag; a pasted list is split on the\ndelimiters. A tag is refused when it is empty, repeated (unless `allowDuplicates`), past\n`maxTags` or rejected by `validator`: a typed tag that is refused stays in the input to\nbe fixed, the refused tags of a pasted list are dropped. Backspace in the empty input,\nor the start arrow at the start of the input, moves to the last tag; the arrows move\nbetween tags, and Backspace or Delete removes the focused one. With `suggestions`,\nmatching items not yet added show below the input. With `clearable`, a button at the\nend removes every tag. Bind `value`.",
-				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
+				"doc": "A field of tags shown as chips, with a text input after them. Enter or a `delimiters`\ncharacter adds the typed text, trimmed, as a tag; a pasted list is split on the\ndelimiters. A tag is refused when it is empty, repeated (unless `allowDuplicates`), past\n`maxTags` or rejected by `validator`: a typed tag that is refused stays in the input to\nbe fixed, the refused tags of a pasted list are dropped. Backspace in the empty input,\nor the start arrow at the start of the input, moves to the last tag; the arrows move\nbetween tags, and Backspace or Delete removes the focused one. With `suggestions`,\nmatching items not yet added show below the input. With `clearable`, a button at the\nend removes every tag. Bind `value`, or set `defaultValue` and listen to `onValueChange`.",
+				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'>",
 				"props": [
 					{
 						"name": "value",
@@ -7807,8 +7915,15 @@
 						"type": "readonly string[]",
 						"optional": true,
 						"doc": "The tags, in order.",
-						"default": "[]",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "readonly string[]",
+						"optional": true,
+						"doc": "The tags of an uncontrolled field at first. Defaults to none.",
+						"default": "[]"
 					},
 					{
 						"name": "onValueChange",
@@ -8628,8 +8743,8 @@
 			"SegmentedEntry": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/entries/SegmentedEntry.svelte",
-				"doc": "A row of short text fields joined by a `delimiter`, for values like IP addresses or\nlicense keys. Focus moves to the next segment when one fills up or when the first\nvisible character of the delimiter is typed in a segment with text, and back to the previous one on Backspace\nin an empty segment or on the arrow toward the start at its start; the arrow toward the\nend at the end of a segment moves to the next. Bind `value`, one string per segment.",
-				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
+				"doc": "A row of short text fields joined by a `delimiter`, for values like IP addresses or\nlicense keys. Focus moves to the next segment when one fills up or when the first\nvisible character of the delimiter is typed in a segment with text, and back to the previous one on Backspace\nin an empty segment or on the arrow toward the start at its start; the arrow toward the\nend at the end of a segment moves to the next. Bind `value`, one string per segment, or\nset `defaultValue` and listen to `onValueChange`.",
+				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'>",
 				"props": [
 					{
 						"name": "segments",
@@ -8652,8 +8767,15 @@
 						"type": "readonly string[]",
 						"optional": true,
 						"doc": "The text of each segment.",
-						"default": "[]",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "readonly string[]",
+						"optional": true,
+						"doc": "The text of each segment of an uncontrolled entry at first. Defaults to none.",
+						"default": "[]"
 					},
 					{
 						"name": "onValueChange",
@@ -8675,8 +8797,8 @@
 			"NumberEntry": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/entries/NumberEntry.svelte",
-				"doc": "A number field with decrease and increase buttons, like a GNOME spin button. It shows\n`value` in the locale's number format with `decimals` places. Typed text is read when\nthe field loses focus or on Enter, rounded, kept between `min` and `max` and reported;\ntext that isn't a number is replaced by the current value. The Up and Down arrows step\nby `step`, Page Up and Page Down by `pageStep`, and Home and End jump to finite limits.\nWith focus in the field the mouse wheel steps too, and dragging sideways on the buttons\nscrubs the value one step per 4 pixels. Assistive technologies read it as a spin button.",
-				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'min' | 'max' | 'step'>",
+				"doc": "A number field with decrease and increase buttons, like a GNOME spin button. It shows\n`value` in the locale's number format with `decimals` places. Typed text is read when\nthe field loses focus or on Enter, rounded, kept between `min` and `max` and reported;\ntext that isn't a number is replaced by the current value. The Up and Down arrows step\nby `step`, Page Up and Page Down by `pageStep`, and Home and End jump to finite limits.\nWith focus in the field the mouse wheel steps too, and dragging sideways on the buttons\nscrubs the value one step per 4 pixels. Assistive technologies read it as a spin button.\nBind `value`, or set `defaultValue` and listen to `onValueChange`.",
+				"extends": "Omit<HTMLInputAttributes, 'children' | 'value' | 'defaultValue' | 'min' | 'max' | 'step'>",
 				"props": [
 					{
 						"name": "value",
@@ -8684,8 +8806,15 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The value.",
-						"default": "0",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "number",
+						"optional": true,
+						"doc": "The value of an uncontrolled entry at first. Defaults to 0.",
+						"default": "0"
 					},
 					{
 						"name": "onValueChange",
@@ -8772,7 +8901,7 @@
 			"Rating": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/rating/Rating.svelte",
-				"doc": "A row of `max` stars showing `value`, which the user changes by clicking or with the\nkeyboard. With `allowHalf` the value moves in halves: the start half of a star gives the\nhalf value. Hovering previews the value under the pointer. The arrow keys change it by\none step, Home and End jump to 0 and `max`, and the digit keys pick that whole value. A\nstar pops when it fills. Assistive technologies read it as a slider; with `readonly` it\nis an image with the value as its name.",
+				"doc": "A row of `max` stars showing `value`, which the user changes by clicking or with the\nkeyboard. With `allowHalf` the value moves in halves: the start half of a star gives the\nhalf value. Hovering previews the value under the pointer. The arrow keys change it by\none step, Home and End jump to 0 and `max`, and the digit keys pick that whole value. A\nstar pops when it fills. Assistive technologies read it as a slider; with `readonly` it\nis an image with the value as its name. Bind `value`, or set `defaultValue` and listen\nto `onValueChange`.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 				"props": [
 					{
@@ -8781,7 +8910,6 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The value, from 0 to `max`.",
-						"default": "defaultValue",
 						"bindable": true
 					},
 					{
@@ -8860,7 +8988,7 @@
 			"AngleSlider": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/rating/AngleSlider.svelte",
-				"doc": "A round dial that picks an angle in degrees, from 0 at the top clockwise to just under\n360, such as a rotation or a gradient direction. Dragging or clicking points the dial\nat the pointer, in `step` increments. The arrow keys turn it by `step`, Page Up and Page\nDown by `pageStep`, and Home goes back to 0; the value wraps around. `markers` draws\nticks at those angles. Assistive technologies read it as a slider. `onValueCommit`\nreceives the final angle when a drag ends and after each key press.",
+				"doc": "A round dial that picks an angle in degrees, from 0 at the top clockwise to just under\n360, such as a rotation or a gradient direction. Dragging or clicking points the dial\nat the pointer, in `step` increments. The arrow keys turn it by `step`, Page Up and Page\nDown by `pageStep`, and Home goes back to 0; the value wraps around. `markers` draws\nticks at those angles. Assistive technologies read it as a slider. `onValueCommit`\nreceives the final angle when a drag ends and after each key press. Bind `value`, or set\n`defaultValue` and listen to `onValueChange`.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 				"props": [
 					{
@@ -8869,7 +8997,6 @@
 						"type": "number",
 						"optional": true,
 						"doc": "The angle in degrees, from 0 to under 360.",
-						"default": "defaultValue",
 						"bindable": true
 					},
 					{
@@ -9450,8 +9577,8 @@
 			"Calendar": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/calendar/Calendar.svelte",
-				"doc": "A month grid that picks a date, or a range of dates with `range`. The header changes the\nmonth. The grid has one Tab stop, the focused day: the arrows move by a day or a week,\nHome and End to the start and end of the week, Page Up and Page Down by a month (a year\nwith Shift), and Enter or Space picks the focused day. A range takes two picks, in any\norder. Days outside `min` and `max`, or refused by `isDateAllowed`, can't be picked.\nWeek numbers follow ISO 8601. Bind `value`, or `rangeValue` in range mode.",
-				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
+				"doc": "A month grid that picks a date, or a range of dates with `range`. The header changes the\nmonth. The grid has one Tab stop, the focused day: the arrows move by a day or a week,\nHome and End to the start and end of the week, Page Up and Page Down by a month (a year\nwith Shift), and Enter or Space picks the focused day. A range takes two picks, in any\norder. Days outside `min` and `max`, or refused by `isDateAllowed`, can't be picked.\nWeek numbers follow ISO 8601. Bind `value`, or set `defaultValue` and listen to\n`onValueChange`; in range mode bind `rangeValue`, or set `defaultRangeValue` and listen\nto `onRangeChange`.",
+				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'>",
 				"props": [
 					{
 						"name": "value",
@@ -9459,8 +9586,15 @@
 						"type": "Date | null",
 						"optional": true,
 						"doc": "The picked date, in single mode.",
-						"default": "null",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "Date | null",
+						"optional": true,
+						"doc": "The picked date of an uncontrolled calendar at first, in single mode. Defaults to none.",
+						"default": "null"
 					},
 					{
 						"name": "onValueChange",
@@ -9483,8 +9617,15 @@
 						"type": "DateRange | null",
 						"optional": true,
 						"doc": "The picked range, in range mode.",
-						"default": "null",
 						"bindable": true
+					},
+					{
+						"name": "defaultRangeValue",
+						"kind": "prop",
+						"type": "DateRange | null",
+						"optional": true,
+						"doc": "The picked range of an uncontrolled calendar at first, in range mode. Defaults to none.",
+						"default": "null"
 					},
 					{
 						"name": "onRangeChange",
@@ -9552,8 +9693,8 @@
 			"DatePicker": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/calendar/DatePicker.svelte",
-				"doc": "A field-like button that shows a date, or a date range with `range`, and opens a\n`Calendar` in a popover to change it. Enter, Space or Alt+Down opens the calendar, which\ntakes focus; a pick closes it. Bind `value`, or `rangeValue` in range mode.",
-				"extends": "Omit<HTMLButtonAttributes, 'children' | 'value'>",
+				"doc": "A field-like button that shows a date, or a date range with `range`, and opens a\n`Calendar` in a popover to change it. Enter, Space or Alt+Down opens the calendar, which\ntakes focus; a pick closes it. Bind `value`, or set `defaultValue` and listen to\n`onValueChange`; in range mode bind `rangeValue`, or set `defaultRangeValue` and listen\nto `onRangeChange`.",
+				"extends": "Omit<HTMLButtonAttributes, 'children' | 'value' | 'defaultValue'>",
 				"props": [
 					{
 						"name": "value",
@@ -9561,8 +9702,15 @@
 						"type": "Date | null",
 						"optional": true,
 						"doc": "The picked date, in single mode.",
-						"default": "null",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "Date | null",
+						"optional": true,
+						"doc": "The picked date of an uncontrolled picker at first, in single mode. Defaults to none.",
+						"default": "null"
 					},
 					{
 						"name": "onValueChange",
@@ -9585,8 +9733,15 @@
 						"type": "DateRange | null",
 						"optional": true,
 						"doc": "The picked range, in range mode.",
-						"default": "null",
 						"bindable": true
+					},
+					{
+						"name": "defaultRangeValue",
+						"kind": "prop",
+						"type": "DateRange | null",
+						"optional": true,
+						"doc": "The picked range of an uncontrolled picker at first, in range mode. Defaults to none.",
+						"default": "null"
 					},
 					{
 						"name": "onRangeChange",
@@ -9695,8 +9850,8 @@
 			"ColorPicker": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/color-picker/ColorPicker.svelte",
-				"doc": "A color picker: a saturation and brightness area, a hue slider, an optional opacity\nslider, text fields in a chosen format (hex, RGB or HSL) and optional `swatches`. Every\npart works by pointer and keyboard: the arrows move the area and the sliders by 1%, or\n10% with Shift, and the fields apply on Enter or when they lose focus. The color is\nheld as HSV, so a gray keeps its hue. Bind `value` (`#RRGGBB`, or `#RRGGBBAA` when\ntranslucent). `ColorPickerButton` shows it in a popover.",
-				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
+				"doc": "A color picker: a saturation and brightness area, a hue slider, an optional opacity\nslider, text fields in a chosen format (hex, RGB or HSL) and optional `swatches`. Every\npart works by pointer and keyboard: the arrows move the area and the sliders by 1%, or\n10% with Shift, and the fields apply on Enter or when they lose focus. The color is\nheld as HSV, so a gray keeps its hue. Bind `value` (`#RRGGBB`, or `#RRGGBBAA` when\ntranslucent), or set `defaultValue` and listen to `onValueChange`. `ColorPickerButton`\nshows it in a popover.",
+				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'>",
 				"props": [
 					{
 						"name": "value",
@@ -9704,8 +9859,15 @@
 						"type": "string",
 						"optional": true,
 						"doc": "The color, as a hex string.",
-						"default": "'#3584E4'",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The color of an uncontrolled picker at first, as a hex string. Defaults to `#3584E4`.",
+						"default": "'#3584E4'"
 					},
 					{
 						"name": "onValueChange",
@@ -9751,8 +9913,8 @@
 			"ColorPickerButton": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/color-picker/ColorPickerButton.svelte",
-				"doc": "An outlined button with a color swatch and its hex value that opens a `ColorPicker` in a\npopover. Bind `value`. `label` names the button and the popover, such as what the color\nis for.",
-				"extends": "Omit<HTMLButtonAttributes, 'children' | 'value'>",
+				"doc": "An outlined button with a color swatch and its hex value that opens a `ColorPicker` in a\npopover. Bind `value`, or set `defaultValue` and listen to `onValueChange`. `label` names the button and the popover, such as what the color\nis for.",
+				"extends": "Omit<HTMLButtonAttributes, 'children' | 'value' | 'defaultValue'>",
 				"props": [
 					{
 						"name": "value",
@@ -9760,8 +9922,15 @@
 						"type": "string",
 						"optional": true,
 						"doc": "The color, as a hex string.",
-						"default": "'#3584E4'",
 						"bindable": true
+					},
+					{
+						"name": "defaultValue",
+						"kind": "prop",
+						"type": "string",
+						"optional": true,
+						"doc": "The color of an uncontrolled button at first, as a hex string. Defaults to `#3584E4`.",
+						"default": "'#3584E4'"
 					},
 					{
 						"name": "onValueChange",
@@ -11247,7 +11416,7 @@
 						"kind": "prop",
 						"type": "string",
 						"optional": true,
-						"doc": "The accessible name of the code area, such as the file name."
+						"doc": "The accessible name of the code area, such as the file name. Defaults to the\nlocalized \"Code\"."
 					},
 					{
 						"name": "ref",

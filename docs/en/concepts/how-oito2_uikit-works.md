@@ -65,6 +65,11 @@ By default it follows the system: light or dark from `prefers-color-scheme`, the
 
 The components read the tokens and the theme only through `var(--oito2-…)`. All their rules sit in the `oito2` cascade layer, so an app's own unlayered CSS always wins. Behavior — roles, keyboard, focus, dismissal — follows the WAI-ARIA Authoring Practices and is built on shared internal primitives (focus scope, roving focus, typeahead, dismissable layer, floating positioning). See [Interaction primitives](../architecture/interaction-primitives.md).
 
+Every component follows the same two prop contracts:
+
+- **Values and open states.** A component with a value or an open state takes it as a prop (`value`, `checked`, `open`, `page`…) that can be bound, its starting value as `default<Name>` when the parent doesn't control it, and reports every change through `on<Name>Change`. Bind the prop to keep the value in sync; a value passed without `bind:` changes inside the component until the parent passes a new one, and every change is reported.
+- **HTML attributes.** Attributes and event handlers the component doesn't name reach its main element. A consumer's handler runs before the component's own handler of the same event, and calling `preventDefault()` in it cancels the component's behavior; `class` and `style` are joined with the component's.
+
 ## 5. Overlays and the Portal
 
 Dialogs, menus, popovers, tooltips and selects must escape the clipping and stacking of the element that opens them. They render through an internal `Portal` into a host element that the closest `ThemeProvider` places at the end of its own `div`. Because the host is inside the themed `div`, overlays keep the theme's custom properties; they are positioned with `position: fixed` (anchored overlays through `@floating-ui/dom`). Without a `ThemeProvider` the portal falls back to `document.body`.

@@ -19,16 +19,17 @@
   @component
   Page navigation: previous and next buttons around page number buttons with ellipses,
   and an optional page size selector. Narrower than `compactWidth` it shows only the
-  buttons around "Page 3 of 10". Pages count from 1. Bind `page`, or listen to
-  `onPageChange`.
+  buttons around "Page 3 of 10". Pages count from 1. Bind `page`, or set `defaultPage`
+  and listen to `onPageChange`; likewise `pageSize`, `defaultPageSize` and
+  `onPageSizeChange`.
 -->
 <script lang="ts">
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { ListCollection } from '../../collections/list-collection.js';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { useLocale } from '../../l10n/locale.js';
-	import { materialStrings } from '../../l10n/material.js';
 	import IconButton from '../button/IconButton.svelte';
 	import type { IconComponent } from '../icon.js';
 	import * as Select from '../select/select/index.js';
@@ -49,6 +50,11 @@
 		boundaryCount?: number;
 		/** The current page size; one of `pageSizes`. */
 		pageSize?: number;
+		/**
+		 * The page size of an uncontrolled pagination at first. Without it the selector
+		 * shows the first of `pageSizes`.
+		 */
+		defaultPageSize?: number;
 		/** The page sizes offered; the selector shows when it has entries. */
 		pageSizes?: readonly number[];
 		/** Called with the chosen page size. */
@@ -62,13 +68,14 @@
 	}
 
 	let {
+		page = $bindable(),
 		defaultPage = 1,
-		page = $bindable(defaultPage),
 		pageCount,
 		onPageChange,
 		siblingCount = 1,
 		boundaryCount = 1,
 		pageSize = $bindable(),
+		defaultPageSize,
 		pageSizes = [],
 		onPageSizeChange,
 		compactWidth = 420,
@@ -78,20 +85,36 @@
 		...rest
 	}: Props = $props();
 
+	const pageModel = new Controllable<number>({
+		value: () => page,
+		defaultValue: () => defaultPage,
+		onChange: (next) => {
+			page = next;
+			onPageChange?.(next);
+		}
+	});
+	const pageSizeModel = new Controllable<number | undefined>({
+		value: () => pageSize,
+		defaultValue: () => defaultPageSize,
+		onChange: (next) => {
+			pageSize = next;
+			if (next !== undefined) onPageSizeChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	let width = $state(Number.POSITIVE_INFINITY);
 	let compact = $derived(width < compactWidth);
 	let count = $derived(Math.max(1, pageCount));
-	let current = $derived(Math.min(Math.max(1, page), count));
+	let current = $derived(Math.min(Math.max(1, pageModel.current), count));
 	let items = $derived(paginationItems(current, count, { siblingCount, boundaryCount }));
 	let sizes = $derived(new ListCollection(pageSizes.map(String)));
-	let material = $derived(materialStrings(locale.locale));
+	let material = $derived(locale.strings);
 
 	/** Shows `target` when it is another page. */
 	function go(target: number) {
 		if (disabled || target < 1 || target > count || target === current) return;
-		page = target;
-		onPageChange?.(target);
+		pageModel.current = target;
 	}
 </script>
 
@@ -133,18 +156,17 @@
 			onclick={() => go(current + 1)}
 		/>
 	</div>
-	{#if pageSizes.length > 0 && (onPageSizeChange || pageSize !== undefined)}
+	{#if pageSizes.length > 0 && (onPageSizeChange || pageSizeModel.current !== undefined)}
 		<div class="sizes">
 			<span class="sizes-label">{locale.strings.itemsPerPage}</span>
 			<Select.Root
 				collection={sizes}
 				label={locale.strings.itemsPerPage}
-				value={String(pageSize ?? pageSizes[0])}
+				value={String(pageSizeModel.current ?? pageSizes[0])}
 				{disabled}
 				onValueChange={(next) => {
 					if (next === null) return;
-					pageSize = Number(next);
-					onPageSizeChange?.(Number(next));
+					pageSizeModel.current = Number(next);
 				}}
 			/>
 		</div>

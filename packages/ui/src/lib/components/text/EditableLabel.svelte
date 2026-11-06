@@ -26,6 +26,7 @@
 	import { tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { useLocale } from '../../l10n/locale.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
@@ -128,14 +129,15 @@
 		aria-describedby="{id}-hint"
 		class={['oito2-editable-label', className]}
 		data-empty={text ? undefined : ''}
-		ondblclick={start}
-		onkeydown={(event) => {
-			if (event.key === 'Enter' || event.key === 'F2') {
-				event.preventDefault();
-				start();
+		{...mergeProps(rest, {
+			ondblclick: start,
+			onkeydown: (event: KeyboardEvent) => {
+				if (event.key === 'Enter' || event.key === 'F2') {
+					event.preventDefault();
+					start();
+				}
 			}
-		}}
-		{...rest}
+		})}
 	>
 		{text || placeholder || ''}
 	</span>

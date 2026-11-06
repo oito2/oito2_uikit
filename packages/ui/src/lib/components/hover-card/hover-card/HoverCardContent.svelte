@@ -24,6 +24,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { PopoverAlignment, PopoverPlacement } from '../../popover/popover-state.svelte.js';
+	import { mergeProps } from '../../../internal/merge-props.js';
 	import * as Popover from '../../popover/popover/index.js';
 	import { useHoverCard } from '../hover-card-context.js';
 
@@ -58,9 +59,10 @@
 	{maxWidth}
 	focusOnOpen={false}
 	role="tooltip"
-	onpointerenter={() => card.cancel()}
-	onpointerleave={() => card.schedule(false)}
-	{...rest}
+	{...mergeProps(rest, {
+		onpointerenter: () => card.cancel(),
+		onpointerleave: () => card.schedule(false)
+	})}
 >
 	{#if arrow}<Popover.Arrow />{/if}
 	{@render children()}

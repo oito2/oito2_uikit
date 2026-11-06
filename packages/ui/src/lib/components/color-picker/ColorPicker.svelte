@@ -22,11 +22,13 @@
   part works by pointer and keyboard: the arrows move the area and the sliders by 1%, or
   10% with Shift, and the fields apply on Enter or when they lose focus. The color is
   held as HSV, so a gray keeps its hue. Bind `value` (`#RRGGBB`, or `#RRGGBBAA` when
-  translucent). `ColorPickerButton` shows it in a popover.
+  translucent), or set `defaultValue` and listen to `onValueChange`. `ColorPickerButton`
+  shows it in a popover.
 -->
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf } from '../../internal/keyboard.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import * as SegmentGroup from '../choice/segment-group/index.js';
@@ -43,9 +45,11 @@
 		type RgbaColor
 	} from './color-math.js';
 
-	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'> {
 		/** The color, as a hex string. */
 		value?: string;
+		/** The color of an uncontrolled picker at first, as a hex string. Defaults to `#3584E4`. */
+		defaultValue?: string;
 		/** Called with each new color. */
 		onValueChange?: (value: string) => void;
 		/** Whether the opacity slider shows and the hex field keeps the alpha channel. Defaults to true. */
@@ -59,7 +63,8 @@
 	}
 
 	let {
-		value = $bindable('#3584E4'),
+		value = $bindable(),
+		defaultValue = '#3584E4',
 		onValueChange,
 		showAlpha = true,
 		swatches = [],
@@ -69,18 +74,27 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<string>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	let hsv = $state<HsvColor>(
-		untrack(() => hsvKeepingHue(parseHexColor(value) ?? { r: 0, g: 0, b: 0, a: 1 }, 0))
+		untrack(() => hsvKeepingHue(parseHexColor(model.current) ?? { r: 0, g: 0, b: 0, a: 1 }, 0))
 	);
 	let format = $state<ColorFormat | null>(untrack(() => defaultFormat));
-	let reported = untrack(() => value);
+	let reported = untrack(() => model.current);
 	let rgb = $derived(hsvToRgb(hsv));
 	let hex = $derived(formatHexColor(rgb, showAlpha));
 
 	// A color set from outside, keeping the hue for grays.
 	$effect.pre(() => {
-		const next = value;
+		const next = model.current;
 		untrack(() => {
 			if (next === reported) return;
 			const parsed = parseHexColor(next);
@@ -89,12 +103,13 @@
 		});
 	});
 
-	/** Shows and reports `next`. */
+	/** Reports `next` and shows it, unless a parent that controls the value keeps another. */
 	function set(next: HsvColor) {
+		const color = formatHexColor(hsvToRgb(next), showAlpha);
+		model.current = color;
+		if (model.current !== color) return;
 		hsv = next;
-		reported = formatHexColor(hsvToRgb(next), showAlpha);
-		value = reported;
-		onValueChange?.(reported);
+		reported = color;
 	}
 
 	/** Sets an RGB color, keeping the hue (or `hue`) for grays. */
@@ -335,7 +350,7 @@
 			{/each}
 		{/key}
 	</div>
-	<SegmentGroup.Root bind:value={format} aria-label="Format" class="formats">
+	<SegmentGroup.Root bind:value={format} aria-label={locale.strings.colorFormat} class="formats">
 		<SegmentGroup.Item value="hex">HEX</SegmentGroup.Item>
 		<SegmentGroup.Item value="rgb">RGB</SegmentGroup.Item>
 		<SegmentGroup.Item value="hsl">HSL</SegmentGroup.Item>

@@ -23,7 +23,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { useLocale } from '../../l10n/locale.js';
-	import { materialStrings } from '../../l10n/material.js';
 	import Button from '../button/Button.svelte';
 	import * as Dialog from './dialog/index.js';
 
@@ -58,7 +57,7 @@
 	}: Props = $props();
 
 	const locale = useLocale();
-	let strings = $derived(materialStrings(locale.locale));
+	let strings = $derived(locale.strings);
 </script>
 
 {#snippet text(content: string | Snippet)}

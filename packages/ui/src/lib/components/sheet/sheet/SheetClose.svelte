@@ -34,13 +34,17 @@
 		children?: Snippet;
 	}
 
-	let { variant = 'text', children, ...rest }: Props = $props();
+	let { variant = 'text', children, onclick, ...rest }: Props = $props();
 
 	const sheet = useSheet();
+	const close = (event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) => {
+		onclick?.(event);
+		if (!event.defaultPrevented) sheet.open = false;
+	};
 </script>
 
 {#if children}
-	<Button {variant} onclick={() => (sheet.open = false)} {...rest}>{@render children()}</Button>
+	<Button {variant} {...rest} onclick={close}>{@render children()}</Button>
 {:else}
-	<CloseButton onclick={() => (sheet.open = false)} {...rest} />
+	<CloseButton {...rest} onclick={close} />
 {/if}

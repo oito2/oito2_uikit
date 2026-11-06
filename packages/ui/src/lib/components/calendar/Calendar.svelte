@@ -22,16 +22,18 @@
   Home and End to the start and end of the week, Page Up and Page Down by a month (a year
   with Shift), and Enter or Space picks the focused day. A range takes two picks, in any
   order. Days outside `min` and `max`, or refused by `isDateAllowed`, can't be picked.
-  Week numbers follow ISO 8601. Bind `value`, or `rangeValue` in range mode.
+  Week numbers follow ISO 8601. Bind `value`, or set `defaultValue` and listen to
+  `onValueChange`; in range mode bind `rangeValue`, or set `defaultRangeValue` and listen
+  to `onRangeChange`.
 -->
 <script lang="ts">
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import { tick, untrack } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf } from '../../internal/keyboard.js';
 	import { useLocale } from '../../l10n/locale.js';
-	import { dateTimeStrings } from '../../l10n/material.js';
 	import IconButton from '../button/IconButton.svelte';
 	import { dateOnly } from '../entries/date-time.js';
 	import type { IconComponent } from '../icon.js';
@@ -45,15 +47,19 @@
 		type DateRange
 	} from './calendar-math.js';
 
-	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'> {
 		/** The picked date, in single mode. */
 		value?: Date | null;
+		/** The picked date of an uncontrolled calendar at first, in single mode. Defaults to none. */
+		defaultValue?: Date | null;
 		/** Called with each picked date, in single mode. */
 		onValueChange?: (value: Date) => void;
 		/** Whether the calendar picks a range. */
 		range?: boolean;
 		/** The picked range, in range mode. */
 		rangeValue?: DateRange | null;
+		/** The picked range of an uncontrolled calendar at first, in range mode. Defaults to none. */
+		defaultRangeValue?: DateRange | null;
 		/** Called with each completed range. */
 		onRangeChange?: (range: DateRange) => void;
 		/** The earliest date that can be picked. */
@@ -73,10 +79,12 @@
 	}
 
 	let {
-		value = $bindable(null),
+		value = $bindable(),
+		defaultValue = null,
 		onValueChange,
 		range = false,
-		rangeValue = $bindable(null),
+		rangeValue = $bindable(),
+		defaultRangeValue = null,
 		onRangeChange,
 		min,
 		max,
@@ -89,9 +97,26 @@
 		...rest
 	}: Props = $props();
 
+	const single = new Controllable<Date | null>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			if (next) onValueChange?.(next);
+		}
+	});
+	const ranged = new Controllable<DateRange | null>({
+		value: () => rangeValue,
+		defaultValue: () => defaultRangeValue,
+		onChange: (next) => {
+			rangeValue = next;
+			if (next) onRangeChange?.(next);
+		}
+	});
+
 	const id = $props.id();
 	const locale = useLocale();
-	let strings = $derived(dateTimeStrings(locale.locale));
+	let strings = $derived(locale.strings);
 	let intl = $derived(locale.locale.replace('_', '-'));
 	let weekStart = $derived(firstDayOfWeek(locale.locale));
 	let todayDate = $derived(dateOnly(today));
@@ -107,7 +132,9 @@
 		return clamp(day).getTime() === day.getTime() && (isDateAllowed?.(day) ?? true);
 	}
 
-	let focused = $state(untrack(() => clamp(dateOnly(value ?? rangeValue?.start ?? today))));
+	let focused = $state(
+		untrack(() => clamp(dateOnly(single.current ?? ranged.current?.start ?? today)))
+	);
 	let month = $derived(new Date(focused.getFullYear(), focused.getMonth(), 1));
 	let pending = $state<Date | null>(null);
 	let hovered = $state<Date | null>(null);
@@ -116,7 +143,7 @@
 
 	// A selection changed from outside moves the focused day there.
 	$effect.pre(() => {
-		const selected = value ?? rangeValue?.start ?? null;
+		const selected = single.current ?? ranged.current?.start ?? null;
 		if (selected && !untrack(() => sameDay(selected, focused)))
 			focused = clamp(dateOnly(selected));
 	});
@@ -159,8 +186,8 @@
 		if (!canPick(day)) return;
 		focused = day;
 		if (!range) {
-			value = day;
-			onValueChange?.(day);
+			// A copy, so picking the picked day again reports it again.
+			single.current = new Date(day.getTime());
 			return;
 		}
 		if (!pending) {
@@ -170,8 +197,7 @@
 		const next = day < pending ? { start: day, end: pending } : { start: pending, end: day };
 		pending = null;
 		hovered = null;
-		rangeValue = next;
-		onRangeChange?.(next);
+		ranged.current = next;
 	}
 
 	function onkeydown(event: KeyboardEvent) {
@@ -220,15 +246,20 @@
 	/** Where `day` sits in the shown selection; a range in progress previews to the hovered or focused day. */
 	function stateOf(day: Date) {
 		if (!range)
-			return { selected: sameDay(day, value), inRange: false, start: false, end: false };
+			return {
+				selected: sameDay(day, single.current),
+				inRange: false,
+				start: false,
+				end: false
+			};
 		let start: Date | null = null;
 		let end: Date | null = null;
 		if (pending) {
 			const other = hovered ?? (gridFocused ? focused : null) ?? pending;
 			[start, end] = other < pending ? [other, pending] : [pending, other];
-		} else if (rangeValue) {
-			start = dateOnly(rangeValue.start);
-			end = dateOnly(rangeValue.end);
+		} else if (ranged.current) {
+			start = dateOnly(ranged.current.start);
+			end = dateOnly(ranged.current.end);
 		}
 		if (!start || !end) return { selected: false, inRange: false, start: false, end: false };
 		const isStart = sameDay(day, start);

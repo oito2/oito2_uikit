@@ -25,7 +25,6 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { useLocale } from '../../l10n/locale.js';
-	import { dateTimeStrings } from '../../l10n/material.js';
 	import { formatTime, parseTime, uses12HourClock, type TimeOfDay } from './date-time.js';
 	import ParsedEntry from './ParsedEntry.svelte';
 
@@ -55,7 +54,7 @@
 	}: Props = $props();
 
 	const locale = useLocale();
-	let strings = $derived(dateTimeStrings(locale.locale));
+	let strings = $derived(locale.strings);
 	let twentyFour = $derived(use24Hour ?? !uses12HourClock(locale.locale));
 
 	function parse(text: string): { value: TimeOfDay | null } | { error: string } {

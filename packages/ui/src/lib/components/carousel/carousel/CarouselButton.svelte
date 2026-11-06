@@ -25,7 +25,6 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { useLocale } from '../../../l10n/locale.js';
-	import { materialStrings } from '../../../l10n/material.js';
 	import IconButton from '../../button/IconButton.svelte';
 	import type { IconComponent } from '../../icon.js';
 	import { useCarousel } from '../carousel-controller.svelte.js';
@@ -51,7 +50,7 @@
 	const carousel = useCarousel();
 	const locale = useLocale();
 	let previous = $derived(direction === 'previous');
-	let strings = $derived(materialStrings(locale.locale));
+	let strings = $derived(locale.strings);
 </script>
 
 <span class={['oito2-carousel-button', className]} data-direction={direction}>

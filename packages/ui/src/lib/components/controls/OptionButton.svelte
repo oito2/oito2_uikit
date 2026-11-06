@@ -26,6 +26,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import type { IconComponent } from '../icon.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import * as Tooltip from '../tooltip/index.js';
 
 	interface Props extends Omit<HTMLButtonAttributes, 'children' | 'color'> {
@@ -63,8 +64,7 @@
 				{disabled}
 				class={['oito2-option-button', className]}
 				data-disabled={disabled ? '' : undefined}
-				{...rest}
-				{...props}
+				{...mergeProps(rest, props)}
 			>
 				{#if children}
 					{@render children()}

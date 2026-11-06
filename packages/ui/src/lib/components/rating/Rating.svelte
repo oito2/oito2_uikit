@@ -22,12 +22,15 @@
   half value. Hovering previews the value under the pointer. The arrow keys change it by
   one step, Home and End jump to 0 and `max`, and the digit keys pick that whole value. A
   star pops when it fills. Assistive technologies read it as a slider; with `readonly` it
-  is an image with the value as its name.
+  is an image with the value as its name. Bind `value`, or set `defaultValue` and listen
+  to `onValueChange`.
 -->
 <script lang="ts">
 	import Star from '@lucide/svelte/icons/star';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf } from '../../internal/keyboard.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import { alignRating, ratingAt } from './rating-math.js';
 
@@ -55,8 +58,8 @@
 	}
 
 	let {
+		value = $bindable(),
 		defaultValue = 0,
-		value = $bindable(defaultValue),
 		onValueChange,
 		max = 5,
 		allowHalf = false,
@@ -70,11 +73,21 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<number>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	let hover = $state<number | null>(null);
 	let enabled = $derived(!readonly && !disabled);
 	let step = $derived(allowHalf ? 0.5 : 1);
-	let shown = $derived(hover ?? value);
+	let current = $derived(model.current);
+	let shown = $derived(hover ?? current);
 
 	/** Formats `rating` for assistive technologies, such as "3.5 of 5". */
 	function describe(rating: number): string {
@@ -88,9 +101,7 @@
 	/** Aligns, clamps and reports `next`. */
 	function set(next: number) {
 		const aligned = alignRating(next, max, allowHalf);
-		if (aligned === value) return;
-		value = aligned;
-		onValueChange?.(aligned);
+		model.current = aligned;
 	}
 
 	/** The rating under the pointer of `event`. */
@@ -106,7 +117,7 @@
 		const rtl = directionOf(event.currentTarget) === 'rtl';
 		const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
 		const back = rtl ? 'ArrowRight' : 'ArrowLeft';
-		const aligned = alignRating(value, max, allowHalf);
+		const aligned = alignRating(current, max, allowHalf);
 		if (event.key === forward || event.key === 'ArrowUp') set(aligned + step);
 		else if (event.key === back || event.key === 'ArrowDown') set(aligned - step);
 		else if (event.key === 'Home') set(0);
@@ -134,21 +145,22 @@
 		tabindex="0"
 		aria-valuemin={0}
 		aria-valuemax={max}
-		aria-valuenow={value}
-		aria-valuetext={describe(value)}
+		aria-valuenow={current}
+		aria-valuetext={describe(current)}
 		class={['oito2-rating', className]}
 		data-hover={hover === null ? undefined : ''}
 		style:--oito2-rating-size="{size}px"
 		style:--oito2-rating-color={color}
 		{style}
-		onpointermove={(event) => (hover = valueAt(event))}
-		onpointerleave={() => (hover = null)}
-		onclick={(event) => {
-			hover = null;
-			set(valueAt(event));
-		}}
-		{onkeydown}
-		{...rest}
+		{...mergeProps(rest, {
+			onpointermove: (event: PointerEvent) => (hover = valueAt(event)),
+			onpointerleave: () => (hover = null),
+			onclick: (event: MouseEvent) => {
+				hover = null;
+				set(valueAt(event));
+			},
+			onkeydown
+		})}
 	>
 		{@render stars()}
 	</div>
@@ -160,11 +172,11 @@
 		tabindex={disabled ? undefined : 0}
 		aria-valuemin={0}
 		aria-valuemax={max}
-		aria-valuenow={value}
-		aria-valuetext={describe(value)}
+		aria-valuenow={current}
+		aria-valuetext={describe(current)}
 		aria-readonly={readonly && !disabled ? true : undefined}
 		aria-disabled={disabled || undefined}
-		aria-label={describe(value)}
+		aria-label={describe(current)}
 		class={['oito2-rating', className]}
 		data-disabled={disabled ? '' : undefined}
 		style:--oito2-rating-size="{size}px"

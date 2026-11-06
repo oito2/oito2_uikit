@@ -29,7 +29,6 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { useLocale } from '../../l10n/locale.js';
-	import { materialStrings } from '../../l10n/material.js';
 	import IconButton from '../button/IconButton.svelte';
 	import type { IconComponent } from '../icon.js';
 	import SearchField from './SearchField.svelte';
@@ -116,7 +115,7 @@
 		bind:ref={toggle}
 		class="oito2-search-title-toggle"
 		icon={Search as IconComponent}
-		label={toggleLabel ?? materialStrings(locale.locale).search}
+		label={toggleLabel ?? locale.strings.searchField}
 		selected={searchActive}
 		onclick={() => (searchActive ? close() : setActive(true))}
 	/>

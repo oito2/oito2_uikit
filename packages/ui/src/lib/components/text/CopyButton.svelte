@@ -30,7 +30,6 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { announce } from '../../internal/live-region.js';
 	import { useLocale } from '../../l10n/locale.js';
-	import { materialStrings } from '../../l10n/material.js';
 	import IconButton from '../button/IconButton.svelte';
 	import Swap from '../controls/Swap.svelte';
 
@@ -71,7 +70,7 @@
 			? locale.strings.copied
 			: copied === false
 				? locale.strings.copyFailed
-				: (label ?? materialStrings(locale.locale).copy)
+				: (label ?? locale.strings.copy)
 	);
 
 	/** Copies the text, shows and announces the outcome, then goes back to idle. */

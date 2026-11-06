@@ -32,7 +32,6 @@
 	import type { IconComponent } from '../icon.js';
 	import * as Popover from '../popover/popover/index.js';
 	import { useLocale } from '../../l10n/locale.js';
-	import { dateTimeStrings } from '../../l10n/material.js';
 	import { dateOnly, formatCompactDate, parseCompactDate } from './date-time.js';
 	import ParsedEntry from './ParsedEntry.svelte';
 
@@ -72,7 +71,7 @@
 	}: Props = $props();
 
 	const locale = useLocale();
-	let strings = $derived(dateTimeStrings(locale.locale));
+	let strings = $derived(locale.strings);
 	let open = $state(false);
 	let entry = $state<{ setValue: (value: Date) => void } | null>(null);
 

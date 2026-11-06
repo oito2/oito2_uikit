@@ -25,7 +25,6 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { useLocale } from '../../l10n/locale.js';
-	import { dateTimeStrings } from '../../l10n/material.js';
 	import { dateOnly, type TimeOfDay } from './date-time.js';
 	import DateEntry from './DateEntry.svelte';
 	import TimeEntry from './TimeEntry.svelte';
@@ -63,7 +62,7 @@
 	}: Props = $props();
 
 	const locale = useLocale();
-	let strings = $derived(dateTimeStrings(locale.locale));
+	let strings = $derived(locale.strings);
 	let date = $state<Date | null>(null);
 	let time = $state<TimeOfDay | null>(null);
 	let dateError: string | null = null;

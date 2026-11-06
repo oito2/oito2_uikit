@@ -321,7 +321,7 @@
 					value={controller.zoom}
 					min={1}
 					max={controller.maxZoom}
-					thumbLabels={[locale.strings.zoomIn, locale.strings.zoomIn]}
+					thumbLabels={[locale.strings.zoom, locale.strings.zoom]}
 					valueText={(zoom) => `${Math.round(zoom * 100)}%`}
 					onValueChange={(value) => {
 						if (typeof value === 'number') controller.zoom = value;

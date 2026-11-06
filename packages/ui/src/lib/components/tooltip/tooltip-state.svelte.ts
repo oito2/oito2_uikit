@@ -22,6 +22,7 @@ const key = Symbol('oito2.tooltip');
 /** The options of a `TooltipState`. */
 export interface TooltipOptions {
 	open: () => boolean | undefined;
+	defaultOpen?: () => boolean;
 	onOpenChange: (open: boolean) => void;
 	delay: () => number;
 	disabled: () => boolean;
@@ -54,7 +55,7 @@ export class TooltipState {
 		this.#options = options;
 		this.#open = new Controllable({
 			value: options.open,
-			defaultValue: () => false,
+			defaultValue: options.defaultOpen ?? (() => false),
 			onChange: options.onOpenChange
 		});
 	}

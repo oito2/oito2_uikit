@@ -19,7 +19,8 @@
   @component
   A tooltip: a short label in the inverse surface color that shows next to its trigger
   after the pointer rests on it for `delay` milliseconds, or at once when the trigger gets
-  keyboard focus. Compose it with `Tooltip.Trigger` and `Tooltip.Content`.
+  keyboard focus. Compose it with `Tooltip.Trigger` and `Tooltip.Content`. Bind `open`, or
+  set `defaultOpen` and listen to `onOpenChange`.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -28,6 +29,8 @@
 	interface Props {
 		/** Whether the tooltip shows. */
 		open?: boolean;
+		/** Whether an uncontrolled tooltip starts open. */
+		defaultOpen?: boolean;
 		/** Called when the tooltip opens or closes. */
 		onOpenChange?: (open: boolean) => void;
 		/** The hover delay in milliseconds. Defaults to 500. */
@@ -40,6 +43,7 @@
 
 	let {
 		open = $bindable(),
+		defaultOpen = false,
 		onOpenChange,
 		delay = 500,
 		disabled = false,
@@ -50,6 +54,7 @@
 	setTooltip(
 		new TooltipState({
 			open: () => open,
+			defaultOpen: () => defaultOpen,
 			onOpenChange: (next) => {
 				open = next;
 				onOpenChange?.(next);

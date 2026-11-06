@@ -29,7 +29,7 @@
 	import Check from '@lucide/svelte/icons/check';
 	import X from '@lucide/svelte/icons/x';
 	import type { Snippet } from 'svelte';
-	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import type { IconComponent } from '../icon.js';
@@ -106,7 +106,9 @@
 				>{@render label()}</button
 			>
 		{:else}
-			<span class="oito2-chip-main">{@render label()}</span>
+			<span class="oito2-chip-main" {...rest as HTMLAttributes<HTMLElement>}
+				>{@render label()}</span
+			>
 		{/if}
 		<button
 			type="button"

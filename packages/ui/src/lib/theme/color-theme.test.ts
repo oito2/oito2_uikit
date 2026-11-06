@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import parity from '../../fixtures/parity/schemes.json';
 import type { AccentColor } from '../tokens/values.js';
 import {
@@ -51,6 +51,15 @@ describe('createColorTheme', () => {
 		const a = createColorTheme({ brightness: 'light', accent: '#0F766E' });
 		expect(createColorTheme({ brightness: 'light', accent: '#0F766E' })).toBe(a);
 		expect(Contrast.ratio(a.colorScheme.primary, '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
+	});
+
+	it('falls back to the default accent for an invalid one', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		expect(createColorTheme({ brightness: 'light', accent: 'not-a-color' })).toEqual(
+			createColorTheme({ brightness: 'light', accent: 'blue' })
+		);
+		expect(warn).toHaveBeenCalledOnce();
+		warn.mockRestore();
 	});
 
 	it('defaults to the blue accent', () => {

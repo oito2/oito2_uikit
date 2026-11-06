@@ -39,6 +39,8 @@
 		current?: string | null;
 		open?: string | null;
 		log?: string[];
+		/** Whether the handlers given to the navigation menu call `preventDefault()`. */
+		cancel?: boolean;
 	}
 
 	let {
@@ -52,8 +54,15 @@
 		circle = false,
 		current = 'docs',
 		open = $bindable(null),
-		log = []
+		log = [],
+		cancel = false
 	}: Props = $props();
+
+	/** Returns a handler that logs `name` and, with `cancel`, prevents the default. */
+	const handler = (name: string) => (event: Event) => {
+		log.push(name);
+		if (cancel) event.preventDefault();
+	};
 </script>
 
 <ThemeProvider {mode} {highContrast} accent="blue" data-testid="gallery">
@@ -84,19 +93,25 @@
 			<NavigationMenu.Root bind:value={open} {current} aria-label="Main" hoverDelay={100}>
 				<NavigationMenu.List>
 					<NavigationMenu.Item value="home">
-						<NavigationMenu.Link href="#home" onclick={() => log.push('home')}
-							>Home</NavigationMenu.Link
+						<NavigationMenu.Link
+							href="#home"
+							onclick={() => log.push('home')}
+							onpointerenter={handler('home-enter')}>Home</NavigationMenu.Link
 						>
 					</NavigationMenu.Item>
 					<NavigationMenu.Item value="products">
-						<NavigationMenu.Trigger>Products</NavigationMenu.Trigger>
+						<NavigationMenu.Trigger onclick={handler('products-click')}
+							>Products</NavigationMenu.Trigger
+						>
 						<NavigationMenu.Content>
 							<a href="#editor">Editor</a>
 							<a href="#viewer">Viewer</a>
 						</NavigationMenu.Content>
 					</NavigationMenu.Item>
 					<NavigationMenu.Item value="docs">
-						<NavigationMenu.Trigger>Docs</NavigationMenu.Trigger>
+						<NavigationMenu.Trigger onkeydown={handler('docs-key')}
+							>Docs</NavigationMenu.Trigger
+						>
 						<NavigationMenu.Content>
 							<a href="#guide">Guide</a>
 						</NavigationMenu.Content>

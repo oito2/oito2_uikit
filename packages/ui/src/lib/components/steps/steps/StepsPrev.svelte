@@ -43,7 +43,7 @@
 <StepsNavigation
 	bind:ref
 	direction="previous"
-	label={locale.strings.tourBack}
+	label={locale.strings.previousStep}
 	{variant}
 	{...rest}
 />

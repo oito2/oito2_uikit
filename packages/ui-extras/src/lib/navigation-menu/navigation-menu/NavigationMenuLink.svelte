@@ -30,7 +30,7 @@
 		children: Snippet;
 	}
 
-	let { children, class: className, ...rest }: Props = $props();
+	let { children, class: className, onpointerenter, ...rest }: Props = $props();
 
 	const menu = useNavigationMenu();
 	const value = useNavigationMenuItem();
@@ -40,10 +40,12 @@
 <a
 	class={['oito2-navigation-menu-link', className]}
 	aria-current={current ? 'page' : undefined}
-	onpointerenter={(event) => {
-		if (event.pointerType === 'mouse' && menu.open !== null) menu.leave();
-	}}
 	{...rest}
+	onpointerenter={(event) => {
+		onpointerenter?.(event);
+		if (!event.defaultPrevented && event.pointerType === 'mouse' && menu.open !== null)
+			menu.leave();
+	}}
 >
 	{@render children()}
 </a>

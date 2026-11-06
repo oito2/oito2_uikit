@@ -61,6 +61,7 @@
 		dark,
 		children,
 		class: className,
+		style,
 		...rest
 	}: Props = $props();
 
@@ -96,7 +97,7 @@
 	class={['oito2-theme', className]}
 	data-oito2-brightness={theme.brightness}
 	data-oito2-contrast={theme.highContrast ? 'high' : 'normal'}
-	style={colorThemeStyle(theme)}
+	style={[colorThemeStyle(theme), style].filter(Boolean).join('; ')}
 >
 	{@render children()}
 	<div class="oito2-portal-host" bind:this={portalHost}></div>

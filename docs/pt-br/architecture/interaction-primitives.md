@@ -24,6 +24,7 @@ As primitivas internas **não são exportadas** pelo pacote: podem mudar sem uma
 | `scroll-lock.ts`             | `lockScroll()`                                                            | Função               | Impede a página de rolar sob um modal, compensando no body a largura da barra de rolagem escondida. Os bloqueios se aninham; devolve uma função de liberação.                                                                                                                           |
 | `live-region.ts`             | `announce(message, politeness)`                                           | Função               | Faz os leitores de tela lerem uma mensagem (`polite` ou `assertive`) sem mover o foco, por regiões live visualmente ocultas                                                                                                                                                             |
 | `controllable.svelte.ts`     | `Controllable`                                                            | Classe               | Estado controlado ou não controlado: `current` lê a prop quando dada e o valor próprio caso contrário; atribuir chama `onChange`                                                                                                                                                        |
+| `merge-props.ts`             | `mergeProps(a, b)`                                                        | Função               | Combina as props do consumidor com as do componente num elemento: handlers de mesmo nome rodam os dois, o do consumidor primeiro, e o do componente é pulado quando o consumidor chamou `preventDefault()`; `class`, `style` e `aria-describedby`/`aria-labelledby` são concatenados    |
 | `ids.ts`                     | `uniqueId`, `partId`                                                      | Funções              | Ids para elementos criados por script e para as partes de um componente (alvos de `aria-labelledby`); fora isso, os componentes usam `$props.id()`                                                                                                                                      |
 | `sets.ts`                    | `snapshotSet`                                                             | Função               | Snapshots imutáveis de conjuntos que as classes reativas trocam inteiros, para que as leituras acompanhem cada mudança                                                                                                                                                                  |
 | `ResizeHandle.svelte`        | `ResizeHandle`                                                            | Componente           | Um divisor focável de 8 px que redimensiona os painéis ao lado por arraste, setas e tecnologias assistivas                                                                                                                                                                              |
@@ -49,19 +50,20 @@ Um overlay ancorado como `Popover.Content` coloca várias primitivas em um eleme
 </Portal>
 ```
 
-| Família de componentes                                            | Primitivas                                                                                                 |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `Dialog`, `Sheet`                                                 | `Portal`, `focusScope` (armadilha; no sheet só quando modal), `dismissableLayer`, `lockScroll`, `Presence` |
-| `Popover`, `Menu` (e `ContextMenu`, `Select` pelo painel de menu) | `Portal`, `floating`, `dismissableLayer`, `focusScope`, `Presence`                                         |
-| `Combobox`                                                        | `Portal`, `floating`, `dismissableLayer`, `announce`                                                       |
-| `Tooltip`                                                         | `Portal`, `floating`, `Presence`                                                                           |
-| `Tour`                                                            | `Portal`, `floating`, `focusScope`                                                                         |
-| `CommandPalette`                                                  | `Portal`, `dismissableLayer`, `focusScope`, `Presence`                                                     |
-| `Tabs.List`, `RadioGroup`, `SegmentGroup`, `ToggleGroup`          | `rovingFocus`                                                                                              |
-| `Menu`, `ListBox`                                                 | `Typeahead`                                                                                                |
-| `CopyButton`                                                      | `announce`                                                                                                 |
-| `PanedView`, `Splitter`, `MasterDetail`                           | `ResizeHandle`                                                                                             |
-| Componentes com estado `value`/`open`/`checked`                   | `Controllable`                                                                                             |
+| Família de componentes                                               | Primitivas                                                                                                 |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `Dialog`, `Sheet`                                                    | `Portal`, `focusScope` (armadilha; no sheet só quando modal), `dismissableLayer`, `lockScroll`, `Presence` |
+| `Popover`, `Menu` (e `ContextMenu`, `Select` pelo painel de menu)    | `Portal`, `floating`, `dismissableLayer`, `focusScope`, `Presence`                                         |
+| `Combobox`                                                           | `Portal`, `floating`, `dismissableLayer`, `announce`                                                       |
+| `Tooltip`                                                            | `Portal`, `floating`, `Presence`                                                                           |
+| `Tour`                                                               | `Portal`, `floating`, `focusScope`                                                                         |
+| `CommandPalette`                                                     | `Portal`, `dismissableLayer`, `focusScope`, `Presence`                                                     |
+| `Tabs.List`, `RadioGroup`, `SegmentGroup`, `ToggleGroup`             | `rovingFocus`                                                                                              |
+| `Menu`, `ListBox`                                                    | `Typeahead`                                                                                                |
+| `CopyButton`                                                         | `announce`                                                                                                 |
+| `PanedView`, `Splitter`, `MasterDetail`                              | `ResizeHandle`                                                                                             |
+| Componentes com estado `value`/`open`/`checked`                      | `Controllable`                                                                                             |
+| Gatilhos e partes que acrescentam handlers ao elemento do consumidor | `mergeProps`                                                                                               |
 
 O conjunto exato de cada componente está no seu código em `packages/ui/src/lib/components/`.
 

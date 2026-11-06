@@ -40,4 +40,4 @@
 	const locale = useLocale();
 </script>
 
-<StepsNavigation bind:ref direction="next" label={locale.strings.tourNext} {variant} {...rest} />
+<StepsNavigation bind:ref direction="next" label={locale.strings.nextStep} {variant} {...rest} />

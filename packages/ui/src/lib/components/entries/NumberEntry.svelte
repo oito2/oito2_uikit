@@ -24,12 +24,15 @@
   by `step`, Page Up and Page Down by `pageStep`, and Home and End jump to finite limits.
   With focus in the field the mouse wheel steps too, and dragging sideways on the buttons
   scrubs the value one step per 4 pixels. Assistive technologies read it as a spin button.
+  Bind `value`, or set `defaultValue` and listen to `onValueChange`.
 -->
 <script lang="ts">
 	import Minus from '@lucide/svelte/icons/minus';
 	import Plus from '@lucide/svelte/icons/plus';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf } from '../../internal/keyboard.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import IconButton from '../button/IconButton.svelte';
 	import TextField from '../field/TextField.svelte';
@@ -38,10 +41,12 @@
 
 	interface Props extends Omit<
 		HTMLInputAttributes,
-		'children' | 'value' | 'min' | 'max' | 'step'
+		'children' | 'value' | 'defaultValue' | 'min' | 'max' | 'step'
 	> {
 		/** The value. */
 		value?: number;
+		/** The value of an uncontrolled entry at first. Defaults to 0. */
+		defaultValue?: number;
 		/** Called with each new value. */
 		onValueChange?: (value: number) => void;
 		/** The smallest value. Defaults to no limit. */
@@ -59,7 +64,8 @@
 	}
 
 	let {
-		value = $bindable(0),
+		value = $bindable(),
+		defaultValue = 0,
 		onValueChange,
 		min = Number.NEGATIVE_INFINITY,
 		max = Number.POSITIVE_INFINITY,
@@ -74,35 +80,41 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<number>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	let text = $state('');
 	let editing = $state(false);
 	let scrub = 0;
 	let scrubbing = false;
 	let enabled = $derived(!readonly && !disabled);
-	let typed = $derived(parseNumber(text, locale.locale) ?? value);
+	let current = $derived(model.current);
+	let typed = $derived(parseNumber(text, locale.locale) ?? current);
 
 	// Shows the value in the locale's format, unless the text is being edited.
 	$effect.pre(() => {
-		const formatted = formatNumber(value, locale.locale, decimals);
+		const formatted = formatNumber(current, locale.locale, decimals);
 		if (!editing) text = formatted;
 	});
 
-	/** Rounds, clamps, shows and reports `next`. */
+	/** Rounds, clamps and reports `next`, then shows the resulting value. */
 	function set(next: number) {
-		const normalized = normalizeNumber(next, decimals, min, max);
-		text = formatNumber(normalized, locale.locale, decimals);
-		if (normalized !== value) {
-			value = normalized;
-			onValueChange?.(normalized);
-		}
+		model.current = normalizeNumber(next, decimals, min, max);
+		text = formatNumber(model.current, locale.locale, decimals);
 	}
 
 	/** Applies the typed text, or restores the current value. */
 	function commit() {
 		editing = false;
 		const parsed = parseNumber(text, locale.locale);
-		if (parsed === null || !enabled) text = formatNumber(value, locale.locale, decimals);
+		if (parsed === null || !enabled) text = formatNumber(current, locale.locale, decimals);
 		else set(parsed);
 	}
 
@@ -249,18 +261,17 @@
 		autocomplete="off"
 		{readonly}
 		{disabled}
-		aria-valuenow={value}
+		aria-valuenow={current}
 		aria-valuemin={Number.isFinite(min) ? min : undefined}
 		aria-valuemax={Number.isFinite(max) ? max : undefined}
-		aria-valuetext={formatNumber(value, locale.locale, decimals)}
+		aria-valuetext={formatNumber(current, locale.locale, decimals)}
 		trailing={buttons}
-		oninput={() => (editing = true)}
+		{...mergeProps(rest, { oninput: () => (editing = true) })}
 		onkeydown={handleKey}
 		onblur={(event: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => {
 			commit();
 			onblur?.(event);
 		}}
-		{...rest}
 	/>
 </div>
 

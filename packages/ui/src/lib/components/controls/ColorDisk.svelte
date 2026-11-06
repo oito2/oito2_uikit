@@ -27,6 +27,7 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { colorToHex, lerpColor, toColorValue } from '../../foundation/color.js';
 	import { Contrast, ensureContrastColor } from '../../foundation/contrast.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { useTheme } from '../../theme/theme-context.js';
 	import * as Tooltip from '../tooltip/index.js';
 
@@ -56,7 +57,14 @@
 
 	const theme = useTheme();
 	let surface = $derived(theme.current.colorScheme.surface);
-	let value = $derived(toColorValue(color));
+	// A color that doesn't parse shows as an empty disk instead of failing to render.
+	let value = $derived.by(() => {
+		try {
+			return toColorValue(color);
+		} catch {
+			return { r: 0, g: 0, b: 0, a: 0 };
+		}
+	});
 	// The ring keeps the disk's hue, adjusted to stand out from the surface.
 	let ring = $derived(
 		colorToHex(ensureContrastColor({ ...value, a: 1 }, [surface], Contrast.nonTextAA))
@@ -83,8 +91,7 @@
 				style:--oito2-color-disk-ring={ring}
 				style:--oito2-color-disk-alpha={value.a}
 				style:--oito2-color-disk-size="{size}px"
-				{...rest}
-				{...props}
+				{...mergeProps(rest, props)}
 			>
 				<span class="disk"></span>
 			</button>

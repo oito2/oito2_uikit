@@ -21,11 +21,13 @@
   license keys. Focus moves to the next segment when one fills up or when the first
   visible character of the delimiter is typed in a segment with text, and back to the previous one on Backspace
   in an empty segment or on the arrow toward the start at its start; the arrow toward the
-  end at the end of a segment moves to the next. Bind `value`, one string per segment.
+  end at the end of a segment moves to the next. Bind `value`, one string per segment, or
+  set `defaultValue` and listen to `onValueChange`.
 -->
 <script lang="ts">
 	import { tick } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf } from '../../internal/keyboard.js';
 	import { useLocale } from '../../l10n/locale.js';
 
@@ -41,13 +43,15 @@
 		label?: string;
 	}
 
-	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'> {
 		/** The segments, in order. */
 		segments: readonly EntrySegment[];
 		/** The text drawn between segments. Defaults to `.`. */
 		delimiter?: string;
 		/** The text of each segment. */
 		value?: readonly string[];
+		/** The text of each segment of an uncontrolled entry at first. Defaults to none. */
+		defaultValue?: readonly string[];
 		/** Called with the text of every segment whenever one changes. */
 		onValueChange?: (value: readonly string[]) => void;
 		/** Whether every segment can't be used. */
@@ -57,12 +61,22 @@
 	let {
 		segments,
 		delimiter = '.',
-		value = $bindable([]),
+		value = $bindable(),
+		defaultValue = [],
 		onValueChange,
 		disabled = false,
 		class: className,
 		...rest
 	}: Props = $props();
+
+	const model = new Controllable<readonly string[]>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
 
 	const locale = useLocale();
 	let inputs = $state<(HTMLInputElement | null)[]>([]);
@@ -70,7 +84,7 @@
 	let advance = $derived(delimiter.trim().charAt(0) || delimiter.charAt(0));
 
 	function textOf(index: number): string {
-		return value[index] ?? '';
+		return model.current[index] ?? '';
 	}
 
 	/** Keeps the allowed characters of `text` for segment `index`. */
@@ -94,11 +108,12 @@
 
 	function onInput(event: Event & { currentTarget: HTMLInputElement }, index: number) {
 		const text = clean(event.currentTarget.value, index);
-		event.currentTarget.value = text;
-		const next = segments.map((_, i) => (i === index ? text : textOf(i)));
-		value = next;
-		onValueChange?.(next);
-		if (text.length >= (segments[index]?.length ?? Infinity)) void focus(index + 1);
+		model.current = segments.map((_, i) => (i === index ? text : textOf(i)));
+		// Shows the segment's current text, which stays the same while a parent that
+		// controls the value hasn't accepted the change.
+		const shown = textOf(index);
+		event.currentTarget.value = shown;
+		if (shown.length >= (segments[index]?.length ?? Infinity)) void focus(index + 1);
 	}
 
 	function onKey(event: KeyboardEvent & { currentTarget: HTMLInputElement }, index: number) {

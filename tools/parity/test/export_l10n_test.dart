@@ -17,6 +17,8 @@
 // JSON fixture: getters by name, and methods by name with the sample
 // arguments they were called with.
 
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oito2_ui/oito2_ui.dart';
 
@@ -113,6 +115,32 @@ final Map<String, Getter> getters = {
 
 /// One call of a method of [Oito2Localizations]: its name, its arguments
 /// (time units by name) and the function that calls it.
+typedef MaterialGetter = String Function(MaterialLocalizations m);
+
+/// The Flutter Material strings that oito2_ui widgets use, by their oito2_uikit name.
+final Map<String, MaterialGetter> materialGetters = {
+  'back': (m) => m.backButtonTooltip,
+  'searchField': (m) => m.searchFieldLabel,
+  'previousPage': (m) => m.previousPageTooltip,
+  'nextPage': (m) => m.nextPageTooltip,
+  'clearText': (m) => m.clearButtonTooltip,
+  'copy': (m) => m.copyButtonLabel,
+  'ok': (m) => m.okButtonLabel,
+  'cancel': (m) => m.cancelButtonLabel,
+  'dateInput': (m) => m.dateInputLabel,
+  'dateHelp': (m) => m.dateHelpText,
+  'invalidDateFormat': (m) => m.invalidDateFormatLabel,
+  'dateOutOfRange': (m) => m.dateOutOfRangeLabel,
+  'timeInput': (m) => m.timePickerInputHelpText,
+  'invalidTime': (m) => m.invalidTimeLabel,
+  'am': (m) => m.anteMeridiemAbbreviation,
+  'pm': (m) => m.postMeridiemAbbreviation,
+  'previousMonth': (m) => m.previousMonthTooltip,
+  'nextMonth': (m) => m.nextMonthTooltip,
+  'today': (m) => m.currentDateLabel,
+  'selectDate': (m) => m.datePickerHelpText,
+};
+
 typedef Call = (String, List<Object>, String Function(Oito2Localizations l));
 
 List<Call> calls() => [
@@ -144,8 +172,11 @@ List<Call> calls() => [
   ('folderNotAccepted', ['docs'], (l) => l.folderNotAccepted('docs')),
 ];
 
-Map<String, Object> export(Oito2Localizations l) => {
+Map<String, Object> export(Oito2Localizations l, MaterialLocalizations m) => {
   'localeName': l.localeName,
+  'material': {
+    for (final MapEntry(:key, :value) in materialGetters.entries) key: value(m),
+  },
   'getters': {
     for (final MapEntry(:key, :value) in getters.entries) key: value(l),
   },
@@ -156,10 +187,16 @@ Map<String, Object> export(Oito2Localizations l) => {
 };
 
 void main() {
-  test('exports the localizations', () {
+  test('exports the localizations', () async {
+    final portuguese = await GlobalMaterialLocalizations.delegate.load(
+      const Locale('pt', 'BR'),
+    );
     final file = writeFixture('l10n.json', {
-      'en': export(const Oito2LocalizationsEn()),
-      'pt-BR': export(const Oito2LocalizationsPtBr()),
+      'en': export(
+        const Oito2LocalizationsEn(),
+        const DefaultMaterialLocalizations(),
+      ),
+      'pt-BR': export(const Oito2LocalizationsPtBr(), portuguese),
     });
     expect(file.existsSync(), isTrue);
   });

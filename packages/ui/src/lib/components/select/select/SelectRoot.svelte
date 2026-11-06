@@ -21,7 +21,8 @@
   from. Give it a `collection` to render the options and their groups by itself, or
   compose `Select.Trigger`, `Select.Value` and `Select.Content` with `Select.Item`,
   `Select.Group` and `Select.Label`. Bind `value`, or set `defaultValue` and listen to
-  `onValueChange`. With `name` it submits the value in a form.
+  `onValueChange`; likewise `open`, `defaultOpen` and `onOpenChange` for the list. With
+  `name` it submits the value in a form.
 -->
 <script lang="ts" generics="T">
 	import type { Snippet } from 'svelte';
@@ -37,6 +38,12 @@
 		defaultValue?: string | null;
 		/** Called with each new value. */
 		onValueChange?: (value: string | null) => void;
+		/** Whether the list of options is open. */
+		open?: boolean;
+		/** Whether the list of an uncontrolled select starts open. */
+		defaultOpen?: boolean;
+		/** Called when the list opens or closes. */
+		onOpenChange?: (open: boolean) => void;
 		/** The options, their labels, groups and disabled states. */
 		collection?: ListCollection<T>;
 		/** The text shown while nothing is selected. */
@@ -55,6 +62,9 @@
 		value = $bindable(),
 		defaultValue = null,
 		onValueChange,
+		open = $bindable(),
+		defaultOpen = false,
+		onOpenChange,
 		collection,
 		placeholder,
 		label,
@@ -70,6 +80,12 @@
 		onValueChange: (next) => {
 			value = next;
 			onValueChange?.(next);
+		},
+		open: () => open,
+		defaultOpen: () => defaultOpen,
+		onOpenChange: (next) => {
+			open = next;
+			onOpenChange?.(next);
 		},
 		disabled: () => disabled,
 		collection: () => collection as ListCollection<unknown> | undefined,

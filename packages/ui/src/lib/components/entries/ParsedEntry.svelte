@@ -56,6 +56,7 @@
 		trailing,
 		ref = $bindable(null),
 		class: className,
+		oninput,
 		onblur,
 		onkeydown,
 		'aria-describedby': describedBy,
@@ -109,7 +110,10 @@
 		aria-describedby={[describedBy, showError && error ? `${id}-error` : undefined]
 			.filter(Boolean)
 			.join(' ') || undefined}
-		oninput={onInput}
+		oninput={(event: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
+			oninput?.(event);
+			onInput();
+		}}
 		onblur={(event: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => {
 			showError = true;
 			onblur?.(event);

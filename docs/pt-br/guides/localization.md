@@ -61,7 +61,7 @@ Um componente lê os textos com `useLocale()`, que devolve uma referência viva 
 <p>{locale.locale}: {locale.strings.resultCount(3)}</p>
 ```
 
-`strings` traz textos simples (`close`, `loading`, `download`, ...) e funções para mensagens com valores (`resultCount(count)`, `timeAgo(count, unit)`, `fileTooLarge(name, limit)`, ...). A lista completa é o tipo `Localizations` em [`packages/ui/src/lib/l10n/localizations.ts`](../../../packages/ui/src/lib/l10n/localizations.ts). `@oito2/ui-extras` e `@oito2/ui-files` usam os mesmos textos (rótulos de QR code, assinatura, recorte, envio e download de arquivos).
+`strings` traz textos simples (`close`, `loading`, `download`, ...) e funções para mensagens com valores (`resultCount(count)`, `timeAgo(count, unit)`, `fileTooLarge(name, limit)`, ...). A lista completa é o tipo `Localizations` em [`packages/ui/src/lib/l10n/localizations.ts`](../../../packages/ui/src/lib/l10n/localizations.ts). `@oito2/ui-extras` e `@oito2/ui-files` usam os mesmos textos (rótulos de QR code, assinatura, recorte, envio e download de arquivos). Os rótulos dos botões padrão, da paginação e das entradas de data e hora (`back`, `ok`, `cancel`, `previousPage`, `dateHelp`, `today`, ...) também fazem parte dele, com o texto das localizações Material do Flutter, então um conjunto `strings` passado ao `LocaleProvider` substitui todos os rótulos embutidos.
 
 ## Substituindo textos
 

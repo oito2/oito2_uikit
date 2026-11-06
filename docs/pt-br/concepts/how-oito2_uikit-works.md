@@ -65,6 +65,11 @@ Por padrão ele segue o sistema: claro ou escuro por `prefers-color-scheme`, o a
 
 Os componentes leem os tokens e o tema apenas por `var(--oito2-…)`. Todas as suas regras ficam na camada de cascata `oito2`, então o CSS do próprio app, fora de camadas, sempre vence. O comportamento — papéis, teclado, foco, fechamento — segue as WAI-ARIA Authoring Practices e é construído sobre primitivas internas compartilhadas (escopo de foco, foco itinerante, typeahead, camada dispensável, posicionamento flutuante). Veja [Primitivas de interação](../architecture/interaction-primitives.md).
 
+Todos os componentes seguem os mesmos dois contratos de props:
+
+- **Valores e estados de abertura.** Um componente com valor ou estado de abertura o recebe como prop (`value`, `checked`, `open`, `page`…) que pode ser vinculada, o valor inicial como `default<Nome>` quando o pai não o controla, e informa cada mudança por `on<Nome>Change`. Vincule a prop para manter o valor sincronizado; um valor passado sem `bind:` muda dentro do componente até o pai passar um novo, e toda mudança é informada.
+- **Atributos HTML.** Atributos e handlers de evento que o componente não nomeia chegam ao seu elemento principal. O handler do consumidor roda antes do handler do próprio componente para o mesmo evento, e chamar `preventDefault()` nele cancela o comportamento do componente; `class` e `style` são concatenados aos do componente.
+
 ## 5. Overlays e o Portal
 
 Diálogos, menus, popovers, tooltips e selects precisam escapar do recorte e do empilhamento do elemento que os abre. Eles renderizam por um `Portal` interno em um elemento hospedeiro que o `ThemeProvider` mais próximo coloca no fim da própria `div`. Como o hospedeiro está dentro da `div` com tema, os overlays mantêm as custom properties do tema; eles são posicionados com `position: fixed` (os ancorados, pelo `@floating-ui/dom`). Sem um `ThemeProvider`, o portal usa o `document.body`.

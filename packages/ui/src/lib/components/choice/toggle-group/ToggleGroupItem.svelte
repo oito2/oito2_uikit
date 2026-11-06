@@ -24,6 +24,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import type { IconComponent } from '../../icon.js';
+	import { mergeProps } from '../../../internal/merge-props.js';
 	import * as Tooltip from '../../tooltip/index.js';
 	import { useToggleGroup } from './toggle-group-state.svelte.js';
 
@@ -74,8 +75,7 @@
 					onclick?.(event);
 					if (!event.defaultPrevented) group.toggle(value);
 				}}
-				{...rest}
-				{...props}
+				{...mergeProps(rest, props)}
 			>
 				{#if Icon}<Icon size={20} aria-hidden="true" class="oito2-toggle-group-icon" />{/if}
 				{#if children}<span>{@render children()}</span>{/if}

@@ -49,6 +49,7 @@
 		onCheckedChange,
 		onOffShapes = false,
 		name,
+		form,
 		value = 'on',
 		disabled = false,
 		ref = $bindable(null),
@@ -73,6 +74,7 @@
 	role="switch"
 	aria-checked={state.current}
 	{disabled}
+	{form}
 	class={['oito2-switch', 'oito2-toggle-host', className]}
 	data-mark-focus=""
 	data-state={state.current ? 'checked' : 'unchecked'}
@@ -86,7 +88,7 @@
 	<SwitchMark checked={state.current} {onOffShapes} />
 </button>
 {#if name && state.current}
-	<input type="hidden" {name} {value} />
+	<input type="hidden" {name} {value} {disabled} {form} />
 {/if}
 
 <style>

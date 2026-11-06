@@ -23,7 +23,6 @@
 	import X from '@lucide/svelte/icons/x';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { useLocale } from '../../l10n/locale.js';
-	import { materialStrings } from '../../l10n/material.js';
 	import IconButton from './IconButton.svelte';
 
 	interface Props extends Omit<HTMLButtonAttributes, 'children'> {
@@ -38,4 +37,4 @@
 	const locale = useLocale();
 </script>
 
-<IconButton bind:ref icon={X} label={label ?? materialStrings(locale.locale).close} {...rest} />
+<IconButton bind:ref icon={X} label={label ?? locale.strings.close} {...rest} />

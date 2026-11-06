@@ -27,6 +27,7 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import Button from '../../button/Button.svelte';
 	import type { IconComponent } from '../../icon.js';
+	import { mergeProps } from '../../../internal/merge-props.js';
 	import { useMenu } from '../menu-state.svelte.js';
 
 	interface Props extends Omit<HTMLButtonAttributes, 'children'> {
@@ -71,5 +72,5 @@
 {#if child}
 	{@render child({ props: triggerProps })}
 {:else}
-	<Button {variant} {...rest} {...triggerProps}>{@render children?.()}</Button>
+	<Button {variant} {...mergeProps(rest, triggerProps)}>{@render children?.()}</Button>
 {/if}

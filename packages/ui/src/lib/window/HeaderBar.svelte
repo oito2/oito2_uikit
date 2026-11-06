@@ -30,7 +30,6 @@
 	import IconButton from '../components/button/IconButton.svelte';
 	import TextField from '../components/field/TextField.svelte';
 	import { useLocale } from '../l10n/locale.js';
-	import { materialStrings } from '../l10n/material.js';
 	import WindowTitleBar from './WindowTitleBar.svelte';
 
 	type Props = Omit<ComponentProps<typeof WindowTitleBar>, 'leading' | 'trailing' | 'title'> & {
@@ -97,7 +96,7 @@
 				bind:value={searchValue}
 				type="search"
 				placeholder={searchPlaceholder}
-				aria-label={searchLabel ?? materialStrings(locale.locale).search}
+				aria-label={searchLabel ?? locale.strings.searchField}
 				onkeydown={(event: KeyboardEvent) => {
 					if (event.key === 'Escape') {
 						event.preventDefault();
@@ -127,7 +126,7 @@
 		<IconButton
 			bind:ref={toggle}
 			icon={Search}
-			label={searchLabel ?? materialStrings(locale.locale).search}
+			label={searchLabel ?? locale.strings.searchField}
 			selected={active}
 			onclick={() => (active ? close() : (searchActive = true))}
 		/>

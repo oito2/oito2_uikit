@@ -21,15 +21,23 @@
   One input sits under the cells, so typing, deleting, pasting a whole code and one-time
   code autofill work as in any field; a pasted code fills the cells in order. When the
   last cell is filled it calls `onComplete` and gives up the focus. With `numeric` only
-  digits are kept; otherwise spaces are dropped.
+  digits are kept; otherwise spaces are dropped. Bind `value`, or set `defaultValue` and
+  listen to `onValueChange`.
 -->
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { useLocale } from '../../l10n/locale.js';
 
-	interface Props extends Omit<HTMLInputAttributes, 'children' | 'value' | 'type'> {
+	interface Props extends Omit<
+		HTMLInputAttributes,
+		'children' | 'value' | 'defaultValue' | 'type'
+	> {
 		/** The code. */
 		value?: string;
+		/** The code of an uncontrolled entry at first. Defaults to empty. */
+		defaultValue?: string;
 		/** The number of characters. Defaults to 6. */
 		length?: number;
 		/** Called whenever the code changes. */
@@ -47,7 +55,8 @@
 	}
 
 	let {
-		value = $bindable(''),
+		value = $bindable(),
+		defaultValue = '',
 		length = 6,
 		onValueChange,
 		onComplete,
@@ -61,10 +70,20 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<string>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	const segmenter = new Intl.Segmenter();
 	let focused = $state(false);
-	let chars = $derived([...segmenter.segment(value)].map((part) => part.segment));
+	let current = $derived(model.current);
+	let chars = $derived([...segmenter.segment(current)].map((part) => part.segment));
 	let active = $derived(Math.min(chars.length, length - 1));
 
 	/** Keeps the allowed characters of `text`, up to `length` of them. */
@@ -77,13 +96,15 @@
 	}
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement }) {
-		const next = clean(event.currentTarget.value);
-		event.currentTarget.value = next;
-		if (next === value) return;
-		value = next;
-		onValueChange?.(next);
-		if ([...segmenter.segment(next)].length === length) {
-			onComplete?.(next);
+		const previous = model.current;
+		model.current = clean(event.currentTarget.value);
+		// The input shows the current code, which stays the same while a parent that
+		// controls the value hasn't accepted the change.
+		const code = model.current;
+		event.currentTarget.value = code;
+		if (code === previous) return;
+		if ([...segmenter.segment(code)].length === length) {
+			onComplete?.(code);
 			event.currentTarget.blur();
 		}
 	}
@@ -110,7 +131,7 @@
 	</div>
 	<input
 		bind:this={ref}
-		{value}
+		value={current}
 		type={obscure ? 'password' : 'text'}
 		inputmode={numeric ? 'numeric' : 'text'}
 		autocomplete="one-time-code"
@@ -120,15 +141,16 @@
 		{disabled}
 		aria-label={ariaLabel ?? locale.strings.codeEntry(length)}
 		aria-invalid={invalid || undefined}
-		{oninput}
-		onfocus={(event) => {
-			focused = true;
-			caretAtEnd(event);
-		}}
-		onblur={() => (focused = false)}
-		onselect={caretAtEnd}
-		onpointerup={caretAtEnd}
-		{...rest}
+		{...mergeProps(rest, {
+			oninput,
+			onfocus: (event: FocusEvent & { currentTarget: HTMLInputElement }) => {
+				focused = true;
+				caretAtEnd(event);
+			},
+			onblur: () => (focused = false),
+			onselect: caretAtEnd,
+			onpointerup: caretAtEnd
+		})}
 	/>
 </div>
 

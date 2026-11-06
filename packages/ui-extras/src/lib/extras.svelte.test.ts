@@ -264,6 +264,47 @@ describe('NavigationMenu', () => {
 		await expect.element(page.getByRole('link', { name: 'Guide' })).toBeVisible();
 	});
 
+	it('runs the handlers given to a trigger before its own', async () => {
+		const log: string[] = [];
+		const props = $state({ show: 'menu', log, cancel: false, open: null as string | null });
+		render(ExtrasHarness, props);
+		await page.getByRole('button', { name: 'Products' }).click();
+		expect(props.log).toEqual(['products-click']);
+		expect(props.open).toBe('products');
+		await userEvent.keyboard('{Escape}');
+		el(page.getByRole('button', { name: 'Docs' })).focus();
+		await userEvent.keyboard('{ArrowDown}');
+		expect(props.log).toContain('docs-key');
+		await expect.element(page.getByRole('link', { name: 'Guide' })).toHaveFocus();
+		await userEvent.keyboard('{Escape}');
+
+		props.cancel = true;
+		await page.getByRole('button', { name: 'Products' }).click();
+		expect(props.log.filter((entry) => entry === 'products-click')).toHaveLength(2);
+		expect(props.open).toBeNull();
+	});
+
+	it('runs a handler given to a link and still closes the open panel', async () => {
+		const log: string[] = [];
+		const props = $state({ show: 'menu', log, cancel: false, open: null as string | null });
+		render(ExtrasHarness, props);
+		const enter = () =>
+			el(page.getByRole('link', { name: 'Home' })).dispatchEvent(
+				new PointerEvent('pointerenter', { pointerType: 'mouse', cancelable: true })
+			);
+		await page.getByRole('button', { name: 'Products' }).click();
+		enter();
+		expect(props.log).toEqual(['products-click', 'home-enter']);
+		await expect.poll(() => props.open).toBeNull();
+
+		props.cancel = true;
+		props.open = 'products';
+		await expect.element(page.getByRole('link', { name: 'Editor' })).toBeVisible();
+		enter();
+		await wait(400);
+		expect(props.open).toBe('products');
+	});
+
 	it('puts the line under the current item', async () => {
 		render(ExtrasHarness, { show: 'menu', current: 'docs' });
 		const indicator = el(page.getByTestId('indicator'));

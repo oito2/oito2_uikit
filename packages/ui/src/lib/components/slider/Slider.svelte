@@ -66,6 +66,8 @@
 		disabled?: boolean;
 		/** The form field name; a range submits two values under it. */
 		name?: string;
+		/** The id of the form the value is submitted with, when the control is outside it. */
+		form?: string;
 	}
 
 	let {
@@ -85,6 +87,7 @@
 		thumbLabels,
 		disabled = false,
 		name,
+		form,
 		class: className,
 		...rest
 	}: Props = $props();
@@ -292,7 +295,7 @@
 	</div>
 	{#if name}
 		{#each values as thumbValue, index (index)}
-			<input type="hidden" {name} value={thumbValue} />
+			<input type="hidden" {name} value={thumbValue} {disabled} {form} />
 		{/each}
 	{/if}
 </div>

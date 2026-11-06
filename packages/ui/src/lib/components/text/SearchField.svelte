@@ -19,22 +19,28 @@
   @component
   A search text field with a search icon and a clear button that shows while it has text.
   Escape clears the text; Escape again on the empty field calls `onEscape`. The hint and
-  the clear button label follow the active locale.
+  the clear button label follow the active locale. Bind `value`, or set `defaultValue`
+  and listen to `onValueChange`.
 -->
 <script lang="ts">
 	import Search from '@lucide/svelte/icons/search';
 	import X from '@lucide/svelte/icons/x';
 	import type { Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { useLocale } from '../../l10n/locale.js';
-	import { materialStrings } from '../../l10n/material.js';
 	import IconButton from '../button/IconButton.svelte';
 	import TextField from '../field/TextField.svelte';
 	import type { IconComponent } from '../icon.js';
 
-	interface Props extends Omit<HTMLInputAttributes, 'children' | 'value' | 'type'> {
+	interface Props extends Omit<
+		HTMLInputAttributes,
+		'children' | 'value' | 'defaultValue' | 'type'
+	> {
 		/** The text. */
 		value?: string;
+		/** The text of an uncontrolled field at first. Defaults to empty. */
+		defaultValue?: string;
 		/** Called whenever the text changes. */
 		onValueChange?: (value: string) => void;
 		/** Called with the text when the user presses Enter. */
@@ -50,7 +56,8 @@
 	}
 
 	let {
-		value = $bindable(''),
+		value = $bindable(),
+		defaultValue = '',
 		onValueChange,
 		onSubmit,
 		onClear,
@@ -63,13 +70,21 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<string>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
-	let strings = $derived(materialStrings(locale.locale));
+	let strings = $derived(locale.strings);
 
 	/** Empties the field, reports it and keeps the focus in the field. */
 	function clear() {
-		value = '';
-		onValueChange?.('');
+		model.current = '';
 		onClear?.();
 		ref?.focus();
 	}
@@ -90,26 +105,23 @@
 
 <TextField
 	bind:ref
-	bind:value
+	bind:value={() => model.current, (next) => (model.current = String(next ?? ''))}
 	type="search"
 	enterkeyhint="search"
 	placeholder={placeholder ?? strings.searchField}
-	oninput={(event) => {
-		oninput?.(event);
-		onValueChange?.(value);
-	}}
+	{oninput}
 	onkeydown={(event: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }) => {
 		onkeydown?.(event);
 		if (event.defaultPrevented) return;
 		if (event.key === 'Escape') {
 			event.preventDefault();
-			if (value) clear();
+			if (model.current) clear();
 			else onEscape?.();
-		} else if (event.key === 'Enter') onSubmit?.(value);
+		} else if (event.key === 'Enter') onSubmit?.(model.current);
 	}}
 	class="oito2-search-field"
 	leading={searchIcon}
-	trailing={value ? clearButton : undefined}
+	trailing={model.current ? clearButton : undefined}
 	{...rest}
 />
 

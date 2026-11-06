@@ -21,11 +21,13 @@
   wider pill in the text-safe primary tone. With `onPageChange` (or `interactive`) each
   dot is a button; the current one is the group's Tab stop, and the arrow keys, Home and
   End change the page. When the dots don't fit the width, it shows "page / length" instead.
+  Bind `page`, or set `defaultPage` and listen to `onPageChange`.
 -->
 <script lang="ts">
 	import { tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf, navigationIntent } from '../../internal/keyboard.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import { pageIndicatorGeometry, type PageIndicatorLayout } from './page-indicator-layout.js';
@@ -35,6 +37,8 @@
 		length: number;
 		/** The current page, from 0. */
 		page?: number;
+		/** The page of an uncontrolled indicator at first. Defaults to 0. */
+		defaultPage?: number;
 		/** Called with the page of the activated dot or key. */
 		onPageChange?: (page: number) => void;
 		/** Whether the dots are buttons. Defaults to whether `onPageChange` is set. */
@@ -60,7 +64,8 @@
 
 	let {
 		length,
-		page = $bindable(0),
+		page = $bindable(),
+		defaultPage = 0,
 		onPageChange,
 		interactive,
 		dotSize = 8,
@@ -74,11 +79,20 @@
 		...rest
 	}: Props = $props();
 
+	const model = new Controllable<number>({
+		value: () => page,
+		defaultValue: () => defaultPage,
+		onChange: (next) => {
+			page = next;
+			onPageChange?.(next);
+		}
+	});
+
 	const locale = useLocale();
 	let width = $state(Number.POSITIVE_INFINITY);
 	let active = $derived(interactive ?? onPageChange !== undefined);
 	let pageText = $derived(pageLabel ?? ((p: number, n: number) => locale.strings.pageOf(p, n)));
-	let current = $derived(Math.min(Math.max(0, page), Math.max(0, length - 1)));
+	let current = $derived(Math.min(Math.max(0, model.current), Math.max(0, length - 1)));
 	let geometry = $derived(
 		pageIndicatorGeometry({
 			length,
@@ -94,8 +108,7 @@
 	/** Moves to `target` when it is another valid page. */
 	function go(target: number) {
 		if (target < 0 || target >= length || target === current) return;
-		page = target;
-		onPageChange?.(target);
+		model.current = target;
 	}
 
 	/**

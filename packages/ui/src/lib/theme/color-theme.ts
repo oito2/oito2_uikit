@@ -367,9 +367,15 @@ export interface BaseColorThemeOptions {
 // Resolves a named accent or a hex string to a color value.
 function accentValue(accent: AccentColor | string | undefined): ColorValue {
 	const name = accent ?? defaultAccent;
-	return toColorValue(
-		Object.hasOwn(accentColors, name) ? accentColors[name as AccentColor] : name
-	);
+	if (Object.hasOwn(accentColors, name)) return toColorValue(accentColors[name as AccentColor]);
+	try {
+		return toColorValue(name);
+	} catch {
+		// An accent that is neither a named accent nor a hex color falls back to the default
+		// one, so a bad value doesn't keep the app from rendering.
+		console.warn(`@oito2/ui: invalid accent "${name}", using "${defaultAccent}"`);
+		return toColorValue(accentColors[defaultAccent]);
+	}
 }
 
 /**

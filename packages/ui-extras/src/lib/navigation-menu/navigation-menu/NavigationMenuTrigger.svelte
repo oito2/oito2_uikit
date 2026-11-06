@@ -32,7 +32,15 @@
 		children: Snippet;
 	}
 
-	let { children, class: className, ...rest }: Props = $props();
+	let {
+		children,
+		class: className,
+		onclick,
+		onpointerenter,
+		onpointerleave,
+		onkeydown,
+		...rest
+	}: Props = $props();
 
 	const menu = useNavigationMenu();
 	const value = useNavigationMenuItem();
@@ -47,15 +55,21 @@
 			data-current={menu.current === value() ? '' : undefined}
 			{...rest}
 			{...props}
-			onclick={() => menu.show(open ? null : value(), true)}
+			onclick={(event) => {
+				onclick?.(event);
+				if (!event.defaultPrevented) menu.show(open ? null : value(), true);
+			}}
 			onpointerenter={(event) => {
-				if (event.pointerType === 'mouse') menu.hover(value());
+				onpointerenter?.(event);
+				if (!event.defaultPrevented && event.pointerType === 'mouse') menu.hover(value());
 			}}
 			onpointerleave={(event) => {
-				if (event.pointerType === 'mouse') menu.leave();
+				onpointerleave?.(event);
+				if (!event.defaultPrevented && event.pointerType === 'mouse') menu.leave();
 			}}
 			onkeydown={(event) => {
-				if (event.key === 'ArrowDown') {
+				onkeydown?.(event);
+				if (!event.defaultPrevented && event.key === 'ArrowDown') {
 					event.preventDefault();
 					menu.show(value(), true);
 				}

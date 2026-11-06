@@ -26,6 +26,9 @@ export interface SelectOptions {
 	value: () => string | null | undefined;
 	defaultValue: () => string | null;
 	onValueChange: (value: string | null) => void;
+	open: () => boolean | undefined;
+	defaultOpen: () => boolean;
+	onOpenChange: (open: boolean) => void;
 	disabled: () => boolean;
 	collection: () => ListCollection<unknown> | undefined;
 	id: string;
@@ -36,7 +39,7 @@ export class SelectState {
 	readonly id: string;
 	readonly #value: Controllable<string | null>;
 	readonly #options: SelectOptions;
-	open = $state(false);
+	readonly #open: Controllable<boolean>;
 	initialFocus: InitialFocus = 'first';
 	trigger: HTMLElement | null = $state(null);
 	/** The id of the trigger, which names the list of options. */
@@ -53,6 +56,20 @@ export class SelectState {
 			defaultValue: options.defaultValue,
 			onChange: options.onValueChange
 		});
+		this.#open = new Controllable({
+			value: options.open,
+			defaultValue: options.defaultOpen,
+			onChange: options.onOpenChange
+		});
+	}
+
+	/** Whether the list is open. */
+	get open(): boolean {
+		return this.#open.current;
+	}
+
+	set open(next: boolean) {
+		this.#open.current = next;
 	}
 
 	/** The selected value, or `null`. */

@@ -20,7 +20,7 @@
   A check box: 20 pixels with a pointer and 24 with touch, in a target as large as a
   button. It is checked, unchecked or, with `tristate` or a `mixed` value, mixed. Bind
   `checked`, or set `defaultChecked` and listen to `onCheckedChange`. With `name` it
-  submits `value` in a form while checked.
+  submits `value` in a form while checked and enabled.
 -->
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
@@ -51,6 +51,7 @@
 		onCheckedChange,
 		tristate = false,
 		name,
+		form,
 		value = 'on',
 		disabled = false,
 		ref = $bindable(null),
@@ -75,6 +76,7 @@
 	role="checkbox"
 	aria-checked={state.current === 'mixed' ? 'mixed' : state.current}
 	{disabled}
+	{form}
 	class={['oito2-checkbox', 'oito2-toggle-host', className]}
 	data-mark-focus=""
 	data-state={state.current === 'mixed' ? 'mixed' : state.current ? 'checked' : 'unchecked'}
@@ -88,7 +90,7 @@
 	<CheckboxMark checked={state.current} />
 </button>
 {#if name && state.current === true}
-	<input type="hidden" {name} {value} />
+	<input type="hidden" {name} {value} {disabled} {form} />
 {/if}
 
 <style>

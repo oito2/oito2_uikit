@@ -234,4 +234,54 @@ export interface Localizations {
 	readonly download: string;
 	/** Why a download button is disabled on platforms that can't save files. */
 	readonly downloadUnavailable: string;
+	/** The label of a button that goes back. */
+	readonly back: string;
+	/** The label and hint of a search field, and of the button that shows one. */
+	readonly searchField: string;
+	/** The label of a button that shows the previous page. */
+	readonly previousPage: string;
+	/** The label of a button that shows the next page. */
+	readonly nextPage: string;
+	/** The label of a button that empties a text field. */
+	readonly clearText: string;
+	/** The label of a button that copies to the clipboard. */
+	readonly copy: string;
+	/** The label of a button that accepts a dialog. */
+	readonly ok: string;
+	/** The label of a button that dismisses a dialog without acting. */
+	readonly cancel: string;
+	/** The label of a date field. */
+	readonly dateInput: string;
+	/** The hint of a date field, the compact date pattern. */
+	readonly dateHelp: string;
+	/** The error of a date that doesn't parse. */
+	readonly invalidDateFormat: string;
+	/** The error of a date outside the accepted range. */
+	readonly dateOutOfRange: string;
+	/** The label of a time field. */
+	readonly timeInput: string;
+	/** The error of a time that doesn't parse. */
+	readonly invalidTime: string;
+	/** The morning marker of 12-hour times. */
+	readonly am: string;
+	/** The afternoon marker of 12-hour times. */
+	readonly pm: string;
+	/** The label of the button that shows the previous month. */
+	readonly previousMonth: string;
+	/** The label of the button that shows the next month. */
+	readonly nextMonth: string;
+	/** The word that marks today in a calendar. */
+	readonly today: string;
+	/** The name of a date picker. */
+	readonly selectDate: string;
+	/** The label of the color format chooser of a color picker. */
+	readonly colorFormat: string;
+	/** The button that returns to the previous step of a stepper. */
+	readonly previousStep: string;
+	/** The button that moves to the next step of a stepper. */
+	readonly nextStep: string;
+	/** The name of a code block without a label of its own. */
+	readonly code: string;
+	/** The label of a zoom slider. */
+	readonly zoom: string;
 }

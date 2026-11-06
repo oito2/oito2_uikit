@@ -20,23 +20,36 @@
   A password text field with a button that shows or hides the text and a warning below it
   while Caps Lock is on. Password managers fill it through `autocomplete`; use
   `new-password` for a field that sets a new password. Inside a `Field.Root` it takes the
-  field's label, description and error.
+  field's label, description and error. Bind `value`, or set `defaultValue` and listen
+  to `onValueChange`; likewise `visible`, `defaultVisible` and `onVisibleChange`.
 -->
 <script lang="ts">
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import IconButton from '../button/IconButton.svelte';
 	import TextField from '../field/TextField.svelte';
 	import type { IconComponent } from '../icon.js';
 
-	interface Props extends Omit<HTMLInputAttributes, 'children' | 'value' | 'type'> {
+	interface Props extends Omit<
+		HTMLInputAttributes,
+		'children' | 'value' | 'defaultValue' | 'type'
+	> {
 		/** The text. */
 		value?: string;
+		/** The text of an uncontrolled field at first. Defaults to empty. */
+		defaultValue?: string;
+		/** Called whenever the text changes. */
+		onValueChange?: (value: string) => void;
 		/** Whether the text shows instead of dots. */
 		visible?: boolean;
+		/** Whether the text of an uncontrolled field shows at first. Defaults to false. */
+		defaultVisible?: boolean;
+		/** Called when the text is shown or hidden. */
+		onVisibleChange?: (visible: boolean) => void;
 		/** Whether a warning shows below the focused field while Caps Lock is on. Defaults to true. */
 		capsLockWarning?: boolean;
 		/** Whether the value is invalid. */
@@ -46,8 +59,12 @@
 	}
 
 	let {
-		value = $bindable(''),
-		visible = $bindable(false),
+		value = $bindable(),
+		defaultValue = '',
+		onValueChange,
+		visible = $bindable(),
+		defaultVisible = false,
+		onVisibleChange,
 		capsLockWarning = true,
 		autocomplete = 'current-password',
 		disabled,
@@ -59,6 +76,23 @@
 		'aria-describedby': describedBy,
 		...rest
 	}: Props = $props();
+
+	const text = new Controllable<string>({
+		value: () => value,
+		defaultValue: () => defaultValue,
+		onChange: (next) => {
+			value = next;
+			onValueChange?.(next);
+		}
+	});
+	const shown = new Controllable<boolean>({
+		value: () => visible,
+		defaultValue: () => defaultVisible,
+		onChange: (next) => {
+			visible = next;
+			onVisibleChange?.(next);
+		}
+	});
 
 	const locale = useLocale();
 	const id = $props.id();
@@ -74,18 +108,18 @@
 {#snippet toggle()}
 	<IconButton
 		class="oito2-field-button"
-		icon={(visible ? EyeOff : Eye) as IconComponent}
-		label={visible ? locale.strings.hidePassword : locale.strings.showPassword}
+		icon={(shown.current ? EyeOff : Eye) as IconComponent}
+		label={shown.current ? locale.strings.hidePassword : locale.strings.showPassword}
 		disabled={disabled ?? false}
-		onclick={() => (visible = !visible)}
+		onclick={() => (shown.current = !shown.current)}
 	/>
 {/snippet}
 
 <div class={['oito2-password-field', className]}>
 	<TextField
 		bind:ref
-		bind:value
-		type={visible ? 'text' : 'password'}
+		bind:value={() => text.current, (next) => (text.current = String(next ?? ''))}
+		type={shown.current ? 'text' : 'password'}
 		{autocomplete}
 		autocapitalize="off"
 		spellcheck={false}

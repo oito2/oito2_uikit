@@ -25,7 +25,6 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { useLocale } from '../../l10n/locale.js';
-	import { materialStrings } from '../../l10n/material.js';
 	import IconButton from './IconButton.svelte';
 
 	interface Props extends Omit<HTMLButtonAttributes, 'children'> {
@@ -48,7 +47,7 @@
 <IconButton
 	bind:ref
 	icon={rtl ? ChevronRight : ChevronLeft}
-	label={label ?? materialStrings(locale.locale).back}
+	label={label ?? locale.strings.back}
 	{@attach readDirection}
 	{...rest}
 />

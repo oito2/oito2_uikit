@@ -61,7 +61,7 @@ A component reads the strings with `useLocale()`, which returns a live reference
 <p>{locale.locale}: {locale.strings.resultCount(3)}</p>
 ```
 
-`strings` holds plain strings (`close`, `loading`, `download`, ...) and functions for messages with values (`resultCount(count)`, `timeAgo(count, unit)`, `fileTooLarge(name, limit)`, ...). The full list is the `Localizations` type in [`packages/ui/src/lib/l10n/localizations.ts`](../../../packages/ui/src/lib/l10n/localizations.ts). `@oito2/ui-extras` and `@oito2/ui-files` use the same strings (QR code, signature pad, cropper, file upload and download labels).
+`strings` holds plain strings (`close`, `loading`, `download`, ...) and functions for messages with values (`resultCount(count)`, `timeAgo(count, unit)`, `fileTooLarge(name, limit)`, ...). The full list is the `Localizations` type in [`packages/ui/src/lib/l10n/localizations.ts`](../../../packages/ui/src/lib/l10n/localizations.ts). `@oito2/ui-extras` and `@oito2/ui-files` use the same strings (QR code, signature pad, cropper, file upload and download labels). The standard button, pager and date and time entry labels (`back`, `ok`, `cancel`, `previousPage`, `dateHelp`, `today`, ...) are part of it too, worded like Flutter's Material localizations, so a `strings` set passed to `LocaleProvider` replaces every built-in label.
 
 ## Overriding strings
 

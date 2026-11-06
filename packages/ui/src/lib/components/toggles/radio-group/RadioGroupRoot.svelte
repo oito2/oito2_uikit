@@ -41,6 +41,8 @@
 		toggleable?: boolean;
 		/** The form field name; the selected value is submitted under it. */
 		name?: string;
+		/** The id of the form the value is submitted with, when the control is outside it. */
+		form?: string;
 		/** The layout of the items, for assistive technologies. Defaults to `vertical`. */
 		orientation?: 'horizontal' | 'vertical';
 		/** The group element. */
@@ -56,6 +58,7 @@
 		disabled = false,
 		toggleable = false,
 		name,
+		form,
 		orientation = 'vertical',
 		ref = $bindable(null),
 		class: className,
@@ -96,7 +99,7 @@
 >
 	{@render children?.()}
 	{#if name && group.value !== null}
-		<input type="hidden" {name} value={group.value} />
+		<input type="hidden" {name} value={group.value} {disabled} {form} />
 	{/if}
 </div>
 

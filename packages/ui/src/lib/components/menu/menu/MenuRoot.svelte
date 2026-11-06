@@ -21,7 +21,8 @@
   `Menu.Content`, which holds `Menu.Item`, `Menu.CheckboxItem`, `Menu.RadioGroup` with
   `Menu.RadioItem`, `Menu.Group`, `Menu.Label`, `Menu.Separator` and `Menu.Sub`
   submenus. It follows the WAI-ARIA menu button pattern: the arrows move between items,
-  typing finds an item, Escape closes.
+  typing finds an item, Escape closes. Bind `open`, or set `defaultOpen` and listen to
+  `onOpenChange`.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -30,18 +31,21 @@
 	interface Props {
 		/** Whether the menu is open. */
 		open?: boolean;
+		/** Whether an uncontrolled menu starts open. */
+		defaultOpen?: boolean;
 		/** Called when the menu opens or closes. */
 		onOpenChange?: (open: boolean) => void;
 		/** The trigger and the content. */
 		children: Snippet;
 	}
 
-	let { open = $bindable(), onOpenChange, children }: Props = $props();
+	let { open = $bindable(), defaultOpen = false, onOpenChange, children }: Props = $props();
 
 	const id = $props.id();
 	setMenu(
 		new MenuState({
 			open: () => open,
+			defaultOpen: () => defaultOpen,
 			onOpenChange: (next) => {
 				open = next;
 				onOpenChange?.(next);
