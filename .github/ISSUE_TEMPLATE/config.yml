@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/oito2/oito2_uikit/security/advisories/new
+    about: Report vulnerabilities privately, never in a public issue.
+  - name: Browse the showcase
+    url: https://oito2.github.io/oito2_uikit/
+    about: Every component with examples and its API reference.

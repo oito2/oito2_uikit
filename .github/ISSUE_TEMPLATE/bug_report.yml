@@ -1,0 +1,65 @@
+name: Bug report
+description: Report something in a package, plugin or the showcase that doesn't work as expected
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! Security problems must not be reported here: follow the [Security Policy](https://github.com/oito2/oito2_uikit/security/policy).
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - '@oito2/ui'
+        - '@oito2/ui-themes'
+        - '@oito2/ui-syntax'
+        - '@oito2/ui-extras'
+        - '@oito2/ui-files'
+        - '@oito2/ui-window'
+        - '@oito2/ui-settings'
+        - tauri-plugin-oito2-window
+        - tauri-plugin-oito2-settings
+        - Showcase
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: e.g. 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, the expected behavior and the actual behavior. A minimal Svelte snippet helps a lot.
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - Windows
+        - macOS
+        - Web browser (no Tauri)
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Distribution and desktop environment on Linux (e.g. Ubuntu 24.04, GNOME 46, Wayland), system version on Windows/macOS, or the browser.
+  - type: input
+    id: webview
+    attributes:
+      label: WebView version
+      description: WebKitGTK, WebView2 or Safari version, if you know it (`npm run tauri info` shows it).
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and screenshots
+      description: Console errors, Rust panics or screenshots.
