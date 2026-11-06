@@ -68,6 +68,8 @@ No Linux, os apps precisam do runtime WebKitGTK 4.1 (`libwebkit2gtk-4.1-0` no De
 - Node.js 24+ e pnpm (ou npm).
 - Um app Svelte 5; para builds desktop, um projeto Tauri v2 e os seus [pré-requisitos de sistema](https://v2.tauri.app/start/prerequisites/).
 
+O [guia de instalação](getting-started/installation.md) cobre cada sistema em detalhe, e o [início rápido](getting-started/quickstart.md) monta um app completo.
+
 ### Adicione os componentes
 
 ```bash
@@ -124,10 +126,11 @@ Todos os pacotes e crates compartilham uma única versão.
 pnpm update "@oito2/*" --latest
 ```
 
-Para os plugins Rust, troque `tag = "vX.Y.Z"` no `Cargo.toml` pela nova versão e rode `cargo update -p tauri-plugin-oito2-window -p tauri-plugin-oito2-settings`. Mantenha os pacotes npm e os crates na mesma versão. As mudanças de cada versão estão nos arquivos `CHANGELOG.md` dos pacotes e na [página de releases](https://github.com/oito2/oito2_uikit/releases).
+Para os plugins Rust, troque `tag = "vX.Y.Z"` no `Cargo.toml` pela nova versão e rode `cargo update -p tauri-plugin-oito2-window -p tauri-plugin-oito2-settings`. Mantenha os pacotes npm e os crates na mesma versão. As mudanças de cada versão estão nos arquivos `CHANGELOG.md` dos pacotes e na [página de releases](https://github.com/oito2/oito2_uikit/releases). A remoção dos pacotes e do showcase está em [Desinstalação](getting-started/uninstallation.md).
 
 ## Documentação
 
+- [Site de documentação](index.md) — o guia completo: [instalação](getting-started/installation.md), [início rápido](getting-started/quickstart.md), [arquitetura](concepts/architecture.md), [guias](guides/theming.md), [referência](reference/components.md) e [solução de problemas](troubleshooting/common-issues.md).
 - [Showcase ao vivo](https://oito2.github.io/oito2_uikit/) — todos os componentes, com exemplos, código-fonte e referência de API.
 - READMEs dos pacotes — configuração e uso de cada pacote (veja a [tabela acima](#pacotes)).
 - [Como contribuir](contribuindo.md) — ambiente de desenvolvimento, verificações e o processo de lançamento.

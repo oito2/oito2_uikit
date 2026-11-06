@@ -68,6 +68,8 @@ On Linux, apps need the WebKitGTK 4.1 runtime (`libwebkit2gtk-4.1-0` on Debian/U
 - Node.js 24+ and pnpm (or npm).
 - A Svelte 5 app; for desktop builds, a Tauri v2 project and its [system prerequisites](https://v2.tauri.app/start/prerequisites/).
 
+The [installation guide](docs/en/getting-started/installation.md) covers every system in detail, and the [quickstart](docs/en/getting-started/quickstart.md) builds a complete app.
+
 ### Add the components
 
 ```bash
@@ -124,10 +126,11 @@ Every package and crate shares one version.
 pnpm update "@oito2/*" --latest
 ```
 
-For the Rust plugins, change `tag = "vX.Y.Z"` in `Cargo.toml` to the new release and run `cargo update -p tauri-plugin-oito2-window -p tauri-plugin-oito2-settings`. Keep the npm packages and the crates on the same version. The changes of each release are in the package `CHANGELOG.md` files and on the [releases page](https://github.com/oito2/oito2_uikit/releases).
+For the Rust plugins, change `tag = "vX.Y.Z"` in `Cargo.toml` to the new release and run `cargo update -p tauri-plugin-oito2-window -p tauri-plugin-oito2-settings`. Keep the npm packages and the crates on the same version. The changes of each release are in the package `CHANGELOG.md` files and on the [releases page](https://github.com/oito2/oito2_uikit/releases). Removing the packages and the showcase is covered in [Uninstallation](docs/en/getting-started/uninstallation.md).
 
 ## Documentation
 
+- [Documentation site](docs/en/index.md) — the full guide: [installation](docs/en/getting-started/installation.md), [quickstart](docs/en/getting-started/quickstart.md), [architecture](docs/en/concepts/architecture.md), [guides](docs/en/guides/theming.md), [reference](docs/en/reference/components.md) and [troubleshooting](docs/en/troubleshooting/common-issues.md).
 - [Live showcase](https://oito2.github.io/oito2_uikit/) — every component, with examples, source and API reference.
 - Package READMEs — setup and usage of each package (see the [table above](#packages)).
 - [Contributing](CONTRIBUTING.md) — development environment, checks and the release process.
