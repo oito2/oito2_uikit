@@ -40,7 +40,12 @@
 		type PopoverPlacement
 	} from '../popover-state.svelte.js';
 
-	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'role'> {
+		/**
+		 * The role of the panel, such as `group` or `region` for a panel that is part of the
+		 * page's navigation rather than a dialog. Defaults to `dialog`.
+		 */
+		role?: HTMLAttributes<HTMLDivElement>['role'];
 		/** The preferred side of the anchor. Defaults to `bottom`. */
 		placement?: PopoverPlacement;
 		/** The alignment along the anchor's edge. Defaults to `start`. */
@@ -64,6 +69,7 @@
 	}
 
 	let {
+		role = 'dialog',
 		placement = 'bottom',
 		alignment = 'start',
 		offset = 4,
@@ -94,7 +100,7 @@
 		<div
 			bind:this={ref}
 			id="{popover.id}-content"
-			role="dialog"
+			{role}
 			aria-labelledby={popover.hasTitle ? `${popover.id}-title` : undefined}
 			class={['oito2-popover', className]}
 			data-state={popover.open ? 'open' : 'closed'}

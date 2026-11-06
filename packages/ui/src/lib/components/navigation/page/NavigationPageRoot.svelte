@@ -108,9 +108,19 @@
 		navigationLayout({ width, touch, compactBreakpoint, extendedBreakpoint, railStyle })
 	);
 
-	/** Reads the density forced on an ancestor. */
+	/** Reads the density forced on an ancestor, again whenever a density attribute changes. */
 	function readDensity(root: HTMLElement) {
-		density = root.closest('[data-oito2-density]')?.getAttribute('data-oito2-density') ?? null;
+		const read = () => {
+			density =
+				root.closest('[data-oito2-density]')?.getAttribute('data-oito2-density') ?? null;
+		};
+		read();
+		const observer = new MutationObserver(read);
+		observer.observe(document.documentElement, {
+			subtree: true,
+			attributeFilter: ['data-oito2-density']
+		});
+		return () => observer.disconnect();
 	}
 </script>
 

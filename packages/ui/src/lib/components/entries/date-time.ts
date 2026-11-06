@@ -40,28 +40,60 @@ export function formatCompactDate(date: Date, locale: string): string {
 	return compactFormat(locale).format(date);
 }
 
+/** The bidirectional marks some locales put around date separators. */
+const directionMarks = /[\u200e\u200f\u061c]/gu;
+
+/**
+ * Returns the ten digits `format` writes, from zero to nine: Arabic-Indic ones such as
+ * `٣` for `ar-EG`, Latin ones for most locales.
+ */
+function digitsOf(locale: string, format: Intl.DateTimeFormat): string[] {
+	return [
+		...new Intl.NumberFormat(intlLocale(locale), {
+			useGrouping: false,
+			numberingSystem: format.resolvedOptions().numberingSystem
+		}).format(9876543210)
+	].reverse();
+}
+
 /**
  * Parses `text` written in the compact numeric date form of `locale` (the day, month and
  * year in the locale's order, separated as the locale separates them, with or without
- * leading zeros) and returns the local date at midnight, or `null` when it isn't a real
- * date in that form.
+ * leading zeros, in the locale's digits or Latin ones) and returns the local date at
+ * midnight, or `null` when it isn't a real date in that form.
  */
 export function parseCompactDate(text: string, locale: string): Date | null {
-	const parts = compactFormat(locale).formatToParts(new Date(2001, 10, 22));
+	const format = compactFormat(locale);
+	const parts = format.formatToParts(new Date(2001, 10, 22));
+	const digits = digitsOf(locale, format);
+	const digit = `[0-9${digits.join('').replace(/[\]\\^-]/g, '\\$&')}]`;
 	const order: ('day' | 'month' | 'year')[] = [];
 	let pattern = '^';
 	for (const part of parts) {
 		if (part.type === 'day' || part.type === 'month' || part.type === 'year') {
 			order.push(part.type);
-			pattern += part.type === 'year' ? '(\\d{1,4})' : '(\\d{1,2})';
+			pattern += part.type === 'year' ? `(${digit}{1,4})` : `(${digit}{1,2})`;
 		} else if (part.type === 'literal') {
-			pattern += part.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*');
+			pattern += part.value
+				.replace(directionMarks, '')
+				.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+				.replace(/\s+/g, '\\s*');
 		}
 	}
-	const match = new RegExp(`${pattern}$`).exec(text.trim());
+	const match = new RegExp(`${pattern}$`, 'u').exec(text.replace(directionMarks, '').trim());
 	if (!match) return null;
+	/** Reads a number written in the locale's digits or Latin ones. */
+	const toNumber = (written: string) =>
+		Number(
+			[...written]
+				.map((char) => {
+					const index = digits.indexOf(char);
+					return index >= 0 ? String(index) : char;
+				})
+				.join('')
+		);
 	const value = { day: 0, month: 0, year: 0 };
-	order.forEach((field, index) => (value[field] = Number(match[index + 1])));
+	order.forEach((field, index) => (value[field] = toNumber(match[index + 1] ?? '')));
 	const date = new Date(value.year, value.month - 1, value.day);
 	date.setFullYear(value.year);
 	const valid =

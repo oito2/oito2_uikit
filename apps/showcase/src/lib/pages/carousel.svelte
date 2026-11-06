@@ -86,9 +86,10 @@
 	<section aria-labelledby="carousel-auto">
 		<h2 id="carousel-auto">Automatic scrolling</h2>
 		<p>
-			With <code>autoScroll</code> it advances every <code>interval</code> milliseconds. It pauses
-			while the pointer is over it or something inside has focus, and never moves when the system
-			asks for reduced motion.
+			With <code>autoScroll</code> it advances every <code>interval</code> milliseconds. It
+			pauses while the pointer is over it, something inside has focus or the window is hidden,
+			and never moves when the system asks for reduced motion. <code>Carousel.PlayPause</code>
+			stops and restarts it; bind <code>playing</code> to control it from outside.
 		</p>
 		<Carousel.Root
 			aria-label="Automatic landscapes"
@@ -102,6 +103,7 @@
 				{/each}
 			</Carousel.Viewport>
 			<Carousel.Indicators />
+			<Carousel.PlayPause />
 		</Carousel.Root>
 	</section>
 </main>

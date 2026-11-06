@@ -45,7 +45,7 @@ export class SelectState {
 	/** The id of the trigger, which names the list of options. */
 	triggerId = $state('');
 	content: HTMLElement | null = $state(null);
-	/** The labels of the options rendered so far, by value. */
+	/** The labels of the rendered options and of the chosen one, by value. */
 	readonly labels = new SvelteMap<string, string>();
 
 	constructor(options: SelectOptions) {

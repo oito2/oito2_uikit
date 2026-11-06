@@ -247,11 +247,19 @@ export class CropController {
 
 /**
  * Loads the image at `src` and, when its longest side is above `maxDimension`, scales it
- * down onto a canvas, keeping its aspect ratio, to bound the memory it takes.
+ * down onto a canvas, keeping its aspect ratio, to bound the memory it takes. Set
+ * `crossOrigin` to load an image of another origin with CORS, which the crop exports need:
+ * a canvas painted with an image of another origin loaded without it can't be read, so
+ * `CropController.cropBlob()` rejects.
  */
-export async function loadCropImage(src: string, maxDimension: number | null): Promise<CropImage> {
+export async function loadCropImage(
+	src: string,
+	maxDimension: number | null,
+	options: { crossOrigin?: 'anonymous' | 'use-credentials' | null } = {}
+): Promise<CropImage> {
 	const image = new Image();
 	image.decoding = 'async';
+	if (options.crossOrigin != null) image.crossOrigin = options.crossOrigin;
 	image.src = src;
 	await image.decode();
 	const longest = Math.max(image.naturalWidth, image.naturalHeight);

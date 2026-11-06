@@ -48,6 +48,12 @@ export class ComboboxState<T = unknown> {
 	anchor = $state<HTMLElement | null>(null);
 	/** The suggestion list element. */
 	list = $state<HTMLElement | null>(null);
+	/** The suggestions for the current text, computed once per change of their inputs. */
+	readonly #suggestions = $derived.by((): T[] => {
+		const text = this.text.trim();
+		if (!text && !this.#options.showAllWhenEmpty()) return [];
+		return this.collection.suggestions(text, { exclude: this.#options.exclude() });
+	});
 
 	constructor(options: ComboboxOptions<T>) {
 		this.#options = options;
@@ -84,9 +90,7 @@ export class ComboboxState<T = unknown> {
 	 * `showAllWhenEmpty`; never the excluded values.
 	 */
 	get options(): T[] {
-		const text = this.text.trim();
-		if (!text && !this.#options.showAllWhenEmpty()) return [];
-		return this.collection.suggestions(text, { exclude: this.#options.exclude() });
+		return this.#suggestions;
 	}
 
 	/** Whether the list shows: open, with suggestions or with text to say none matched. */

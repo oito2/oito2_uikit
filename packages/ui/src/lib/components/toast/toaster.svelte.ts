@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { SvelteSet } from 'svelte/reactivity';
 import type { InfoType } from '../../theme/css.js';
 
 /** Where a `Toaster` stacks its toasts; `start` and `end` follow the text direction. */
@@ -62,20 +63,57 @@ export interface ToastHandle {
 let nextId = 0;
 
 /**
- * The toasts of an app: shown by `toast()`, rendered by `Toaster`. The toasts past
- * `maxVisible` wait their turn, and every timer pauses while the pointer is over the
- * toasts or focus is inside them.
+ * The toasts of an app: shown by `toast()`, rendered by `Toaster`. The toasts past the
+ * number on screen wait their turn, and every timer pauses while the pointer is over the
+ * toasts, focus is inside them or the page is hidden.
  */
 export class ToasterStore {
 	/** The toasts, oldest first. */
 	entries = $state<ToastEntry[]>([]);
-	/** How many toasts show at once. */
+	/** How many toasts show at once while no `Toaster` renders the store. */
 	maxVisible = $state(3);
+	/** The number of toasts each rendering `Toaster` shows at once. */
+	readonly #views = new SvelteSet<{ count: number }>();
 	#paused = false;
+	#hidden = false;
+	#stopWatching: (() => void) | null = null;
 
-	/** The toasts on screen. */
+	/**
+	 * The toasts on screen: as many as the `Toaster` that shows the most, or `maxVisible`
+	 * while none renders the store.
+	 */
 	get visible(): ToastEntry[] {
-		return this.entries.slice(0, this.maxVisible);
+		let count = this.#views.size === 0 ? this.maxVisible : 0;
+		for (const view of this.#views) count = Math.max(count, view.count);
+		return this.entries.slice(0, count);
+	}
+
+	/**
+	 * Counts a `Toaster` that shows up to `count` toasts at once, and pauses the timers while
+	 * the page is hidden as long as one is counted; returns the function that removes it.
+	 */
+	addView(count: number): () => void {
+		const view = { count };
+		this.#views.add(view);
+		if (this.#stopWatching === null && typeof document !== 'undefined') {
+			const onChange = () => {
+				this.#hidden = document.hidden;
+				this.sync();
+			};
+			document.addEventListener('visibilitychange', onChange);
+			this.#hidden = document.hidden;
+			this.#stopWatching = () => document.removeEventListener('visibilitychange', onChange);
+		}
+		this.sync();
+		return () => {
+			this.#views.delete(view);
+			if (this.#views.size === 0) {
+				this.#stopWatching?.();
+				this.#stopWatching = null;
+				this.#hidden = false;
+			}
+			this.sync();
+		};
 	}
 
 	/** Shows `toast` and returns its handle. */
@@ -171,13 +209,16 @@ export class ToasterStore {
 		entry.startedAt = null;
 	}
 
-	/** Starts, pauses or keeps the timers of the toasts on screen. */
+	/**
+	 * Starts, pauses or keeps the timers of the toasts on screen: paused while the pointer or
+	 * focus is in the toasts or the page is hidden.
+	 */
 	sync(): void {
 		for (const entry of this.visible) {
 			const duration = entry.toast.duration === undefined ? 4000 : entry.toast.duration;
 			if (entry.closing || entry.toast.loading || duration === null) continue;
 			entry.remaining ??= duration;
-			if (this.#paused) this.#stop(entry);
+			if (this.#paused || this.#hidden) this.#stop(entry);
 			else if (entry.timer === null) {
 				entry.startedAt = Date.now();
 				entry.timer = setTimeout(() => this.dismiss(entry.id), entry.remaining);

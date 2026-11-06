@@ -22,7 +22,8 @@
   dragged), which show while the content scrolls or the pointer is over the region, or
   always with `thumbVisibility`. The thumbs can be dragged and the tracks clicked to page.
   While the content overflows, the scrolling area takes the keyboard focus, so the arrow
-  keys and Page Up/Down scroll it.
+  keys and Page Up/Down scroll it, and is a region named by `aria-label` or
+  `aria-labelledby`.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -36,6 +37,10 @@
 		thumbVisibility?: boolean;
 		/** The scrolling element, for reading or setting its scroll position. */
 		viewport?: HTMLDivElement | null;
+		/** The accessible name of the scrolling area. */
+		'aria-label'?: string | null;
+		/** The id of the element that names the scrolling area. */
+		'aria-labelledby'?: string | null;
 		/** The content. */
 		children?: Snippet;
 	}
@@ -44,6 +49,8 @@
 		direction = 'vertical',
 		thumbVisibility = false,
 		viewport = $bindable(null),
+		'aria-label': label,
+		'aria-labelledby': labelledBy,
 		class: className,
 		children,
 		...rest
@@ -163,9 +170,16 @@
 	data-visible={thumbVisibility || scrolling || dragging ? '' : undefined}
 	{...rest}
 >
-	<!-- The viewport joins the tab order only while it scrolls, like a native scroller. -->
+	<!-- The viewport joins the tab order, as a region, only while it scrolls, like a native scroller. -->
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-	<div class="viewport" tabindex={vertical || horizontal ? 0 : undefined} {@attach track}>
+	<div
+		class="viewport"
+		tabindex={vertical || horizontal ? 0 : undefined}
+		role={vertical || horizontal ? 'region' : undefined}
+		aria-label={label}
+		aria-labelledby={labelledBy}
+		{@attach track}
+	>
 		<div class="content">{@render children?.()}</div>
 	</div>
 	{#if vertical}

@@ -26,7 +26,7 @@
   - Up, Down, Home and End move the active row; a single-selection tree selects it, and
     Shift extends a multiple selection.
   - Right opens a branch or moves to its first child; Left closes it or moves to the parent
-    (swapped in right-to-left layouts).
+    (swapped in right-to-left layouts). `*` opens every branch at the level of the active row.
   - Space toggles the check box of a `checkable` tree, or else the selection of a
     multiple-selection one; Control+A (Command+A) selects every shown, enabled node of a
     multiple-selection tree.
@@ -55,12 +55,12 @@
 		type TreeNode
 	} from '../../collections/tree-collection.js';
 	import { directionOf } from '../../internal/keyboard.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 	import { typeaheadTimeout } from '../../internal/typeahead.js';
 	import { useLocale } from '../../l10n/locale.js';
 	import CircularProgress from '../progress/CircularProgress.svelte';
 	import HighlightedText from '../text/HighlightedText.svelte';
 	import CheckboxMark from '../toggles/CheckboxMark.svelte';
-	import { snapshotSet } from '../../internal/sets.js';
 	import { treeCheckStates } from './tree-check.js';
 	import { TreeController } from './tree-controller.svelte.js';
 
@@ -147,9 +147,7 @@
 	let filtered = $derived(filtering ? collection.search(trimmedQuery) : null);
 	let source = $derived(filtered ?? collection);
 	let entries: TreeEntry<T>[] = $derived(
-		filtered
-			? filtered.visible(snapshotSet(filtered.branchValues))
-			: collection.visible(controller.expanded)
+		filtered ? filtered.flatten() : collection.visible(controller.expanded)
 	);
 	let indexes = $derived(new Map(entries.map((entry, i) => [entry.node.value, i])));
 	let checkStates = $derived(checkable ? treeCheckStates(collection, controller.checked) : null);
@@ -362,6 +360,11 @@
 				}
 				break;
 			}
+			case '*':
+				if (!current) return;
+				for (const sibling of collection.siblingsOf(current.node.value))
+					if (isTreeBranch(sibling) && !isOpen(sibling)) void setExpanded(sibling, true);
+				break;
 			case 'Enter':
 				if (!current) return;
 				primary(current.node);
@@ -391,6 +394,8 @@
 	function onfocus(event: FocusEvent): void {
 		if (event.target !== ref) return;
 		focused = true;
+		// Shows the active row when the browser shows a focus ring, as after Tab.
+		keyboard = ref?.matches(':focus-visible') ?? false;
 		if (active === null && entries.length > 0) {
 			const selected = entries.find((e) => controller.isSelected(e.node.value));
 			active = (selected ?? entries[0])?.node.value ?? null;
@@ -403,8 +408,8 @@
 	 */
 	function onRowClick(event: MouseEvent, node: TreeNode<T>): void {
 		if (node.disabled) return;
-		keyboard = false;
 		ref?.focus({ preventScroll: true });
+		keyboard = false;
 		if (multiple && (event.ctrlKey || event.metaKey)) {
 			active = node.value;
 			controller.toggleSelected(node.value);
@@ -449,15 +454,16 @@
 	data-keyboard={keyboard ? '' : undefined}
 	style:--oito2-tree-row-height="{row}px"
 	style:--oito2-tree-indent="{indent}px"
-	{onkeydown}
-	{onfocus}
-	onblur={(event) => {
-		if (event.target === ref && !ref?.contains(event.relatedTarget as Node | null))
-			focused = false;
-	}}
-	onpointerdown={() => (keyboard = false)}
-	onscroll={() => (scrollTop = ref?.scrollTop ?? 0)}
-	{...rest}
+	{...mergeProps(rest, {
+		onkeydown,
+		onfocus,
+		onblur: (event: FocusEvent) => {
+			if (event.target === ref && !ref?.contains(event.relatedTarget as Node | null))
+				focused = false;
+		},
+		onpointerdown: () => (keyboard = false),
+		onscroll: () => (scrollTop = ref?.scrollTop ?? 0)
+	})}
 >
 	<div class="oito2-tree-view-rows" role="presentation" style:height="{entries.length * row}px">
 		{#each rendered as index (entries[index]?.node.value)}

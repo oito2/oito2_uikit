@@ -20,7 +20,7 @@
   Internal: a text field whose text is parsed into a value, shared by the date and time
   entries. The parse error shows only after the field loses focus or Enter is pressed, so
   partial input isn't flagged while typing; valid text hides it at once. A value set from
-  outside replaces the text while the field doesn't have focus.
+  outside, or a change of the format such as a new locale, replaces the text.
 -->
 <script lang="ts" generics="T">
 	import { untrack, type Snippet } from 'svelte';
@@ -69,15 +69,23 @@
 	let showError = $state(false);
 	// The value the text stands for; undefined until the first value arrives.
 	let shown: T | null | undefined = undefined;
+	// The text `format` gave for `shown` when it was set.
+	let shownText = '';
 
-	// A value set from outside replaces the text; the values the field reports itself
-	// already match it and leave the text as typed.
+	/** Returns the text of `next`: empty for `null`, formatted otherwise. */
+	const textOf = (next: T | null) => (next === null ? '' : format(next));
+
+	// A value set from outside, or a change of what `format` returns for it (such as a new
+	// locale), replaces the text; the values the field reports itself already match it and
+	// leave the text as typed.
 	$effect.pre(() => {
 		const next = value;
+		const formatted = textOf(next);
 		untrack(() => {
-			if (shown !== undefined && same(next, shown)) return;
+			if (shown !== undefined && same(next, shown) && formatted === shownText) return;
 			shown = next;
-			text = next === null ? '' : format(next);
+			shownText = formatted;
+			text = formatted;
 		});
 	});
 
@@ -90,6 +98,7 @@
 			showError = false;
 			const next = 'value' in result ? result.value : null;
 			shown = next;
+			shownText = textOf(next);
 			if (!same(next, value)) onValueChange(next);
 		}
 	}

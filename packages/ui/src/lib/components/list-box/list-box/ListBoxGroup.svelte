@@ -36,10 +36,15 @@
 	let { label, children, class: className, ...rest }: Props = $props();
 
 	const id = $props.id();
-	setListBoxGroup(id);
+	const group = setListBoxGroup(id);
 </script>
 
-<div role="group" aria-labelledby={id} class={['oito2-list-box-group', className]} {...rest}>
+<div
+	role="group"
+	aria-labelledby={label || group.labels > 0 ? id : undefined}
+	class={['oito2-list-box-group', className]}
+	{...rest}
+>
 	{#if label}<ListBoxGroupLabel>{label}</ListBoxGroupLabel>{/if}
 	{@render children?.()}
 </div>

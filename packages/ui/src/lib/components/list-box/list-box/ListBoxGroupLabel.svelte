@@ -20,7 +20,7 @@
   The heading of a `ListBox.Group`, which names the group for assistive technologies.
 -->
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onDestroy, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { useListBoxGroup } from '../list-box-state.svelte.js';
 
@@ -31,10 +31,20 @@
 
 	let { children, class: className, ...rest }: Props = $props();
 
-	const id = useListBoxGroup();
+	const group = useListBoxGroup();
+	// Tells the group that it has a label, which names it.
+	if (group) {
+		group.labels++;
+		onDestroy(() => group.labels--);
+	}
 </script>
 
-<div {id} role="presentation" class={['oito2-list-box-group-label', className]} {...rest}>
+<div
+	id={group?.labelId}
+	role="presentation"
+	class={['oito2-list-box-group-label', className]}
+	{...rest}
+>
 	{@render children?.()}
 </div>
 

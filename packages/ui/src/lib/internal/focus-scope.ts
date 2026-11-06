@@ -32,8 +32,8 @@ export interface FocusScopeOptions {
 	autoFocus?: boolean | (() => HTMLElement | null | undefined);
 	/**
 	 * Whether focus returns to the element that had it before the scope was attached when
-	 * the scope goes away, provided focus is still inside the scope or nowhere. Defaults to
-	 * true.
+	 * the scope goes away, provided focus was inside the scope at some point and is still
+	 * inside it or nowhere. Defaults to true.
 	 */
 	restoreFocus?: boolean;
 	/**
@@ -132,7 +132,8 @@ export function focusScope(options: FocusScopeOptions = {}): Attachment<HTMLElem
 			if (index >= 0) traps.splice(index, 1);
 			const scope = scopes.lastIndexOf(container);
 			if (scope >= 0) scopes.splice(scope, 1);
-			if (!restoreFocus) return;
+			// A scope that never held focus, such as a hover card, has nothing to give back.
+			if (!restoreFocus || lastInside === null) return;
 			const target =
 				previous instanceof HTMLElement && previous.isConnected ? previous : finalFocus?.();
 			if (!target) return;

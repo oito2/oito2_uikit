@@ -127,15 +127,26 @@
 		canGoForward = position < max - 0.5;
 	}
 
-	/** Watches the scroll position and the sizes of the row. */
+	/** Watches the scroll position, the sizes of the row and its chips, and chips added or removed. */
 	function watch(element: HTMLDivElement) {
 		const resize = new ResizeObserver(update);
 		resize.observe(element);
 		for (const child of element.children) resize.observe(child);
+		const mutation = new MutationObserver((records) => {
+			for (const record of records) {
+				for (const node of record.addedNodes)
+					if (node instanceof Element) resize.observe(node);
+				for (const node of record.removedNodes)
+					if (node instanceof Element) resize.unobserve(node);
+			}
+			update();
+		});
+		mutation.observe(element, { childList: true });
 		element.addEventListener('scroll', update, { passive: true });
 		update();
 		return () => {
 			resize.disconnect();
+			mutation.disconnect();
 			element.removeEventListener('scroll', update);
 		};
 	}

@@ -27,7 +27,7 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { untrack } from 'svelte';
-	import { jsonTree, jsonValueText, type JsonEntry } from './json-tree.js';
+	import { jsonTree, jsonValueText } from './json-tree.js';
 	import { TreeController } from './tree-controller.svelte.js';
 	import TreeView from './TreeView.svelte';
 
@@ -69,12 +69,15 @@
 
 	/**
 	 * Returns the summary of `value` and the syntax role that colors it; `children` is the
-	 * number of children of a branch node, or `undefined` for a leaf.
+	 * number of children of a branch node, or `undefined` for a leaf, and `circular` marks
+	 * an object or array that contains the node.
 	 */
 	function describe(
 		value: unknown,
-		children: number | undefined
+		children: number | undefined,
+		circular = false
 	): { text: string; role: string } {
+		if (circular) return { text: '[Circular]', role: 'comment' };
 		if (Array.isArray(value)) return { text: `[${value.length}]`, role: 'comment' };
 		if (children !== undefined) return { text: `{${children}}`, role: 'comment' };
 		if (value === null) return { text: 'null', role: 'constant' };
@@ -95,11 +98,14 @@
 	{...rest}
 >
 	{#snippet item(node)}
-		{@const entry = node.data as JsonEntry}
-		{@const summary = describe(entry.value, node.children?.length)}
-		{@const branch = node.children !== undefined}
-		<span class="key">{entry.key}</span><span class="punctuation">{branch ? ' ' : ': '}</span
-		><span style:color="var(--oito2-syntax-{summary.role})">{summary.text}</span>
+		{@const entry = node.data}
+		{#if entry}
+			{@const summary = describe(entry.value, node.children?.length, entry.circular)}
+			{@const branch = node.children !== undefined}
+			<span class="key">{entry.key}</span><span class="punctuation"
+				>{branch ? ' ' : ': '}</span
+			><span style:color="var(--oito2-syntax-{summary.role})">{summary.text}</span>
+		{/if}
 	{/snippet}
 </TreeView>
 

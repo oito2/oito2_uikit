@@ -42,6 +42,17 @@
 
 	const select = useSelect();
 
+	/**
+	 * Whether the options render out of sight to learn the label of the chosen value: only
+	 * while the list is closed and that label is not known yet.
+	 */
+	let probing = $derived(
+		children !== undefined &&
+			!select.open &&
+			select.value !== null &&
+			!select.labels.has(select.value)
+	);
+
 	/** Closes the list and returns focus to the trigger. */
 	function close() {
 		select.open = false;
@@ -88,7 +99,7 @@
 		{/each}
 	{/if}
 </MenuPanel>
-<!-- Closed, the options still render out of sight, so the trigger knows the label of the chosen one. -->
-{#if children && !select.open}
+<!-- Closed, the options render out of sight until the label of the chosen one is known. -->
+{#if probing && children}
 	<div hidden>{@render children()}</div>
 {/if}

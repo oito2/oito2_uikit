@@ -24,6 +24,8 @@
 	import { tick, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { activeElement, focusElement } from '../../../internal/focus.js';
+	import { longPress } from '../../../internal/long-press.js';
+	import { mergeProps } from '../../../internal/merge-props.js';
 	import { menuItems } from '../../menu/menu-list.js';
 	import { useMenu } from '../../menu/menu-state.svelte.js';
 
@@ -46,7 +48,6 @@
 
 	const menu = useMenu();
 	let point = $state<{ x: number; y: number } | null>(null);
-	let press: ReturnType<typeof setTimeout> | undefined;
 
 	/**
 	 * Opens the menu at `at`, or over the middle of the area from the keyboard. A menu
@@ -82,27 +83,21 @@
 	bind:this={ref}
 	class={['oito2-context-menu-trigger', className]}
 	data-state={menu.open ? 'open' : 'closed'}
-	oncontextmenu={(event) => {
-		if (disabled) return;
-		event.preventDefault();
-		open({ x: event.clientX, y: event.clientY });
-	}}
-	onkeydown={(event) => {
-		if ((event.key === 'F10' && event.shiftKey) || event.key === 'ContextMenu') {
-			event.preventDefault();
-			open(null);
-		}
-	}}
-	onpointerdown={(event) => {
-		if (event.pointerType === 'mouse') return;
-		const at = { x: event.clientX, y: event.clientY };
-		press = setTimeout(() => open(at), 500);
-	}}
-	onpointerup={() => clearTimeout(press)}
-	onpointercancel={() => clearTimeout(press)}
-	onpointermove={() => clearTimeout(press)}
 	role="presentation"
-	{...rest}
+	{@attach longPress((at) => open(at))}
+	{...mergeProps(rest, {
+		oncontextmenu: (event: MouseEvent) => {
+			if (disabled) return;
+			event.preventDefault();
+			open({ x: event.clientX, y: event.clientY });
+		},
+		onkeydown: (event: KeyboardEvent) => {
+			if ((event.key === 'F10' && event.shiftKey) || event.key === 'ContextMenu') {
+				event.preventDefault();
+				open(null);
+			}
+		}
+	})}
 >
 	{@render children()}
 	<!-- A new anchor for each point, so the menu is positioned again. -->

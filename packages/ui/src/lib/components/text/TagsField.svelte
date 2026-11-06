@@ -64,7 +64,7 @@
 		variant?: 'filled' | 'subtle';
 		/** Whether a button at the end removes every tag. */
 		clearable?: boolean;
-		/** Whether the tags can't be changed. */
+		/** Whether the field can't be used: the input is disabled and the tags can't be focused. */
 		disabled?: boolean;
 		/** The accessible name of the input, when no `Field.Label` names it. */
 		label?: string;
@@ -186,7 +186,8 @@
 	let inputProps = $derived({
 		id: field?.controlId,
 		placeholder: tags.length === 0 ? placeholder : undefined,
-		readonly: off || full,
+		disabled: off,
+		readonly: !off && full,
 		'aria-label': label,
 		'aria-describedby': describedBy(field, undefined)
 	});
@@ -213,8 +214,9 @@
 			<span
 				class="label"
 				role="button"
-				tabindex="-1"
+				tabindex={off ? undefined : -1}
 				data-tag=""
+				aria-disabled={off || undefined}
 				aria-describedby={off ? undefined : `${id}-hint`}
 				onkeydown={(event) => onTagKey(event, index)}>{tag}</span
 			>

@@ -17,8 +17,8 @@
 
 <!--
   @component
-  A text label that turns into a field to rename it in place. A double click, Enter or F2
-  starts editing with the text selected. Enter or leaving the field keeps the change,
+  A text label that turns into a field to rename it in place. A double click, Enter, Space or
+  F2 starts editing with the text selected. Enter or leaving the field keeps the change,
   calling `onSubmit` with the trimmed text when it changed and isn't empty; Escape
   restores the text. Without `onSubmit` the label is read-only.
 -->
@@ -132,7 +132,7 @@
 		{...mergeProps(rest, {
 			ondblclick: start,
 			onkeydown: (event: KeyboardEvent) => {
-				if (event.key === 'Enter' || event.key === 'F2') {
+				if (event.key === 'Enter' || event.key === ' ' || event.key === 'F2') {
 					event.preventDefault();
 					start();
 				}

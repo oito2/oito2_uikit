@@ -20,11 +20,13 @@
   Shows the toasts of `toast()`: short messages in the inverse surface color, stacked at
   `placement`, up to `maxVisible` at once (the rest wait). A toast closes after its
   duration, by its close button or Escape, or by its action; the timers pause while the
-  pointer is over the toasts or focus is inside them. Screen readers hear each toast.
-  Place one `Toaster` inside the app's `ThemeProvider`.
+  pointer is over the toasts, focus is inside them or the page is hidden. Screen readers
+  hear each toast, a `danger` one at once. Place one `Toaster` inside the app's
+  `ThemeProvider`.
 -->
 <script lang="ts">
 	import X from '@lucide/svelte/icons/x';
+	import { untrack } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { Contrast, ensureContrastColor } from '../../foundation/contrast.js';
 	import { colorToHex } from '../../foundation/color.js';
@@ -66,10 +68,14 @@
 	const locale = useLocale();
 	const theme = useTheme();
 
+	// Counts this toaster, with how many toasts it shows, among the views of the store.
 	$effect.pre(() => {
-		store.maxVisible = maxVisible;
-		store.sync();
+		const count = maxVisible;
+		const target = store;
+		return untrack(() => target.addView(count));
 	});
+
+	let visible = $derived(store.entries.slice(0, maxVisible));
 
 	let colors = $derived.by(() => {
 		const scheme = theme.current.colorScheme;
@@ -118,11 +124,11 @@
 		}}
 		{...rest}
 	>
-		{#each store.visible as entry (entry.id)}
+		{#each visible as entry (entry.id)}
 			{@const item = entry.toast}
 			<div
 				class="toast"
-				role="status"
+				role={item.type === 'danger' ? 'alert' : 'status'}
 				aria-atomic="true"
 				data-state={entry.closing ? 'closed' : 'open'}
 				data-from={top ? 'top' : 'bottom'}

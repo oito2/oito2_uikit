@@ -284,4 +284,8 @@ export interface Localizations {
 	readonly code: string;
 	/** The label of a zoom slider. */
 	readonly zoom: string;
+	/** The button that stops the automatic rotation of a carousel. */
+	readonly pauseRotation: string;
+	/** The button that starts the automatic rotation of a carousel. */
+	readonly startRotation: string;
 }

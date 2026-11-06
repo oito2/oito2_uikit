@@ -31,7 +31,24 @@ export function snapSliderValue(
 	const clamped = Math.min(max, Math.max(min, value));
 	if (!divisions || divisions <= 0 || max === min) return clamped;
 	const size = (max - min) / divisions;
-	return min + Math.round((clamped - min) / size) * size;
+	return roundToStep(min + Math.round((clamped - min) / size) * size, size, min);
+}
+
+/** Returns the number of decimal places `n` is written with, ignoring floating-point noise. */
+function decimalsOf(n: number): number {
+	const [mantissa = '', exponent = '0'] = String(Number(n.toPrecision(12))).split('e');
+	const fraction = (mantissa.split('.')[1] ?? '').length;
+	return Math.min(100, Math.max(0, fraction - Number(exponent)));
+}
+
+/**
+ * Returns `value` rounded to the decimal places of `step` and `origin`, so a value reached
+ * by adding steps to `origin` carries no floating-point noise (0.3 instead of
+ * 0.30000000000000004).
+ */
+export function roundToStep(value: number, step: number, origin = 0): number {
+	if (!Number.isFinite(value)) return value;
+	return Number(value.toFixed(Math.max(decimalsOf(step), decimalsOf(origin))));
 }
 
 /** Returns the position of `value` along the track, from 0 at `min` to 1 at `max`. */

@@ -19,7 +19,7 @@
   @component
   The panel of a dialog, centered over a dimmed page while the dialog is open. Focus moves
   into it and stays there until it closes, then returns to where it was; the page behind
-  doesn't scroll. Escape closes it, and so does a click outside unless `role` is
+  is inert and doesn't scroll. Escape closes it, and so does a click outside unless `role` is
   `alertdialog`.
 -->
 <script lang="ts">
@@ -28,6 +28,7 @@
 	import Portal from '../../../internal/Portal.svelte';
 	import { dismissableLayer } from '../../../internal/dismissable-layer.js';
 	import { focusScope } from '../../../internal/focus-scope.js';
+	import { withInertOutside } from '../../../internal/inert.js';
 	import { Presence } from '../../../internal/presence.svelte.js';
 	import { lockScroll } from '../../../internal/scroll-lock.js';
 	import { useDialog } from '../dialog-state.svelte.js';
@@ -79,7 +80,9 @@
 				class={['oito2-dialog', className]}
 				data-state={dialog.open ? 'open' : 'closed'}
 				{@attach presence.attach}
-				{@attach dialog.open ? focusScope({ trap: true, finalFocus }) : undefined}
+				{@attach dialog.open
+					? withInertOutside(focusScope({ trap: true, finalFocus }))
+					: undefined}
 				{@attach dialog.open
 					? dismissableLayer({
 							onDismiss: () => (dialog.open = false),

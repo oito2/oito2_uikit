@@ -27,8 +27,14 @@
 	import { IconButton, useLocale, type IconComponent } from '@oito2/ui';
 	import Eraser from '@lucide/svelte/icons/eraser';
 	import Undo2 from '@lucide/svelte/icons/undo-2';
+	import { untrack } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { paintStrokes, type SignatureController } from './signature-controller.svelte.js';
+	import {
+		paintStrokes,
+		type SignatureController,
+		type SignaturePoint,
+		type SignatureSize
+	} from './signature-controller.svelte.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The controller that holds the drawn strokes. */
@@ -70,37 +76,107 @@
 	let canvas: HTMLCanvasElement | null = $state(null);
 	let pointer: number | null = null;
 	let last: { x: number; y: number; time: number } | null = null;
+	/** The last point of the stroke being drawn. */
+	let previous: SignaturePoint | null = null;
 	let width = 0;
 
-	// Sizes the canvas to the pad at the device pixel ratio and records the pad size.
+	/** What the canvas shows, so the strokes the pad draws itself aren't painted again. */
+	let painted: {
+		controller: SignatureController;
+		version: number;
+		size: SignatureSize;
+		color: string | undefined;
+		ink: string;
+		width: number;
+		height: number;
+	} | null = null;
+
+	// Sizes the canvas to the pad at the device pixel ratio and records the pad size in the
+	// current controller.
 	$effect(() => {
 		const element = canvas;
+		const target = controller;
 		if (!element) return;
 		const observer = new ResizeObserver(() => {
 			const ratio = window.devicePixelRatio || 1;
 			const box = element.getBoundingClientRect();
 			element.width = Math.max(1, Math.round(box.width * ratio));
 			element.height = Math.max(1, Math.round(box.height * ratio));
-			controller.size = { width: box.width, height: box.height };
+			target.size = { width: box.width, height: box.height };
 		});
 		observer.observe(element);
 		return () => observer.disconnect();
 	});
 
-	// Repaints every stroke whenever they change or the canvas is resized.
-	$effect(() => {
-		const element = canvas;
-		void controller.version;
-		void controller.size;
-		void color;
-		if (!element) return;
+	/** Clears the canvas and paints every stroke of the controller. */
+	function repaint(element: HTMLCanvasElement): void {
 		const context = element.getContext('2d');
 		if (!context) return;
-		const ratio = element.width / Math.max(1, controller.size.width);
+		const target = controller;
+		const ratio = element.width / Math.max(1, target.size.width);
 		context.setTransform(ratio, 0, 0, ratio, 0, 0);
 		context.clearRect(0, 0, element.width, element.height);
-		paintStrokes(context, controller.strokes, color ?? getComputedStyle(element).color);
+		const ink = color ?? getComputedStyle(element).color;
+		paintStrokes(context, target.strokes, ink);
+		painted = {
+			controller: target,
+			version: target.version,
+			size: target.size,
+			color,
+			ink,
+			width: element.width,
+			height: element.height
+		};
+	}
+
+	// Repaints every stroke when they change by other means than drawing on the pad, such
+	// as undo or clear, and when the canvas, the color or the controller change.
+	$effect(() => {
+		const element = canvas;
+		const target = controller;
+		const version = target.version;
+		const size = target.size;
+		const ink = color;
+		if (!element) return;
+		untrack(() => {
+			if (
+				painted?.controller === target &&
+				painted.version === version &&
+				painted.size === size &&
+				painted.color === ink &&
+				painted.width === element.width &&
+				painted.height === element.height
+			)
+				return;
+			repaint(element);
+		});
 	});
+
+	/**
+	 * Paints `points`, a new dot or segment the pad just added to the controller, over what
+	 * the canvas shows; repaints everything instead when the canvas was not up to date with
+	 * the strokes before the change (`before` is the version then) or the ink changed.
+	 */
+	function paintAdded(before: number, points: SignaturePoint[]): void {
+		const element = canvas;
+		if (!element) return;
+		const context = element.getContext('2d');
+		const current =
+			painted !== null &&
+			painted.controller === controller &&
+			painted.version === before &&
+			painted.size === controller.size &&
+			painted.color === color &&
+			painted.width === element.width &&
+			painted.height === element.height &&
+			(points.length > 1 || painted.ink === (color ?? getComputedStyle(element).color));
+		if (!context || !painted || !current) {
+			repaint(element);
+			return;
+		}
+		paintStrokes(context, [points], painted.ink);
+		painted.version = controller.version;
+	}
 
 	/** The width factor from a pen's pressure, from 0.6 to 1.4; 1 for other pointers. */
 	function pressureWidth(event: PointerEvent): number {
@@ -126,7 +202,11 @@
 		const position = positionOf(event);
 		last = { ...position, time: event.timeStamp };
 		width = (minWidth + maxWidth) / 2;
-		controller.beginStroke({ ...position, width: width * pressureWidth(event) });
+		const point = { ...position, width: width * pressureWidth(event) };
+		const before = controller.version;
+		controller.beginStroke(point);
+		previous = point;
+		paintAdded(before, [point]);
 	}
 
 	function onpointermove(event: PointerEvent): void {
@@ -139,13 +219,18 @@
 		const target = Math.min(maxWidth, Math.max(minWidth, maxWidth - speed * 1.2));
 		width = width * 0.6 + target * 0.4;
 		last = { ...position, time: event.timeStamp };
-		controller.extendStroke({ ...position, width: width * pressureWidth(event) });
+		const point = { ...position, width: width * pressureWidth(event) };
+		const before = controller.version;
+		controller.extendStroke(point);
+		if (previous) paintAdded(before, [previous, point]);
+		previous = point;
 	}
 
 	function onpointerup(event: PointerEvent): void {
 		if (event.pointerId !== pointer) return;
 		pointer = null;
 		last = null;
+		previous = null;
 	}
 </script>
 

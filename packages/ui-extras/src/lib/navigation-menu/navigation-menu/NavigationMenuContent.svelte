@@ -19,6 +19,7 @@
   @component
   The flyout panel of a navigation menu item, below its trigger. It stays open while the
   pointer is over it, and takes the focus when it was opened from the keyboard or a click.
+  It is a `group`, part of the page's navigation rather than a dialog.
 -->
 <script lang="ts">
 	import { Popover } from '@oito2/ui';
@@ -41,6 +42,7 @@
 	alignment="start"
 	maxWidth={menu.panelMaxWidth}
 	focusOnOpen={menu.keyboard}
+	role="group"
 	class={['oito2-navigation-menu-content', className].filter(Boolean).join(' ')}
 	onpointerenter={(event: PointerEvent) => {
 		if (event.pointerType === 'mouse') menu.cancel();

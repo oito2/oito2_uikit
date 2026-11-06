@@ -19,3 +19,4 @@ export { default as Item } from './CarouselItem.svelte';
 export { default as Prev } from './CarouselPrev.svelte';
 export { default as Next } from './CarouselNext.svelte';
 export { default as Indicators } from './CarouselIndicators.svelte';
+export { default as PlayPause } from './CarouselPlayPause.svelte';

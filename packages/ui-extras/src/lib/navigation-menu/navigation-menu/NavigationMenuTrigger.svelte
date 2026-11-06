@@ -18,7 +18,8 @@
 <!--
   @component
   The button of a navigation menu item that opens its `NavigationMenu.Content`: on hover,
-  on a click or on the Down arrow, the last two moving the focus into the panel.
+  on a click or on the Down arrow, the last two moving the focus into the panel. It tells
+  whether the panel is expanded, which is a group of links rather than a menu or a dialog.
 -->
 <script lang="ts">
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
@@ -55,6 +56,7 @@
 			data-current={menu.current === value() ? '' : undefined}
 			{...rest}
 			{...props}
+			aria-haspopup={undefined}
 			onclick={(event) => {
 				onclick?.(event);
 				if (!event.defaultPrevented) menu.show(open ? null : value(), true);

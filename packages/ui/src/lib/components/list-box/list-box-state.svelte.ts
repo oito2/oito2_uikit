@@ -68,9 +68,13 @@ export class ListBoxState<T = unknown> {
 		return `${this.id}-option-${this.collection.indexOf(value)}`;
 	}
 
-	/** Makes the first selected or enabled row active when the list gains focus without one. */
-	focus(): void {
+	/**
+	 * Makes the first selected or enabled row active when the list gains focus without one;
+	 * `visible` tells whether the browser shows a focus ring, which shows the active row.
+	 */
+	focus(visible = false): void {
 		this.focused = true;
+		this.keyboard = visible;
 		if (this.active === null || !this.collection.has(this.active)) {
 			this.active = this.controller.firstSelectedValue ?? this.collection.firstValue;
 		}
@@ -178,12 +182,26 @@ export function useListBox(): ListBoxState {
 
 const groupKey = Symbol('oito2.list-box-group');
 
-/** Publishes the id of a group's label to its `ListBox.GroupLabel`. */
-export function setListBoxGroup(labelId: string): void {
-	setContext(groupKey, labelId);
+/** The state a `ListBox.Group` shares with its `ListBox.GroupLabel`. */
+export class ListBoxGroupState {
+	/** The id of the group's label. */
+	readonly labelId: string;
+	/** The number of `ListBox.GroupLabel`s rendered in the group. */
+	labels = $state(0);
+
+	constructor(labelId: string) {
+		this.labelId = labelId;
+	}
 }
 
-/** Returns the label id of the enclosing `ListBox.Group`, or `undefined` outside one. */
-export function useListBoxGroup(): string | undefined {
-	return hasContext(groupKey) ? getContext<string>(groupKey) : undefined;
+/** Publishes the state of a group to its `ListBox.GroupLabel`. */
+export function setListBoxGroup(labelId: string): ListBoxGroupState {
+	const group = new ListBoxGroupState(labelId);
+	setContext(groupKey, group);
+	return group;
+}
+
+/** Returns the state of the enclosing `ListBox.Group`, or `undefined` outside one. */
+export function useListBoxGroup(): ListBoxGroupState | undefined {
+	return hasContext(groupKey) ? getContext<ListBoxGroupState>(groupKey) : undefined;
 }

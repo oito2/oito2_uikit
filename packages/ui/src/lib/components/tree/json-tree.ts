@@ -21,6 +21,8 @@ export interface JsonEntry {
 	readonly key: string;
 	/** The decoded value. */
 	readonly value: unknown;
+	/** Whether `value` is an object or array that contains this node, shown as a leaf. */
+	readonly circular?: boolean;
 }
 
 const identifier = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
@@ -55,7 +57,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /**
  * Returns the tree of decoded JSON `data`: objects and arrays become branches, other values
  * leaves, and the top node is labeled `rootLabel`. Node values are JSON paths, such as
- * `$.items[0].name`.
+ * `$.items[0].name`. An object or array inside itself becomes a `[Circular]` leaf.
  */
 export function jsonTree(data: unknown, rootLabel = '$'): TreeCollection<JsonEntry> {
 	const child = (parent: string, key: string | number) =>
@@ -65,23 +67,24 @@ export function jsonTree(data: unknown, rootLabel = '$'): TreeCollection<JsonEnt
 				? `${parent}.${key}`
 				: `${parent}[${JSON.stringify(key)}]`;
 
+	// The objects and arrays on the path from the top node to the one being built.
+	const ancestors = new Set<object>();
+
 	const build = (path: string, key: string, value: unknown): TreeNode<JsonEntry> => {
 		const data: JsonEntry = { key, value };
-		if (Array.isArray(value)) {
-			return {
-				value: path,
-				label: key,
-				data,
-				children: value.map((item, i) => build(child(path, i), String(i), item))
-			};
-		}
-		if (isRecord(value)) {
-			return {
-				value: path,
-				label: key,
-				data,
-				children: Object.entries(value).map(([k, v]) => build(child(path, k), k, v))
-			};
+		if (Array.isArray(value) || isRecord(value)) {
+			if (ancestors.has(value))
+				return {
+					value: path,
+					label: `${key}: [Circular]`,
+					data: { key, value, circular: true }
+				};
+			ancestors.add(value);
+			const children = Array.isArray(value)
+				? value.map((item, i) => build(child(path, i), String(i), item))
+				: Object.entries(value).map(([k, v]) => build(child(path, k), k, v));
+			ancestors.delete(value);
+			return { value: path, label: key, data, children };
 		}
 		const text = typeof value === 'string' ? JSON.stringify(value) : jsonValueText(value);
 		return { value: path, label: `${key}: ${text}`, data };

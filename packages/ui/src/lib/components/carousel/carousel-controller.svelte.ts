@@ -24,6 +24,16 @@ export interface CarouselOptions {
 	defaultPage: () => number;
 	onChange: (page: number) => void;
 	loop: () => boolean;
+	/** Reads whether the carousel advances by itself; `false` when left out. */
+	autoScroll?: () => boolean;
+	/** Reads the controlled rotation state, `undefined` when uncontrolled. */
+	playing?: () => boolean | undefined;
+	/** Returns the rotation state before the first change; `true` when left out. */
+	defaultPlaying?: () => boolean;
+	/** Called with each new rotation state. */
+	onPlayingChange?: (playing: boolean) => void;
+	/** Reads whether the pages are advancing by themselves at the moment; `false` when left out. */
+	rotating?: () => boolean;
 }
 
 /**
@@ -33,6 +43,7 @@ export interface CarouselOptions {
 export class CarouselController {
 	readonly #options: CarouselOptions;
 	readonly #page: Controllable<number>;
+	readonly #playing: Controllable<boolean>;
 	#slides = $state<symbol[]>([]);
 	/** The scrolling element of the slides. */
 	viewport = $state<HTMLElement | null>(null);
@@ -44,6 +55,36 @@ export class CarouselController {
 			defaultValue: options.defaultPage,
 			onChange: options.onChange
 		});
+		this.#playing = new Controllable({
+			value: options.playing ?? (() => undefined),
+			defaultValue: options.defaultPlaying ?? (() => true),
+			onChange: options.onPlayingChange
+		});
+	}
+
+	/** Whether the carousel advances by itself. */
+	get autoScroll(): boolean {
+		return this.#options.autoScroll?.() ?? false;
+	}
+
+	/**
+	 * Whether the automatic rotation is on; setting it to false stops it until it is set
+	 * back to true.
+	 */
+	get playing(): boolean {
+		return this.#playing.current;
+	}
+
+	set playing(playing: boolean) {
+		this.#playing.current = playing;
+	}
+
+	/**
+	 * Whether the pages are advancing by themselves at the moment: the rotation is on and
+	 * not held by a hovering pointer, the focus inside, reduced motion or a hidden document.
+	 */
+	get rotating(): boolean {
+		return this.#options.rotating?.() ?? false;
 	}
 
 	/** The current page, from 0. */

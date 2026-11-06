@@ -23,7 +23,15 @@ import { ptBR } from './pt-br.js';
 type Method = (...args: (string | number)[]) => string;
 
 /** Strings of components oito2_ui doesn't have, or labels it leaves unnamed. */
-const ownStrings = ['colorFormat', 'previousStep', 'nextStep', 'code', 'zoom'];
+const ownStrings = [
+	'colorFormat',
+	'previousStep',
+	'nextStep',
+	'code',
+	'zoom',
+	'pauseRotation',
+	'startRotation'
+];
 
 describe.each([
 	['en', en],

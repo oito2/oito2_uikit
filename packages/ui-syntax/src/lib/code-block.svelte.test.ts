@@ -51,6 +51,12 @@ describe('CodeBlock', () => {
 		await expect.element(page.getByTestId('block')).not.toHaveAttribute('data-language');
 	});
 
+	it('numbers no line after a final line break', async () => {
+		render(CodeBlockHarness, { code: 'a\nb\n', language: null, showLineNumbers: true });
+		const lines = el(page.getByTestId('block')).querySelector('.oito2-code-block-lines');
+		expect(lines?.textContent).toBe('1\n2');
+	});
+
 	it('copies the code with the copy button', async () => {
 		const copied: string[] = [];
 		Object.defineProperty(Navigator.prototype, 'clipboard', {

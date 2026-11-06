@@ -36,6 +36,7 @@
 		crop?: CropController;
 		src?: string;
 		circle?: boolean;
+		crossOrigin?: 'anonymous' | 'use-credentials' | null;
 		current?: string | null;
 		open?: string | null;
 		log?: string[];
@@ -52,6 +53,7 @@
 		crop = new CropController(),
 		src = '',
 		circle = false,
+		crossOrigin = null,
 		current = 'docs',
 		open = $bindable(null),
 		log = [],
@@ -84,7 +86,7 @@
 		{#if show === 'crop' || (show === 'gallery' && src)}
 			<div class="row">
 				<div style="width: 400px">
-					<ImageCropper {src} controller={crop} {circle} height={240} />
+					<ImageCropper {src} controller={crop} {circle} {crossOrigin} height={240} />
 				</div>
 				<CropPreview controller={crop} {circle} />
 			</div>

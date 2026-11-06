@@ -33,7 +33,10 @@
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** Whether the panes sit side by side or stacked. Defaults to `horizontal`. */
 		orientation?: 'horizontal' | 'vertical';
-		/** Called with the pane sizes, in pixels, after each change. */
+		/**
+		 * Called with the pane sizes, in pixels, after each change: a divider moved, a pane
+		 * collapsed or restored, the splitter resized or the limits of a pane changed.
+		 */
 		onSizesChange?: (sizes: readonly number[]) => void;
 		/** How far one arrow key press moves a divider, in pixels. Defaults to 16. */
 		keyboardStep?: number;

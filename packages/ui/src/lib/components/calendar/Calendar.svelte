@@ -176,9 +176,14 @@
 		grid?.querySelector<HTMLElement>('[data-focused]')?.focus();
 	}
 
-	/** Shows the month `delta` months away, focusing the same day number in it. */
-	function showMonth(delta: number) {
+	/**
+	 * Shows the month `delta` months away, focusing the same day number in it. When
+	 * `button` has focus and becomes disabled at a limit, focus moves to the focused day.
+	 */
+	function showMonth(delta: number, button: HTMLElement) {
+		const hadFocus = button.contains(document.activeElement);
 		focused = clamp(addMonths(focused, delta));
+		if (hadFocus && !(delta < 0 ? canGoBack : canGoForward)) void focusDay(focused);
 	}
 
 	/** Picks `day`: reports it, or starts or completes a range. */
@@ -290,14 +295,14 @@
 			icon={ChevronLeft as IconComponent}
 			label={strings.previousMonth}
 			disabled={!canGoBack}
-			onclick={() => showMonth(-1)}
+			onclick={(event: MouseEvent) => showMonth(-1, event.currentTarget as HTMLElement)}
 		/>
 		<IconButton
 			class="oito2-calendar-nav"
 			icon={ChevronRight as IconComponent}
 			label={strings.nextMonth}
 			disabled={!canGoForward}
-			onclick={() => showMonth(1)}
+			onclick={(event: MouseEvent) => showMonth(1, event.currentTarget as HTMLElement)}
 		/>
 	</div>
 	<table

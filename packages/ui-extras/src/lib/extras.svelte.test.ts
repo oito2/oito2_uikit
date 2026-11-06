@@ -154,6 +154,36 @@ describe('SignaturePad', () => {
 		expect(colorAt(canvas, 70, 40)).toBe('255,0,0');
 		expect(signature.toSvg()).toContain('<path d="M20.0 20.0L120.0 60.0"');
 	});
+
+	it('paints what is drawn, after undo, and sizes a new controller', async () => {
+		const props = $state({ show: 'signature', signature: new SignatureController() });
+		render(ExtrasHarness, props);
+		const canvas = el(page.getByTestId('signature')).querySelector(
+			'canvas'
+		) as HTMLCanvasElement;
+		await expect.poll(() => props.signature.size.width).toBeGreaterThan(0);
+		const box = canvas.getBoundingClientRect();
+		const ratio = canvas.width / box.width;
+		/** Returns the alpha of the canvas at pad position `x`, `y`. */
+		const ink = (x: number, y: number) =>
+			(canvas.getContext('2d') as CanvasRenderingContext2D).getImageData(
+				Math.round(x * ratio),
+				Math.round(y * ratio),
+				1,
+				1
+			).data[3];
+		pointer(canvas, 'pointerdown', box.left + 20, box.top + 40);
+		for (let i = 1; i <= 5; i++)
+			pointer(canvas, 'pointermove', box.left + 20 + i * 20, box.top + 40);
+		pointer(canvas, 'pointerup', box.left + 120, box.top + 40);
+		expect(ink(70, 40)).toBeGreaterThan(0);
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(() => ink(70, 40)).toBe(0);
+
+		const next = new SignatureController();
+		props.signature = next;
+		await expect.poll(() => next.size.width).toBeGreaterThan(0);
+	});
 });
 
 describe('ImageCropper', () => {
@@ -225,6 +255,51 @@ describe('ImageCropper', () => {
 		pointer(target, 'pointerup', box.left + 100, box.top + 90);
 		expect(crop.offset.y).toBe(before - 10);
 	});
+
+	it('pans with two fingers, ignores a third and zooms around their middle', async () => {
+		const crop = new CropController();
+		render(ExtrasHarness, { show: 'crop', crop, src: twoColorImage(400, 200) });
+		await expect.poll(() => crop.image).not.toBeNull();
+		const target = el(page.getByRole('application'));
+		const area = (target.querySelector('canvas') as HTMLCanvasElement).getBoundingClientRect();
+		const cx = area.left + area.width / 2;
+		const cy = area.top + area.height / 2;
+		/** Sends a touch event of `type` for finger `id` at `x`, `y`. */
+		const finger = (type: string, id: number, x: number, y: number) =>
+			pointer(target, type, x, y, { pointerId: id, pointerType: 'touch' });
+
+		finger('pointerdown', 11, cx + 40, cy);
+		finger('pointerdown', 12, cx + 80, cy);
+		finger('pointermove', 11, cx + 20, cy);
+		finger('pointermove', 12, cx + 100, cy);
+		expect(crop.zoom).toBeCloseTo(2, 3);
+		expect(crop.offset.x).toBeCloseTo(-60, 3);
+		expect(crop.offset.y).toBeCloseTo(0, 3);
+		finger('pointerup', 11, cx + 20, cy);
+		finger('pointerup', 12, cx + 100, cy);
+
+		const before = crop.offset.x;
+		finger('pointerdown', 21, cx - 20, cy);
+		finger('pointerdown', 22, cx + 20, cy);
+		finger('pointerdown', 23, cx, cy + 20);
+		finger('pointermove', 21, cx - 10, cy);
+		finger('pointermove', 22, cx + 30, cy);
+		finger('pointermove', 23, cx + 10, cy + 20);
+		expect(crop.zoom).toBeCloseTo(2, 3);
+		expect(crop.offset.x).toBeCloseTo(before + 10, 3);
+	});
+
+	it('loads an image with the CORS mode it is given', async () => {
+		const crop = new CropController();
+		render(ExtrasHarness, {
+			show: 'crop',
+			crop,
+			src: twoColorImage(400, 200),
+			crossOrigin: 'anonymous'
+		});
+		await expect.poll(() => crop.image).not.toBeNull();
+		expect(await crop.cropBlob()).not.toBeNull();
+	});
 });
 
 describe('NavigationMenu', () => {
@@ -240,6 +315,18 @@ describe('NavigationMenu', () => {
 		await expect.element(page.getByRole('link', { name: 'Editor' })).not.toBeInTheDocument();
 		await expect.element(trigger).toHaveFocus();
 		expect(props.open).toBeNull();
+	});
+
+	it('opens a group of links, not a dialog', async () => {
+		render(ExtrasHarness, { show: 'menu' });
+		const trigger = page.getByRole('button', { name: 'Products' });
+		await expect.element(trigger).not.toHaveAttribute('aria-haspopup');
+		await trigger.click();
+		await expect.element(page.getByRole('link', { name: 'Editor' })).toBeVisible();
+		expect(document.querySelector('[role="dialog"]')).toBeNull();
+		expect(
+			el(page.getByRole('link', { name: 'Editor' })).closest('[role="group"]')
+		).not.toBeNull();
 	});
 
 	it('opens with the Down arrow and marks the current item', async () => {

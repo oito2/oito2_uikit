@@ -26,7 +26,14 @@
   `CropPreview` shows the result live.
 -->
 <script lang="ts">
-	import { IconButton, Slider, focusBorder, useLocale, type IconComponent } from '@oito2/ui';
+	import {
+		IconButton,
+		Slider,
+		focusBorder,
+		useLocale,
+		useTheme,
+		type IconComponent
+	} from '@oito2/ui';
 	import ArrowLeftRight from '@lucide/svelte/icons/arrow-left-right';
 	import RefreshCcw from '@lucide/svelte/icons/refresh-ccw';
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
@@ -34,7 +41,7 @@
 	import ZoomIn from '@lucide/svelte/icons/zoom-in';
 	import ZoomOut from '@lucide/svelte/icons/zoom-out';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { CropController, loadCropImage } from './crop-controller.svelte.js';
+	import { CropController, loadCropImage, type CropImage } from './crop-controller.svelte.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The URL of the image to crop, such as an object URL of a picked file. */
@@ -57,6 +64,12 @@
 		 * size. Defaults to 4096.
 		 */
 		maxDecodedDimension?: number | null;
+		/**
+		 * The CORS mode the image loads with, for an image of another origin, such as an asset
+		 * URL of a Tauri app on Windows or Linux. The crop can only be exported from such an
+		 * image when it loads with CORS and its server allows it. Defaults to none.
+		 */
+		crossOrigin?: 'anonymous' | 'use-credentials' | null;
 		/** Called when the image fails to load; the error is logged when it isn't set. */
 		onError?: (error: unknown) => void;
 		/** The element. */
@@ -72,6 +85,7 @@
 		showToolbar = true,
 		label,
 		maxDecodedDimension = 4096,
+		crossOrigin = null,
 		onError,
 		ref = $bindable(null),
 		class: className,
@@ -79,6 +93,7 @@
 	}: Props = $props();
 
 	const locale = useLocale();
+	const theme = useTheme();
 	/** The space between the crop box and the edges of the area. */
 	const margin = 24;
 
@@ -96,17 +111,20 @@
 	});
 	let percent = $derived(`${Math.round(controller.zoom * 100)}%`);
 
-	// Loads the image; a new picture starts with the zoom, pan, rotation and flip reset.
-	let loadedSrc: string | null = null;
+	/** The loaded image and its URL. */
+	let loaded = $state.raw<{ src: string; image: CropImage } | null>(null);
+	/** The controller the image was last given to, and its URL. */
+	let given: { controller: CropController; src: string } | null = null;
+
+	// Loads the image.
 	$effect(() => {
 		const url = src;
 		const max = maxDecodedDimension;
+		const mode = crossOrigin;
 		let cancelled = false;
-		loadCropImage(url, max).then(
+		loadCropImage(url, max, { crossOrigin: mode }).then(
 			(image) => {
-				if (cancelled) return;
-				controller.setImage(image, { reset: loadedSrc !== null && loadedSrc !== url });
-				loadedSrc = url;
+				if (!cancelled) loaded = { src: url, image };
 			},
 			(error: unknown) => {
 				if (cancelled) return;
@@ -119,9 +137,21 @@
 		};
 	});
 
+	// Gives the loaded image to the current controller; a new picture in the same controller
+	// starts with the zoom, pan, rotation and flip reset.
+	$effect(() => {
+		const target = controller;
+		const current = loaded;
+		if (!current) return;
+		const reset = given !== null && given.controller === target && given.src !== current.src;
+		target.setImage(current.image, { reset });
+		given = { controller: target, src: current.src };
+	});
+
 	// Hands the crop box size to the controller.
 	$effect(() => {
-		if (viewportWidth > 0) controller.setBoxSize(box);
+		const target = controller;
+		if (viewportWidth > 0) target.setBoxSize(box);
 	});
 
 	// Measures the width of the crop area.
@@ -133,31 +163,50 @@
 		return () => observer.disconnect();
 	});
 
-	// Paints the image, the scrim outside the box, the box outline and the thirds guides.
+	/** The colors of the area background and of the scrim outside the box. */
+	let colors = $state({ surface: '#e8e8e8', scrim: '#000000' });
+
+	// Reads the colors from the theme's custom properties when the canvas or the theme change.
 	$effect(() => {
 		const element = canvas;
-		void controller.image;
-		void controller.zoom;
-		void controller.offset;
-		void controller.quarterTurns;
-		void controller.flipped;
-		if (!element || viewportWidth <= 0) return;
-		const ratio = window.devicePixelRatio || 1;
-		element.width = Math.round(viewportWidth * ratio);
-		element.height = Math.round(height * ratio);
-		const context = element.getContext('2d');
-		if (!context) return;
+		void theme.current;
+		if (!element) return;
 		const style = getComputedStyle(element);
 		const variable = (name: string, fallback: string) =>
 			style.getPropertyValue(name).trim() || fallback;
+		colors = {
+			surface: variable('--oito2-color-surface-container-highest', '#e8e8e8'),
+			scrim: variable('--oito2-color-scrim', '#000000')
+		};
+	});
+
+	// Paints the image, the scrim outside the box, the box outline and the thirds guides;
+	// the canvas is resized only when the area or the pixel ratio changed.
+	$effect(() => {
+		const element = canvas;
+		const target = controller;
+		void target.image;
+		void target.zoom;
+		void target.offset;
+		void target.quarterTurns;
+		void target.flipped;
+		if (!element || viewportWidth <= 0) return;
+		const ratio = window.devicePixelRatio || 1;
+		const width = Math.round(viewportWidth * ratio);
+		const pixelHeight = Math.round(height * ratio);
+		if (element.width !== width) element.width = width;
+		if (element.height !== pixelHeight) element.height = pixelHeight;
+		const context = element.getContext('2d');
+		if (!context) return;
 		context.setTransform(ratio, 0, 0, ratio, 0, 0);
-		context.fillStyle = variable('--oito2-color-surface-container-highest', '#e8e8e8');
+		context.clearRect(0, 0, viewportWidth, height);
+		context.fillStyle = colors.surface;
 		context.fillRect(0, 0, viewportWidth, height);
 		const left = (viewportWidth - box.width) / 2;
 		const top = (height - box.height) / 2;
 		context.save();
 		context.translate(left, top);
-		controller.paintCrop(context);
+		target.paintCrop(context);
 		context.restore();
 		const hole = new Path2D();
 		if (circle)
@@ -175,7 +224,7 @@
 		scrim.rect(0, 0, viewportWidth, height);
 		scrim.addPath(hole);
 		context.globalAlpha = 0.55;
-		context.fillStyle = variable('--oito2-color-scrim', '#000000');
+		context.fillStyle = colors.scrim;
 		context.fill(scrim, 'evenodd');
 		context.globalAlpha = 1;
 		if (!circle) {
@@ -197,7 +246,7 @@
 		context.stroke(hole);
 	});
 
-	// Pointers on the area: one pans, two pinch to zoom.
+	// Pointers on the area: one pans, two pinch to zoom; more are ignored.
 	const pointers: Record<number, { x: number; y: number }> = {};
 	let pinch: { distance: number; zoom: number } | null = null;
 
@@ -206,11 +255,18 @@
 		return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
 	}
 
+	/** Returns the middle of the two pinching pointers. */
+	function pinchMiddle(): { x: number; y: number } {
+		const [a, b] = Object.values(pointers);
+		return a && b ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } : { x: 0, y: 0 };
+	}
+
 	function onpointerdown(event: PointerEvent): void {
 		if (event.pointerType === 'mouse' && event.button !== 0) return;
 		ref?.querySelector<HTMLElement>('.oito2-image-cropper-area')?.focus({
 			preventScroll: true
 		});
+		if (Object.keys(pointers).length >= 2) return;
 		pointers[event.pointerId] = { x: event.clientX, y: event.clientY };
 		try {
 			(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
@@ -227,17 +283,30 @@
 		const previous = pointers[event.pointerId];
 		if (!previous) return;
 		const next = { x: event.clientX, y: event.clientY };
-		pointers[event.pointerId] = next;
-		if (pinch && Object.keys(pointers).length === 2) {
-			controller.panBy((next.x - previous.x) / 2, (next.y - previous.y) / 2);
+		if (pinch && Object.keys(pointers).length === 2 && canvas) {
+			// Zooms around the middle of the fingers and moves the image with that middle,
+			// so the point of the image under the fingers stays under them.
+			const from = pinchMiddle();
+			pointers[event.pointerId] = next;
+			const to = pinchMiddle();
+			const area = canvas.getBoundingClientRect();
+			const center = { x: area.left + area.width / 2, y: area.top + area.height / 2 };
+			const before = controller.zoom;
+			const offset = controller.offset;
 			const distance = pinchDistance();
 			if (pinch.distance > 0) controller.zoom = (pinch.zoom * distance) / pinch.distance;
+			const factor = controller.zoom / before;
+			const x = to.x - center.x - (from.x - center.x - offset.x) * factor;
+			const y = to.y - center.y - (from.y - center.y - offset.y) * factor;
+			controller.panBy(x - controller.offset.x, y - controller.offset.y);
 		} else {
+			pointers[event.pointerId] = next;
 			controller.panBy(next.x - previous.x, next.y - previous.y);
 		}
 	}
 
 	function onpointerup(event: PointerEvent): void {
+		if (!(event.pointerId in pointers)) return;
 		delete pointers[event.pointerId];
 		pinch = null;
 	}

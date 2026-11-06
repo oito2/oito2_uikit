@@ -36,6 +36,7 @@
 	import { untrack, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { ListCollection } from '../../../collections/list-collection.js';
+	import { mergeProps } from '../../../internal/merge-props.js';
 	import {
 		SelectionController,
 		type SelectionMode
@@ -124,13 +125,15 @@
 		: undefined}
 	class={['oito2-list-box', className]}
 	data-keyboard={list.keyboard ? '' : undefined}
-	onkeydown={(event) => {
-		if (list.keydown(event)) event.preventDefault();
-	}}
-	onfocus={() => list.focus()}
-	onblur={() => (list.focused = false)}
-	onpointerdown={() => (list.keyboard = false)}
-	{...rest}
+	{...mergeProps(rest, {
+		onkeydown: (event: KeyboardEvent) => {
+			if (list.keydown(event)) event.preventDefault();
+		},
+		onfocus: (event: FocusEvent) =>
+			list.focus((event.currentTarget as HTMLElement).matches(':focus-visible')),
+		onblur: () => (list.focused = false),
+		onpointerdown: () => (list.keyboard = false)
+	})}
 >
 	{#if children}
 		{@render children()}

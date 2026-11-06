@@ -19,7 +19,8 @@
   @component
   The scrolling row of `Carousel.Item`s, one page at a time, `height` pixels tall. It
   snaps to a page after a swipe; with a mouse the pages can be dragged too. Place
-  `Carousel.Prev` and `Carousel.Next` inside it to show them over the pages.
+  `Carousel.Prev` and `Carousel.Next` inside it to show them over the pages. Page changes
+  are announced to assistive technologies, except while the pages advance by themselves.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -131,7 +132,7 @@
 		bind:this={ref}
 		class="oito2-carousel-viewport"
 		tabindex="0"
-		aria-live={carousel.count > 0 ? 'polite' : undefined}
+		aria-live={carousel.count === 0 ? undefined : carousel.rotating ? 'off' : 'polite'}
 		data-dragging={dragging ? '' : undefined}
 		{@attach track}
 	>

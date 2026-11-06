@@ -21,8 +21,9 @@
   the dots of `Carousel.Indicators`, the Left and Right arrow keys (swapped in
   right-to-left text) while the carousel has focus, or a swipe, also with a mouse. With
   `loop` the buttons and arrows wrap around, jumping straight to the other end. With
-  `autoScroll` it moves to the next page every `interval` milliseconds while no pointer
-  hovers it, nothing inside it has focus and motion isn't reduced. Bind `page`, or set
+  `autoScroll` it moves to the next page every `interval` milliseconds while `playing`,
+  no pointer hovers it, nothing inside it has focus, the document is visible and motion
+  isn't reduced; `Carousel.PlayPause` turns `playing` off and on. Bind `page`, or set
   `defaultPage` and listen to `onPageChange`; setting `page` scrolls to it.
 -->
 <script lang="ts">
@@ -46,6 +47,12 @@
 		autoScroll?: boolean;
 		/** The time each page stays when `autoScroll`, in milliseconds. Defaults to 4000. */
 		interval?: number;
+		/** Whether the automatic rotation of `autoScroll` is on. */
+		playing?: boolean;
+		/** The rotation state of an uncontrolled carousel before the first change. Defaults to `true`. */
+		defaultPlaying?: boolean;
+		/** Called with each new rotation state. */
+		onPlayingChange?: (playing: boolean) => void;
 		/** The controller of this carousel, for changing its page from outside; bind it to read it. */
 		controller?: CarouselController | null;
 		/** The root element. */
@@ -61,6 +68,9 @@
 		loop = true,
 		autoScroll = false,
 		interval = 4000,
+		playing = $bindable(),
+		defaultPlaying = true,
+		onPlayingChange,
 		controller = $bindable(),
 		ref = $bindable(null),
 		class: className,
@@ -76,7 +86,15 @@
 				page = next;
 				onPageChange?.(next);
 			},
-			loop: () => loop
+			loop: () => loop,
+			autoScroll: () => autoScroll,
+			playing: () => playing,
+			defaultPlaying: () => defaultPlaying,
+			onPlayingChange: (next) => {
+				playing = next;
+				onPlayingChange?.(next);
+			},
+			rotating: () => rotating
 		})
 	);
 
@@ -88,12 +106,30 @@
 	const reduced = new MediaQuery('(prefers-reduced-motion: reduce)');
 	let hovered = $state(false);
 	let focused = $state(false);
+	let hidden = $state(false);
+	let rotating = $derived(
+		autoScroll &&
+			carousel.playing &&
+			!reduced.current &&
+			!hovered &&
+			!focused &&
+			!hidden &&
+			carousel.count > 1
+	);
+
+	// Tracks whether the document is hidden, such as in a background tab.
+	$effect(() => {
+		const sync = () => (hidden = document.hidden);
+		sync();
+		document.addEventListener('visibilitychange', sync);
+		return () => document.removeEventListener('visibilitychange', sync);
+	});
 
 	// Restarts the timer whenever what it depends on changes, including the page, so a
 	// page changed by hand stays for a full interval.
 	$effect(() => {
 		void carousel.page;
-		if (!autoScroll || reduced.current || hovered || focused || carousel.count < 2) return;
+		if (!rotating) return;
 		const timer = setInterval(() => carousel.step(1, true), interval);
 		return () => clearInterval(timer);
 	});

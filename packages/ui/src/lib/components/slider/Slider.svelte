@@ -29,7 +29,13 @@
 	import { on } from 'svelte/events';
 	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf } from '../../internal/keyboard.js';
-	import { sliderFraction, sliderStep, snapSliderValue, type SliderMark } from './slider-math.js';
+	import {
+		roundToStep,
+		sliderFraction,
+		sliderStep,
+		snapSliderValue,
+		type SliderMark
+	} from './slider-math.js';
 
 	type Value = number | [number, number];
 
@@ -108,6 +114,8 @@
 	let fractions = $derived(values.map((v) => sliderFraction(v, min, max)));
 	let dragging: number | null = $state(null);
 	let rail: HTMLElement | null = $state(null);
+	// Whether a key press has changed the value since the last commit.
+	let keyChanged = false;
 
 	const format = (v: number) => (valueText ? valueText(v) : String(Math.round(v * 1000) / 1000));
 	let headerText = $derived(
@@ -118,16 +126,22 @@
 			: null
 	);
 
-	/** Sets thumb `index` to `next`, keeping a range's thumbs in order. */
-	function setThumb(index: number, next: number) {
+	/**
+	 * Sets thumb `index` to `next`, keeping a range's thumbs in order. Returns whether the
+	 * thumb's value changed.
+	 */
+	function setThumb(index: number, next: number): boolean {
 		const snapped = snapSliderValue(next, min, max, divisions);
 		if (!range) {
+			const changed = snapped !== values[0];
 			model.current = snapped;
-			return;
+			return changed;
 		}
 		const [start, end] = values as [number, number];
-		model.current =
-			index === 0 ? [Math.min(snapped, end), end] : [start, Math.max(snapped, start)];
+		const thumb = index === 0 ? Math.min(snapped, end) : Math.max(snapped, start);
+		if (thumb === values[index]) return false;
+		model.current = index === 0 ? [thumb, end] : [start, thumb];
+		return true;
 	}
 
 	/** Returns the value under a pointer position. */
@@ -204,13 +218,16 @@
 				return;
 		}
 		event.preventDefault();
-		setThumb(index, next);
+		const exact = event.key === 'Home' || event.key === 'End';
+		if (setThumb(index, exact ? next : roundToStep(next, step, min))) keyChanged = true;
 	}
 
 	function onkeyup(event: KeyboardEvent) {
+		if (disabled || !keyChanged) return;
 		if (
 			['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)
 		) {
+			keyChanged = false;
 			onValueCommit?.(model.current);
 		}
 	}

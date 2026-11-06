@@ -19,8 +19,8 @@
   @component
   The panel of a sheet, sliding in from its edge. A side sheet is `size` pixels wide; a
   bottom sheet is as tall as its content up to 90% of the window, or rests at its snap
-  points. A modal sheet traps focus and dims the page; focus returns where it was when it
-  closes.
+  points. A modal sheet traps focus and dims the page, which turns inert; focus returns
+  where it was when it closes.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -28,6 +28,7 @@
 	import Portal from '../../../internal/Portal.svelte';
 	import { dismissableLayer } from '../../../internal/dismissable-layer.js';
 	import { focusScope } from '../../../internal/focus-scope.js';
+	import { withInertOutside } from '../../../internal/inert.js';
 	import { Presence } from '../../../internal/presence.svelte.js';
 	import { lockScroll } from '../../../internal/scroll-lock.js';
 	import { useSheet } from '../sheet-state.svelte.js';
@@ -92,7 +93,11 @@
 			style:--oito2-sheet-rest={snaps ? `${rest_}vh` : '0px'}
 			style:--oito2-sheet-drag="{sheet.drag}px"
 			{@attach presence.attach}
-			{@attach sheet.open ? focusScope({ trap: sheet.modal, finalFocus }) : undefined}
+			{@attach sheet.open
+				? sheet.modal
+					? withInertOutside(focusScope({ trap: true, finalFocus }))
+					: focusScope({ trap: false, finalFocus })
+				: undefined}
 			{@attach sheet.open
 				? dismissableLayer({
 						onDismiss: (reason) =>

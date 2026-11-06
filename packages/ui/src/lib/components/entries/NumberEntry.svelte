@@ -150,8 +150,9 @@
 				set(max);
 				break;
 			case 'Enter':
+				// Enter applies the text and still submits the form the field is in.
 				commit();
-				break;
+				return;
 			default:
 				return;
 		}

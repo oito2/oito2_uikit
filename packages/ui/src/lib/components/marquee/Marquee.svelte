@@ -22,7 +22,8 @@
 
   The content moves toward the reading start (up when vertical), or the other way with
   `reverse`, at `speed` pixels per second, followed by a copy after `gap`. It stops while
-  the pointer or the focus is on it, and stays still at its start when the user prefers
+  `paused`, which an app can turn on and off with a button of its own, and while the
+  pointer or the focus is on it, and stays still at its start when the user prefers
   reduced motion. `fadeEdges` fades the content at both ends. Content that fits doesn't
   move. Assistive technologies read the content once; the copy is hidden and inert, so
   plain content, such as text or icons, fits best. A vertical marquee needs a height.
@@ -31,7 +32,9 @@
 	import { untrack, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { MediaQuery } from 'svelte/reactivity';
+	import { Controllable } from '../../internal/controllable.svelte.js';
 	import { directionOf, type Direction, type Orientation } from '../../internal/keyboard.js';
+	import { mergeProps } from '../../internal/merge-props.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The scrolling content. */
@@ -46,6 +49,12 @@
 		gap?: number;
 		/** Whether the pointer or the focus stops the scroll. Defaults to true. */
 		pauseOnHover?: boolean;
+		/** Whether the scroll is stopped, wherever the pointer and the focus are. */
+		paused?: boolean;
+		/** Whether an uncontrolled marquee starts stopped. Defaults to `false`. */
+		defaultPaused?: boolean;
+		/** Called with each new `paused` state. */
+		onPausedChange?: (paused: boolean) => void;
 		/** Whether the content fades at both ends while it scrolls. Defaults to true. */
 		fadeEdges?: boolean;
 		/** The length of the fades in pixels. Defaults to 24. */
@@ -61,6 +70,9 @@
 		speed = 40,
 		gap = 32,
 		pauseOnHover = true,
+		paused = $bindable(),
+		defaultPaused = false,
+		onPausedChange,
 		fadeEdges = true,
 		fadeExtent = 24,
 		ref = $bindable(null),
@@ -69,6 +81,15 @@
 	}: Props = $props();
 
 	const reducedMotion = new MediaQuery('(prefers-reduced-motion: reduce)');
+	// The `paused` state; nothing inside the marquee changes it.
+	const pausedState = new Controllable<boolean>({
+		value: () => paused,
+		defaultValue: () => defaultPaused,
+		onChange: (next) => {
+			paused = next;
+			onPausedChange?.(next);
+		}
+	});
 
 	let track: HTMLDivElement | null = $state(null);
 	let content: HTMLSpanElement | null = $state(null);
@@ -80,7 +101,7 @@
 
 	let horizontal = $derived(orientation === 'horizontal');
 	let overflows = $derived(viewport > 0 && extent > viewport);
-	let paused = $derived(pauseOnHover && (hovered || focused));
+	let stopped = $derived(pausedState.current || (pauseOnHover && (hovered || focused)));
 	let fade = $derived(
 		fadeEdges && overflows
 			? `linear-gradient(${horizontal ? 'to right' : 'to bottom'}, transparent, #000 ${fadeExtent}px, #000 calc(100% - ${fadeExtent}px), transparent)`
@@ -120,16 +141,16 @@
 			],
 			{ duration: (period / speed) * 1000, iterations: Infinity, easing: 'linear' }
 		);
-		if (untrack(() => paused)) animation.pause();
+		if (untrack(() => stopped)) animation.pause();
 		return () => {
 			animation?.cancel();
 			animation = null;
 		};
 	});
 
-	// Stops the scroll under the pointer or the focus.
+	// Stops the scroll while paused or under the pointer or the focus.
 	$effect(() => {
-		const stop = paused;
+		const stop = stopped;
 		if (!animation) return;
 		if (stop) animation.pause();
 		else animation.play();
@@ -144,13 +165,14 @@
 	data-dir={dir}
 	style:mask-image={fade}
 	style:--oito2-marquee-gap="{gap}px"
-	onpointerenter={() => (hovered = true)}
-	onpointerleave={() => (hovered = false)}
-	onfocusin={() => (focused = true)}
-	onfocusout={(event) => {
-		if (!ref?.contains(event.relatedTarget as Node | null)) focused = false;
-	}}
-	{...rest}
+	{...mergeProps(rest, {
+		onpointerenter: () => (hovered = true),
+		onpointerleave: () => (hovered = false),
+		onfocusin: () => (focused = true),
+		onfocusout: (event: FocusEvent) => {
+			if (!ref?.contains(event.relatedTarget as Node | null)) focused = false;
+		}
+	})}
 >
 	<div bind:this={track} class="oito2-marquee-track">
 		<span bind:this={content} class="oito2-marquee-content" {dir}>{@render children()}</span>

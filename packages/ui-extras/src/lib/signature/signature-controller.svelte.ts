@@ -37,6 +37,14 @@ export interface SignatureImageOptions {
 /** Formats `n` with one decimal, as the SVG export writes coordinates. */
 const n = (value: number) => value.toFixed(1);
 
+/** Escapes `value` for a double-quoted XML attribute. */
+const attribute = (value: string) =>
+	value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+
 /**
  * Paints `strokes` in `color` on `context`: round dots for single points, and segments whose
  * width moves from one point's width to the next.
@@ -83,11 +91,18 @@ export class SignatureController {
 
 	readonly #strokes: SignaturePoint[][] = [];
 	#version = $state(0);
+	/** The frozen copy of the strokes and the version it was made at. */
+	#copy: { version: number; strokes: readonly (readonly SignaturePoint[])[] } | null = null;
 
-	/** The strokes, in drawing order, as a frozen copy. */
+	/** The strokes, in drawing order, as a frozen copy made once per change. */
 	get strokes(): readonly (readonly SignaturePoint[])[] {
-		void this.#version;
-		return Object.freeze(this.#strokes.map((stroke) => Object.freeze([...stroke])));
+		const version = this.#version;
+		if (this.#copy?.version !== version)
+			this.#copy = {
+				version,
+				strokes: Object.freeze(this.#strokes.map((stroke) => Object.freeze([...stroke])))
+			};
+		return this.#copy.strokes;
 	}
 
 	/** A number that changes whenever the strokes change, for code that repaints them. */
@@ -139,11 +154,11 @@ export class SignatureController {
 	/**
 	 * Returns the strokes as an SVG document of `size` (the pad size by default), one path
 	 * per stroke segment so the width can vary. A single-point stroke becomes a filled
-	 * circle.
+	 * circle. The `color` is escaped, so it can't add markup to the document.
 	 */
 	toSvg(options: { size?: SignatureSize; color?: string } = {}): string {
 		const { width, height } = options.size ?? this.size;
-		const color = options.color ?? '#000000';
+		const color = attribute(options.color ?? '#000000');
 		let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${n(width)}" height="${n(height)}" viewBox="0 0 ${n(width)} ${n(height)}">`;
 		svg += `<g fill="none" stroke="${color}" stroke-linecap="round" stroke-linejoin="round">`;
 		for (const stroke of this.#strokes) {

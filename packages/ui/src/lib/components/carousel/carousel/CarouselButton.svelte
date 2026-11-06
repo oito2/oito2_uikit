@@ -25,6 +25,7 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { useLocale } from '../../../l10n/locale.js';
+	import { mergeProps } from '../../../internal/merge-props.js';
 	import IconButton from '../../button/IconButton.svelte';
 	import type { IconComponent } from '../../icon.js';
 	import { useCarousel } from '../carousel-controller.svelte.js';
@@ -59,8 +60,7 @@
 		icon={(previous ? ChevronLeft : ChevronRight) as IconComponent}
 		label={label ?? (previous ? strings.previousPage : strings.nextPage)}
 		disabled={disabled || !(previous ? carousel.canGoBack : carousel.canGoForward)}
-		onclick={() => carousel.step(previous ? -1 : 1)}
-		{...rest}
+		{...mergeProps(rest, { onclick: () => carousel.step(previous ? -1 : 1) })}
 	/>
 </span>
 

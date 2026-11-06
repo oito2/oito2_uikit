@@ -21,8 +21,9 @@
   license keys. Focus moves to the next segment when one fills up or when the first
   visible character of the delimiter is typed in a segment with text, and back to the previous one on Backspace
   in an empty segment or on the arrow toward the start at its start; the arrow toward the
-  end at the end of a segment moves to the next. Bind `value`, one string per segment, or
-  set `defaultValue` and listen to `onValueChange`.
+  end at the end of a segment moves to the next. A pasted value that doesn't fit one
+  segment fills it and the ones after it, split on the delimiter or by length. Bind
+  `value`, one string per segment, or set `defaultValue` and listen to `onValueChange`.
 -->
 <script lang="ts">
 	import { tick } from 'svelte';
@@ -87,13 +88,52 @@
 		return model.current[index] ?? '';
 	}
 
+	/** Keeps the allowed characters of `text` for segment `index`, without cutting them. */
+	function allowed(text: string, index: number): string {
+		const segment = segments[index];
+		if (!segment) return text;
+		return (segment.numeric ?? true) ? text.replace(/\D/g, '') : text.split(advance).join('');
+	}
+
 	/** Keeps the allowed characters of `text` for segment `index`. */
 	function clean(text: string, index: number): string {
 		const segment = segments[index];
-		if (!segment) return text;
-		const kept =
-			(segment.numeric ?? true) ? text.replace(/\D/g, '') : text.split(advance).join('');
-		return kept.slice(0, segment.length);
+		return segment ? allowed(text, index).slice(0, segment.length) : text;
+	}
+
+	/**
+	 * Spreads a pasted value that doesn't fit segment `index` over it and the segments after
+	 * it: split on the delimiter when it has one, cut by the segment lengths otherwise.
+	 * Focus moves to the segment after the last one filled.
+	 */
+	function onPaste(event: ClipboardEvent & { currentTarget: HTMLInputElement }, index: number) {
+		const pasted = (event.clipboardData?.getData('text/plain') ?? '').trim();
+		const segment = segments[index];
+		if (
+			!segment ||
+			(!pasted.includes(advance) && allowed(pasted, index).length <= segment.length)
+		)
+			return;
+		event.preventDefault();
+		const next = segments.map((_, i) => textOf(i));
+		let at = index;
+		if (pasted.includes(advance)) {
+			for (const part of pasted.split(advance)) {
+				if (at >= segments.length) break;
+				next[at] = clean(part.trim(), at);
+				at++;
+			}
+		} else {
+			let rest = allowed(pasted, index);
+			while (rest && at < segments.length) {
+				const piece = clean(rest, at);
+				next[at] = piece;
+				rest = rest.slice(piece.length);
+				at++;
+			}
+		}
+		model.current = next;
+		void focus(Math.min(at, segments.length - 1));
 	}
 
 	/** Focuses segment `index` with the caret at `caret` (its end by default). */
@@ -152,6 +192,7 @@
 			{disabled}
 			aria-label={segment.label ?? locale.strings.partOf(index + 1, segments.length)}
 			oninput={(event) => onInput(event, index)}
+			onpaste={(event) => onPaste(event, index)}
 			onkeydown={(event) => onKey(event, index)}
 		/>
 	{/each}

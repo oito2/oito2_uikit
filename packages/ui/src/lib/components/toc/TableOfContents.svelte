@@ -18,7 +18,8 @@
 <!--
   @component
   A list of the sections of a scrolling view that highlights the section in view and
-  scrolls to a section when it is picked. Each entry points at its heading by element id.
+  scrolls to a section when it is picked, moving the focus to its heading and the page's
+  URL fragment to its id. Each entry points at its heading by element id.
   The current section is the last one whose heading has reached `activationOffset`
   pixels below the top of the view, or the last section when the view is scrolled to the
   end. The view is `scrollContainer`, or the page when it isn't given.
@@ -92,15 +93,23 @@
 		};
 	});
 
-	/** Reports `index` and scrolls its heading into view. */
+	/**
+	 * Reports `index`, scrolls its heading into view, focuses the heading (making it
+	 * focusable from script when it isn't) and sets the URL fragment to its id.
+	 */
 	function select(event: MouseEvent, index: number) {
 		event.preventDefault();
 		onSelect?.(index);
 		const entry = entries[index];
 		const heading = entry ? document.getElementById(entry.id) : null;
-		if (!heading) return;
+		if (!entry || !heading) return;
 		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		heading.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+		if (heading.tabIndex < 0 && !heading.hasAttribute('tabindex'))
+			heading.setAttribute('tabindex', '-1');
+		heading.focus({ preventScroll: true });
+		if (location.hash !== `#${entry.id}`)
+			history.replaceState(history.state, '', `#${encodeURIComponent(entry.id)}`);
 	}
 </script>
 

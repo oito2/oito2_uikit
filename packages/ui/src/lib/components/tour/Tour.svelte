@@ -26,6 +26,7 @@
   completed.
 -->
 <script lang="ts">
+	import { autoUpdate } from '@floating-ui/dom';
 	import X from '@lucide/svelte/icons/x';
 	import { tick } from 'svelte';
 	import Portal from '../../internal/Portal.svelte';
@@ -54,41 +55,73 @@
 	let reference = $state<HTMLElement | null>(null);
 	let wasActive = false;
 
-	/** Returns the element of `step`. */
+	/** Returns the element of `step`, or `null` when it has none or its selector is invalid. */
 	function elementOf(step: TourStep | null): Element | null {
 		if (!step?.target) return null;
 		if (typeof step.target === 'function') return step.target() ?? null;
-		return document.querySelector(step.target);
+		try {
+			return document.querySelector(step.target);
+		} catch {
+			return null;
+		}
 	}
 
-	// Follows the target's place every frame while the tour runs.
+	/** The target of a step that appeared after the step began. */
+	let found = $state<{ step: TourStep; element: Element } | null>(null);
+	/** The element of the current step, or `null` while it has none. */
+	let element = $derived.by(() => {
+		const step = controller.step;
+		if (found && found.step === step) return found.element;
+		return elementOf(step);
+	});
+
+	// Waits for the target of the current step to appear in the page while it is missing.
 	$effect(() => {
 		const step = controller.step;
-		if (!step) {
+		if (!step?.target || element) return;
+		const observer = new MutationObserver(() => {
+			const next = elementOf(step);
+			if (next) {
+				observer.disconnect();
+				found = { step, element: next };
+			}
+		});
+		observer.observe(document.body, { childList: true, subtree: true });
+		return () => observer.disconnect();
+	});
+
+	// Scrolls the target into view and follows its place as the page scrolls, resizes or
+	// shifts while the step is shown.
+	$effect(() => {
+		const step = controller.step;
+		const current = element;
+		if (!step || !current) {
 			target = null;
 			return;
 		}
-		const element = elementOf(step);
 		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		element?.scrollIntoView({ block: 'center', behavior: reduced ? 'instant' : 'smooth' });
-		let frame = 0;
-		const track = () => {
-			const box = elementOf(step)?.getBoundingClientRect() ?? null;
+		current.scrollIntoView({ block: 'center', behavior: reduced ? 'instant' : 'smooth' });
+		let shown: DOMRect | null = null;
+		const measure = () => {
+			const box = current.getBoundingClientRect();
 			const pad = step.spotlightPadding ?? 6;
-			const next = box
-				? new DOMRect(box.x - pad, box.y - pad, box.width + 2 * pad, box.height + 2 * pad)
-				: null;
+			const next = new DOMRect(
+				box.x - pad,
+				box.y - pad,
+				box.width + 2 * pad,
+				box.height + 2 * pad
+			);
 			if (
-				next?.x !== target?.x ||
-				next?.y !== target?.y ||
-				next?.width !== target?.width ||
-				next?.height !== target?.height
-			)
+				next.x !== shown?.x ||
+				next.y !== shown?.y ||
+				next.width !== shown?.width ||
+				next.height !== shown?.height
+			) {
+				shown = next;
 				target = next;
-			frame = requestAnimationFrame(track);
+			}
 		};
-		track();
-		return () => cancelAnimationFrame(frame);
+		return autoUpdate(current, document.body, measure);
 	});
 
 	// Reports the end of a run.
@@ -104,8 +137,8 @@
 		const index = controller.index;
 		if (!step?.waitForTap) return;
 		const onClick = (event: MouseEvent) => {
-			const element = elementOf(step);
-			if (element && event.target instanceof Node && element.contains(event.target))
+			const clicked = element;
+			if (clicked && event.target instanceof Node && clicked.contains(event.target))
 				void tick().then(() => {
 					if (controller.index === index) controller.next();
 				});
@@ -137,7 +170,7 @@
 	{@const step = controller.step}
 	{@const index = controller.index}
 	{@const last = index === controller.steps.length - 1}
-	{@const waits = !!step.waitForTap && target !== null}
+	{@const waits = !!step.waitForTap && element !== null}
 	<Portal>
 		<svg
 			class="oito2-tour-spotlight"

@@ -113,21 +113,57 @@
 		onRectChange?.(clamped);
 	}
 
-	/** Follows the pressed pointer from `from`, calling `apply` with the movement. */
-	function follow(from: { x: number; y: number }, apply: (dx: number, dy: number) => void) {
-		const onMove = (event: PointerEvent) =>
-			apply(event.clientX - from.x, event.clientY - from.y);
-		const onUp = () => {
-			window.removeEventListener('pointermove', onMove);
-			window.removeEventListener('pointerup', onUp);
-			window.removeEventListener('pointercancel', onUp);
+	/** The point and pointer of the last press in the panel. */
+	let lastDown = { x: 0, y: 0, pointerId: -1 };
+	/** Ends the drag in progress, if any. */
+	let stopFollowing: (() => void) | null = null;
+
+	/**
+	 * Follows the pressed pointer from `from`, calling `apply` with the movement. The panel
+	 * captures the pointer, or the window listens when it can't; the drag ends when the
+	 * pointer lifts or is cancelled, when another drag starts or when the panel goes away.
+	 */
+	function follow(
+		from: { x: number; y: number; pointerId: number },
+		apply: (dx: number, dy: number) => void
+	) {
+		stopFollowing?.();
+		const node = panel;
+		if (!node) return;
+		let captured = false;
+		try {
+			node.setPointerCapture(from.pointerId);
+			captured = true;
+		} catch {
+			captured = false;
+		}
+		const target: EventTarget = captured ? node : window;
+		const onMove = (event: Event) => {
+			const { clientX, clientY, pointerId } = event as PointerEvent;
+			if (captured && pointerId !== from.pointerId) return;
+			apply(clientX - from.x, clientY - from.y);
 		};
-		window.addEventListener('pointermove', onMove);
-		window.addEventListener('pointerup', onUp);
-		window.addEventListener('pointercancel', onUp);
+		const onEnd = (event: Event) => {
+			if (!captured || (event as PointerEvent).pointerId === from.pointerId) stop();
+		};
+		const stop = () => {
+			target.removeEventListener('pointermove', onMove);
+			target.removeEventListener('pointerup', onEnd);
+			target.removeEventListener('pointercancel', onEnd);
+			target.removeEventListener('lostpointercapture', onEnd);
+			if (captured && node.hasPointerCapture(from.pointerId))
+				node.releasePointerCapture(from.pointerId);
+			if (stopFollowing === stop) stopFollowing = null;
+		};
+		target.addEventListener('pointermove', onMove);
+		target.addEventListener('pointerup', onEnd);
+		target.addEventListener('pointercancel', onEnd);
+		if (captured) target.addEventListener('lostpointercapture', onEnd);
+		stopFollowing = stop;
 	}
 
-	let lastDown = { x: 0, y: 0 };
+	// Ends a drag in progress when the panel goes away.
+	$effect(() => () => stopFollowing?.());
 
 	class PanelWindow implements WindowController {
 		get state(): WindowState {
@@ -195,7 +231,8 @@
 	style:top={maximized ? '0' : `${rect.y}px`}
 	style:width={maximized ? '100%' : `${rect.width}px`}
 	style:height={maximized ? '100%' : minimized ? undefined : `${rect.height}px`}
-	onpointerdowncapture={(event) => (lastDown = { x: event.clientX, y: event.clientY })}
+	onpointerdowncapture={(event) =>
+		(lastDown = { x: event.clientX, y: event.clientY, pointerId: event.pointerId })}
 	{onkeydown}
 	{...rest}
 >
@@ -217,8 +254,14 @@
 					if (event.button !== 0) return;
 					event.preventDefault();
 					const start = { ...rect };
-					follow({ x: event.clientX, y: event.clientY }, (dx, dy) =>
-						setRect({ ...start, width: start.width + dx, height: start.height + dy })
+					follow(
+						{ x: event.clientX, y: event.clientY, pointerId: event.pointerId },
+						(dx, dy) =>
+							setRect({
+								...start,
+								width: start.width + dx,
+								height: start.height + dy
+							})
 					);
 				}}
 			></span>

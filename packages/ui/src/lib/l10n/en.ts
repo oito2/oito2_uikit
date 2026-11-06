@@ -131,6 +131,8 @@ export const en: Localizations = {
 	nextStep: 'Next',
 	code: 'Code',
 	zoom: 'Zoom',
+	pauseRotation: 'Pause automatic rotation',
+	startRotation: 'Start automatic rotation',
 	pageOf: (page, count) => `Page ${page} of ${count}`,
 	partOf: (part, count) => `Part ${part} of ${count}`,
 	timeAgo: (count, timeUnit) => `${unit(count, timeUnit)} ago`,

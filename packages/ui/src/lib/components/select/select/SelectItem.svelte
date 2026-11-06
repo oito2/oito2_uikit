@@ -44,9 +44,17 @@
 	const select = useSelect();
 	let selected = $derived(select.value === value);
 
+	/**
+	 * Records the label of the option; on removal, forgets it unless the option is the chosen
+	 * one, whose label the trigger keeps showing.
+	 */
 	function register(node: HTMLElement) {
 		const text = label ?? node.textContent?.trim() ?? value;
 		select.labels.set(value, text);
+		return () => {
+			if (select.value !== value && select.labels.get(value) === text)
+				select.labels.delete(value);
+		};
 	}
 </script>
 

@@ -91,8 +91,9 @@
 	});
 
 	let vertical = $derived(paneSide === 'top' || paneSide === 'bottom');
-	let width = $state(0);
-	let height = $state(0);
+	// Unbounded until measured, so the pane starts at its own size rather than its smallest.
+	let width = $state(Number.POSITIVE_INFINITY);
+	let height = $state(Number.POSITIVE_INFINITY);
 	let available = $derived(vertical ? height : width);
 	let max = $derived(Math.max(minPaneSize, available - 1 - minPageSize));
 	let current = $derived(Math.min(Math.max(size.current, minPaneSize), max));
@@ -131,7 +132,7 @@
 				label={resizeLabel ?? locale.strings.resizePane}
 				value={current}
 				min={minPaneSize}
-				{max}
+				max={Number.isFinite(max) ? max : current}
 				onMove={(delta) => resize(current + (ref && growsForward(ref) ? delta : -delta))}
 				onKey={(event) => {
 					if (event.key === 'Home') resize(minPaneSize);

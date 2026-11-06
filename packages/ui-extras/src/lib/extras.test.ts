@@ -121,6 +121,28 @@ describe('SignatureController', () => {
 				'</g></svg>'
 		);
 	});
+
+	it('escapes the color of the SVG export', () => {
+		const controller = new SignatureController();
+		controller.size = { width: 10, height: 10 };
+		controller.addStroke([{ x: 5, y: 5, width: 2 }]);
+		const svg = controller.toSvg({ color: '"><script>alert(1)</script><x a="&' });
+		expect(svg).not.toContain('<script>');
+		expect(svg).toContain(
+			'stroke="&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;x a=&quot;&amp;"'
+		);
+		expect(svg).toContain('fill="&quot;&gt;&lt;script&gt;');
+	});
+
+	it('reuses the copy of the strokes until they change', () => {
+		const controller = new SignatureController();
+		controller.addStroke([{ x: 1, y: 1, width: 1 }]);
+		const first = controller.strokes;
+		expect(controller.strokes).toBe(first);
+		controller.extendStroke({ x: 2, y: 2, width: 1 });
+		expect(controller.strokes).not.toBe(first);
+		expect(controller.strokes[0]).toHaveLength(2);
+	});
 });
 
 describe('CropController', () => {

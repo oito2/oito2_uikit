@@ -142,6 +142,8 @@ export const ptBR: Localizations = {
 	nextStep: 'Próximo',
 	code: 'Código',
 	zoom: 'Zoom',
+	pauseRotation: 'Pausar a rotação automática',
+	startRotation: 'Iniciar a rotação automática',
 	pageOf: (page, count) => `Página ${page} de ${count}`,
 	partOf: (part, count) => `Parte ${part} de ${count}`,
 	timeAgo: (count, timeUnit) => `há ${unit(count, timeUnit)}`,

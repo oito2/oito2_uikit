@@ -49,20 +49,30 @@ export class SplitterState {
 
 	constructor(options: SplitterOptions) {
 		this.#options = options;
+		// Fits the panes to the space and to their limits whenever either changes, and
+		// reports the new sizes of panes that were already laid out.
 		$effect.pre(() => {
 			const available = Math.max(0, this.extent - (this.#panes.length - 1));
 			const panes = this.#limits();
-			const layout = this.#layout;
-			if (available === layout.available && layout.sizes.length === panes.length) return;
-			this.#layout = fitSplitter(panes, available, {
+			const layout = untrack(() => this.#layout);
+			const next = fitSplitter(panes, available, {
 				...layout,
 				collapsed:
 					layout.collapsed.length === panes.length
 						? layout.collapsed
-						: this.#panes.map((pane) => pane.defaultCollapsed),
+						: untrack(() => this.#panes.map((pane) => pane.defaultCollapsed)),
 				restore: layout.restore.length === panes.length ? layout.restore : [],
 				sizes: layout.sizes.length === panes.length ? layout.sizes : []
 			});
+			if (
+				next.available === layout.available &&
+				next.sizes.length === layout.sizes.length &&
+				next.sizes.every((size, i) => size === layout.sizes[i])
+			)
+				return;
+			this.#layout = next;
+			if (layout.available > 0 && layout.sizes.length === next.sizes.length)
+				this.#options.onSizesChange()?.([...next.sizes]);
 		});
 	}
 

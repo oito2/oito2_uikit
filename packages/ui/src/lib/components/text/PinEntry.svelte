@@ -109,6 +109,9 @@
 		}
 	}
 
+	/** The keys that move the caret within the input. */
+	const caretKeys = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']);
+
 	/** Keeps the caret at the end, so the active cell is always the next empty one. */
 	function caretAtEnd(event: Event & { currentTarget: HTMLInputElement }) {
 		const end = event.currentTarget.value.length;
@@ -148,6 +151,10 @@
 				caretAtEnd(event);
 			},
 			onblur: () => (focused = false),
+			onkeydown: (event: KeyboardEvent) => {
+				// The keys that move the caret are ignored, so it stays at the end.
+				if (caretKeys.has(event.key)) event.preventDefault();
+			},
 			onselect: caretAtEnd,
 			onpointerup: caretAtEnd
 		})}

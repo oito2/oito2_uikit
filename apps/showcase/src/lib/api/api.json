@@ -2291,7 +2291,7 @@
 					"Content": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/dialog/dialog/DialogContent.svelte",
-						"doc": "The panel of a dialog, centered over a dimmed page while the dialog is open. Focus moves\ninto it and stays there until it closes, then returns to where it was; the page behind\ndoesn't scroll. Escape closes it, and so does a click outside unless `role` is\n`alertdialog`.",
+						"doc": "The panel of a dialog, centered over a dimmed page while the dialog is open. Focus moves\ninto it and stays there until it closes, then returns to where it was; the page behind\nis inert and doesn't scroll. Escape closes it, and so does a click outside unless `role` is\n`alertdialog`.",
 						"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 						"props": [
 							{
@@ -2502,7 +2502,7 @@
 			"ScrollArea": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/scroll/ScrollArea.svelte",
-				"doc": "A scrolling region with the oito2 scroll bars instead of the system ones: thin\nrounded thumbs (6 pixels, 10 while hovered) in the text color at 30% (45% hovered, 60%\ndragged), which show while the content scrolls or the pointer is over the region, or\nalways with `thumbVisibility`. The thumbs can be dragged and the tracks clicked to page.\nWhile the content overflows, the scrolling area takes the keyboard focus, so the arrow\nkeys and Page Up/Down scroll it.",
+				"doc": "A scrolling region with the oito2 scroll bars instead of the system ones: thin\nrounded thumbs (6 pixels, 10 while hovered) in the text color at 30% (45% hovered, 60%\ndragged), which show while the content scrolls or the pointer is over the region, or\nalways with `thumbVisibility`. The thumbs can be dragged and the tracks clicked to page.\nWhile the content overflows, the scrolling area takes the keyboard focus, so the arrow\nkeys and Page Up/Down scroll it, and is a region named by `aria-label` or\n`aria-labelledby`.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 				"props": [
 					{
@@ -2529,6 +2529,20 @@
 						"doc": "The scrolling element, for reading or setting its scroll position.",
 						"default": "null",
 						"bindable": true
+					},
+					{
+						"name": "aria-label",
+						"kind": "prop",
+						"type": "string | null",
+						"optional": true,
+						"doc": "The accessible name of the scrolling area."
+					},
+					{
+						"name": "aria-labelledby",
+						"kind": "prop",
+						"type": "string | null",
+						"optional": true,
+						"doc": "The id of the element that names the scrolling area."
 					},
 					{
 						"name": "children",
@@ -5900,7 +5914,7 @@
 			"TableOfContents": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/toc/TableOfContents.svelte",
-				"doc": "A list of the sections of a scrolling view that highlights the section in view and\nscrolls to a section when it is picked. Each entry points at its heading by element id.\nThe current section is the last one whose heading has reached `activationOffset`\npixels below the top of the view, or the last section when the view is scrolled to the\nend. The view is `scrollContainer`, or the page when it isn't given.",
+				"doc": "A list of the sections of a scrolling view that highlights the section in view and\nscrolls to a section when it is picked, moving the focus to its heading and the page's\nURL fragment to its id. Each entry points at its heading by element id.\nThe current section is the last one whose heading has reached `activationOffset`\npixels below the top of the view, or the last section when the view is scrolled to the\nend. The view is `scrollContainer`, or the page when it isn't given.",
 				"extends": "Omit<HTMLAttributes<HTMLElement>, 'children'>",
 				"props": [
 					{
@@ -6106,7 +6120,7 @@
 								"kind": "event",
 								"type": "(sizes: readonly number[]) => void",
 								"optional": true,
-								"doc": "Called with the pane sizes, in pixels, after each change."
+								"doc": "Called with the pane sizes, in pixels, after each change: a divider moved, a pane\ncollapsed or restored, the splitter resized or the limits of a pane changed."
 							},
 							{
 								"name": "keyboardStep",
@@ -6581,7 +6595,7 @@
 					"Root": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/carousel/carousel/CarouselRoot.svelte",
-						"doc": "A row of pages shown one at a time. Pages change by `Carousel.Prev` and `Carousel.Next`,\nthe dots of `Carousel.Indicators`, the Left and Right arrow keys (swapped in\nright-to-left text) while the carousel has focus, or a swipe, also with a mouse. With\n`loop` the buttons and arrows wrap around, jumping straight to the other end. With\n`autoScroll` it moves to the next page every `interval` milliseconds while no pointer\nhovers it, nothing inside it has focus and motion isn't reduced. Bind `page`, or set\n`defaultPage` and listen to `onPageChange`; setting `page` scrolls to it.",
+						"doc": "A row of pages shown one at a time. Pages change by `Carousel.Prev` and `Carousel.Next`,\nthe dots of `Carousel.Indicators`, the Left and Right arrow keys (swapped in\nright-to-left text) while the carousel has focus, or a swipe, also with a mouse. With\n`loop` the buttons and arrows wrap around, jumping straight to the other end. With\n`autoScroll` it moves to the next page every `interval` milliseconds while `playing`,\nno pointer hovers it, nothing inside it has focus, the document is visible and motion\nisn't reduced; `Carousel.PlayPause` turns `playing` off and on. Bind `page`, or set\n`defaultPage` and listen to `onPageChange`; setting `page` scrolls to it.",
 						"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 						"props": [
 							{
@@ -6632,6 +6646,29 @@
 								"default": "4000"
 							},
 							{
+								"name": "playing",
+								"kind": "prop",
+								"type": "boolean",
+								"optional": true,
+								"doc": "Whether the automatic rotation of `autoScroll` is on.",
+								"bindable": true
+							},
+							{
+								"name": "defaultPlaying",
+								"kind": "prop",
+								"type": "boolean",
+								"optional": true,
+								"doc": "The rotation state of an uncontrolled carousel before the first change. Defaults to `true`.",
+								"default": "true"
+							},
+							{
+								"name": "onPlayingChange",
+								"kind": "event",
+								"type": "(playing: boolean) => void",
+								"optional": true,
+								"doc": "Called with each new rotation state."
+							},
+							{
 								"name": "controller",
 								"kind": "prop",
 								"type": "CarouselController | null",
@@ -6660,7 +6697,7 @@
 					"Viewport": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/carousel/carousel/CarouselViewport.svelte",
-						"doc": "The scrolling row of `Carousel.Item`s, one page at a time, `height` pixels tall. It\nsnaps to a page after a swipe; with a mouse the pages can be dragged too. Place\n`Carousel.Prev` and `Carousel.Next` inside it to show them over the pages.",
+						"doc": "The scrolling row of `Carousel.Item`s, one page at a time, `height` pixels tall. It\nsnaps to a page after a swipe; with a mouse the pages can be dragged too. Place\n`Carousel.Prev` and `Carousel.Next` inside it to show them over the pages. Page changes\nare announced to assistive technologies, except while the pages advance by themselves.",
 						"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 						"props": [
 							{
@@ -6773,6 +6810,37 @@
 								"type": "HTMLDivElement | null",
 								"optional": true,
 								"doc": "The indicator element.",
+								"default": "null",
+								"bindable": true
+							}
+						]
+					},
+					"PlayPause": {
+						"kind": "component",
+						"source": "packages/ui/src/lib/components/carousel/carousel/CarouselPlayPause.svelte",
+						"doc": "The button that stops and restarts the automatic rotation of a carousel with\n`autoScroll`, turning its `playing` off and on. It renders nothing without `autoScroll`.\nPlace it outside `Carousel.Viewport`, such as next to `Carousel.Indicators`.",
+						"extends": "Omit<HTMLButtonAttributes, 'children'>",
+						"props": [
+							{
+								"name": "pauseLabel",
+								"kind": "prop",
+								"type": "string",
+								"optional": true,
+								"doc": "The accessible name while rotating. Defaults to \"Pause automatic rotation\"."
+							},
+							{
+								"name": "playLabel",
+								"kind": "prop",
+								"type": "string",
+								"optional": true,
+								"doc": "The accessible name while stopped. Defaults to \"Start automatic rotation\"."
+							},
+							{
+								"name": "ref",
+								"kind": "prop",
+								"type": "HTMLButtonElement | null",
+								"optional": true,
+								"doc": "The button element.",
 								"default": "null",
 								"bindable": true
 							}
@@ -7765,7 +7833,7 @@
 			"EditableLabel": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/text/EditableLabel.svelte",
-				"doc": "A text label that turns into a field to rename it in place. A double click, Enter or F2\nstarts editing with the text selected. Enter or leaving the field keeps the change,\ncalling `onSubmit` with the trimmed text when it changed and isn't empty; Escape\nrestores the text. Without `onSubmit` the label is read-only.",
+				"doc": "A text label that turns into a field to rename it in place. A double click, Enter, Space or\nF2 starts editing with the text selected. Enter or leaving the field keeps the change,\ncalling `onSubmit` with the trimmed text when it changed and isn't empty; Escape\nrestores the text. Without `onSubmit` the label is read-only.",
 				"extends": "Omit<HTMLAttributes<HTMLElement>, 'children'>",
 				"props": [
 					{
@@ -7997,7 +8065,7 @@
 						"kind": "prop",
 						"type": "boolean",
 						"optional": true,
-						"doc": "Whether the tags can't be changed."
+						"doc": "Whether the field can't be used: the input is disabled and the tags can't be focused."
 					},
 					{
 						"name": "label",
@@ -8510,7 +8578,7 @@
 			"parseCompactDate": {
 				"kind": "function",
 				"source": "packages/ui/src/lib/components/entries/date-time.ts",
-				"doc": "Parses `text` written in the compact numeric date form of `locale` (the day, month and\nyear in the locale's order, separated as the locale separates them, with or without\nleading zeros) and returns the local date at midnight, or `null` when it isn't a real\ndate in that form."
+				"doc": "Parses `text` written in the compact numeric date form of `locale` (the day, month and\nyear in the locale's order, separated as the locale separates them, with or without\nleading zeros, in the locale's digits or Latin ones) and returns the local date at\nmidnight, or `null` when it isn't a real date in that form."
 			},
 			"parseTime": {
 				"kind": "function",
@@ -8743,7 +8811,7 @@
 			"SegmentedEntry": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/entries/SegmentedEntry.svelte",
-				"doc": "A row of short text fields joined by a `delimiter`, for values like IP addresses or\nlicense keys. Focus moves to the next segment when one fills up or when the first\nvisible character of the delimiter is typed in a segment with text, and back to the previous one on Backspace\nin an empty segment or on the arrow toward the start at its start; the arrow toward the\nend at the end of a segment moves to the next. Bind `value`, one string per segment, or\nset `defaultValue` and listen to `onValueChange`.",
+				"doc": "A row of short text fields joined by a `delimiter`, for values like IP addresses or\nlicense keys. Focus moves to the next segment when one fills up or when the first\nvisible character of the delimiter is typed in a segment with text, and back to the previous one on Backspace\nin an empty segment or on the arrow toward the start at its start; the arrow toward the\nend at the end of a segment moves to the next. A pasted value that doesn't fit one\nsegment fills it and the ones after it, split on the delimiter or by length. Bind\n`value`, one string per segment, or set `defaultValue` and listen to `onValueChange`.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue'>",
 				"props": [
 					{
@@ -9211,8 +9279,16 @@
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/popover/popover/PopoverContent.svelte",
 						"doc": "The panel of a popover, over the page next to its anchor, in the surface container color\nwith an outline and a shadow. It opens on the `placement` side (`start` and `end` follow\nthe text direction), moves to the other side when it doesn't fit and lines up by\n`alignment`. With `focusOnOpen` its first focusable element takes focus when it opens;\nwhen it closes with focus inside, focus returns to where it was. Escape closes it, and\nso does a click outside unless `closeOnOutsideClick` is false.",
-						"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
+						"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'role'>",
 						"props": [
+							{
+								"name": "role",
+								"kind": "prop",
+								"type": "HTMLAttributes<HTMLDivElement>['role']",
+								"optional": true,
+								"doc": "The role of the panel, such as `group` or `region` for a panel that is part of the\npage's navigation rather than a dialog. Defaults to `dialog`.",
+								"default": "'dialog'"
+							},
 							{
 								"name": "placement",
 								"kind": "prop",
@@ -10101,7 +10177,7 @@
 					"Content": {
 						"kind": "component",
 						"source": "packages/ui/src/lib/components/sheet/sheet/SheetContent.svelte",
-						"doc": "The panel of a sheet, sliding in from its edge. A side sheet is `size` pixels wide; a\nbottom sheet is as tall as its content up to 90% of the window, or rests at its snap\npoints. A modal sheet traps focus and dims the page; focus returns where it was when it\ncloses.",
+						"doc": "The panel of a sheet, sliding in from its edge. A side sheet is `size` pixels wide; a\nbottom sheet is as tall as its content up to 90% of the window, or rests at its snap\npoints. A modal sheet traps focus and dims the page, which turns inert; focus returns\nwhere it was when it closes.",
 						"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 						"props": [
 							{
@@ -10227,7 +10303,7 @@
 			"ToasterStore": {
 				"kind": "class",
 				"source": "packages/ui/src/lib/components/toast/toaster.svelte.ts",
-				"doc": "The toasts of an app: shown by `toast()`, rendered by `Toaster`. The toasts past\n`maxVisible` wait their turn, and every timer pauses while the pointer is over the\ntoasts or focus is inside them."
+				"doc": "The toasts of an app: shown by `toast()`, rendered by `Toaster`. The toasts past the\nnumber on screen wait their turn, and every timer pauses while the pointer is over the\ntoasts, focus is inside them or the page is hidden."
 			},
 			"Toast": {
 				"kind": "interface",
@@ -10247,7 +10323,7 @@
 			"Toaster": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/toast/Toaster.svelte",
-				"doc": "Shows the toasts of `toast()`: short messages in the inverse surface color, stacked at\n`placement`, up to `maxVisible` at once (the rest wait). A toast closes after its\nduration, by its close button or Escape, or by its action; the timers pause while the\npointer is over the toasts or focus is inside them. Screen readers hear each toast.\nPlace one `Toaster` inside the app's `ThemeProvider`.",
+				"doc": "Shows the toasts of `toast()`: short messages in the inverse surface color, stacked at\n`placement`, up to `maxVisible` at once (the rest wait). A toast closes after its\nduration, by its close button or Escape, or by its action; the timers pause while the\npointer is over the toasts, focus is inside them or the page is hidden. Screen readers\nhear each toast, a `danger` one at once. Place one `Toaster` inside the app's\n`ThemeProvider`.",
 				"extends": "Omit<HTMLAttributes<HTMLElement>, 'children'>",
 				"props": [
 					{
@@ -10695,7 +10771,7 @@
 			"TreeView": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/tree/TreeView.svelte",
-				"doc": "A tree of the nodes of `collection`, with the open, selected and checked nodes kept in\n`controller`.\n\nOnly the rows in view are rendered, so it handles large trees; give it a height. The tree\ntakes the focus as a whole and marks its active row:\n\n- Up, Down, Home and End move the active row; a single-selection tree selects it, and\n  Shift extends a multiple selection.\n- Right opens a branch or moves to its first child; Left closes it or moves to the parent\n  (swapped in right-to-left layouts).\n- Space toggles the check box of a `checkable` tree, or else the selection of a\n  multiple-selection one; Control+A (Command+A) selects every shown, enabled node of a\n  multiple-selection tree.\n- Enter, or a double click, calls `onActivate`, or opens or closes a branch when it is\n  not set.\n- F2 starts an inline rename of the active node when `onRename` is set; Enter or leaving\n  the field confirms it and Escape cancels it.\n- Typing letters jumps to the next shown label that starts with them.\n\nA branch with no children yet and an `onLoadChildren` shows a spinner while its children\nload the first time it opens. A non-empty `query` shows only the matching nodes and their\nancestors, all open, with the match highlighted; branches can't be opened or closed while\nfiltering.",
+				"doc": "A tree of the nodes of `collection`, with the open, selected and checked nodes kept in\n`controller`.\n\nOnly the rows in view are rendered, so it handles large trees; give it a height. The tree\ntakes the focus as a whole and marks its active row:\n\n- Up, Down, Home and End move the active row; a single-selection tree selects it, and\n  Shift extends a multiple selection.\n- Right opens a branch or moves to its first child; Left closes it or moves to the parent\n  (swapped in right-to-left layouts). `*` opens every branch at the level of the active row.\n- Space toggles the check box of a `checkable` tree, or else the selection of a\n  multiple-selection one; Control+A (Command+A) selects every shown, enabled node of a\n  multiple-selection tree.\n- Enter, or a double click, calls `onActivate`, or opens or closes a branch when it is\n  not set.\n- F2 starts an inline rename of the active node when `onRename` is set; Enter or leaving\n  the field confirms it and Escape cancels it.\n- Typing letters jumps to the next shown label that starts with them.\n\nA branch with no children yet and an `onLoadChildren` shows a spinner while its children\nload the first time it opens. A non-empty `query` shows only the matching nodes and their\nancestors, all open, with the match highlighted; branches can't be opened or closed while\nfiltering.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 				"props": [
 					{
@@ -10807,7 +10883,7 @@
 			"jsonTree": {
 				"kind": "function",
 				"source": "packages/ui/src/lib/components/tree/json-tree.ts",
-				"doc": "Returns the tree of decoded JSON `data`: objects and arrays become branches, other values\nleaves, and the top node is labeled `rootLabel`. Node values are JSON paths, such as\n`$.items[0].name`."
+				"doc": "Returns the tree of decoded JSON `data`: objects and arrays become branches, other values\nleaves, and the top node is labeled `rootLabel`. Node values are JSON paths, such as\n`$.items[0].name`. An object or array inside itself becomes a `[Circular]` leaf."
 			},
 			"jsonValueText": {
 				"kind": "function",
@@ -11038,7 +11114,7 @@
 			"Marquee": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/components/marquee/Marquee.svelte",
-				"doc": "Scrolls its content continuously when it is longer than the space it has, such as a news\nticker or a long song title.\n\nThe content moves toward the reading start (up when vertical), or the other way with\n`reverse`, at `speed` pixels per second, followed by a copy after `gap`. It stops while\nthe pointer or the focus is on it, and stays still at its start when the user prefers\nreduced motion. `fadeEdges` fades the content at both ends. Content that fits doesn't\nmove. Assistive technologies read the content once; the copy is hidden and inert, so\nplain content, such as text or icons, fits best. A vertical marquee needs a height.",
+				"doc": "Scrolls its content continuously when it is longer than the space it has, such as a news\nticker or a long song title.\n\nThe content moves toward the reading start (up when vertical), or the other way with\n`reverse`, at `speed` pixels per second, followed by a copy after `gap`. It stops while\n`paused`, which an app can turn on and off with a button of its own, and while the\npointer or the focus is on it, and stays still at its start when the user prefers\nreduced motion. `fadeEdges` fades the content at both ends. Content that fits doesn't\nmove. Assistive technologies read the content once; the copy is hidden and inert, so\nplain content, such as text or icons, fits best. A vertical marquee needs a height.",
 				"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 				"props": [
 					{
@@ -11087,6 +11163,29 @@
 						"optional": true,
 						"doc": "Whether the pointer or the focus stops the scroll. Defaults to true.",
 						"default": "true"
+					},
+					{
+						"name": "paused",
+						"kind": "prop",
+						"type": "boolean",
+						"optional": true,
+						"doc": "Whether the scroll is stopped, wherever the pointer and the focus are.",
+						"bindable": true
+					},
+					{
+						"name": "defaultPaused",
+						"kind": "prop",
+						"type": "boolean",
+						"optional": true,
+						"doc": "Whether an uncontrolled marquee starts stopped. Defaults to `false`.",
+						"default": "false"
+					},
+					{
+						"name": "onPausedChange",
+						"kind": "event",
+						"type": "(paused: boolean) => void",
+						"optional": true,
+						"doc": "Called with each new `paused` state."
 					},
 					{
 						"name": "fadeEdges",
@@ -11665,7 +11764,7 @@
 			"loadCropImage": {
 				"kind": "function",
 				"source": "packages/ui-extras/src/lib/crop/crop-controller.svelte.ts",
-				"doc": "Loads the image at `src` and, when its longest side is above `maxDimension`, scales it\ndown onto a canvas, keeping its aspect ratio, to bound the memory it takes."
+				"doc": "Loads the image at `src` and, when its longest side is above `maxDimension`, scales it\ndown onto a canvas, keeping its aspect ratio, to bound the memory it takes. Set\n`crossOrigin` to load an image of another origin with CORS, which the crop exports need:\na canvas painted with an image of another origin loaded without it can't be read, so\n`CropController.cropBlob()` rejects."
 			},
 			"CropImage": {
 				"kind": "type",
@@ -11748,6 +11847,14 @@
 						"optional": true,
 						"doc": "The longest side, in pixels, the image is kept at; larger images are scaled down,\nkeeping their aspect ratio, to bound the memory they take. `null` keeps the full\nsize. Defaults to 4096.",
 						"default": "4096"
+					},
+					{
+						"name": "crossOrigin",
+						"kind": "prop",
+						"type": "'anonymous' | 'use-credentials' | null",
+						"optional": true,
+						"doc": "The CORS mode the image loads with, for an image of another origin, such as an asset\nURL of a Tauri app on Windows or Linux. The crop can only be exported from such an\nimage when it loads with CORS and its server allows it. Defaults to none.",
+						"default": "null"
 					},
 					{
 						"name": "onError",
@@ -11926,7 +12033,7 @@
 					"Trigger": {
 						"kind": "component",
 						"source": "packages/ui-extras/src/lib/navigation-menu/navigation-menu/NavigationMenuTrigger.svelte",
-						"doc": "The button of a navigation menu item that opens its `NavigationMenu.Content`: on hover,\non a click or on the Down arrow, the last two moving the focus into the panel.",
+						"doc": "The button of a navigation menu item that opens its `NavigationMenu.Content`: on hover,\non a click or on the Down arrow, the last two moving the focus into the panel. It tells\nwhether the panel is expanded, which is a group of links rather than a menu or a dialog.",
 						"extends": "Omit<HTMLButtonAttributes, 'children'>",
 						"props": [
 							{
@@ -11956,7 +12063,7 @@
 					"Content": {
 						"kind": "component",
 						"source": "packages/ui-extras/src/lib/navigation-menu/navigation-menu/NavigationMenuContent.svelte",
-						"doc": "The flyout panel of a navigation menu item, below its trigger. It stays open while the\npointer is over it, and takes the focus when it was opened from the keyboard or a click.",
+						"doc": "The flyout panel of a navigation menu item, below its trigger. It stays open while the\npointer is over it, and takes the focus when it was opened from the keyboard or a click.\nIt is a `group`, part of the page's navigation rather than a dialog.",
 						"extends": "Omit<HTMLAttributes<HTMLDivElement>, 'children'>",
 						"props": [
 							{

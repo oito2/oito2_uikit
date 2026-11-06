@@ -27,6 +27,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { addDescribedBy } from '../../internal/described-by.js';
 	import { tabbables } from '../../internal/focus.js';
 	import { useTooltip } from './tooltip-state.svelte.js';
 
@@ -53,16 +54,7 @@
 			return () => wrapper.removeAttribute('tabindex');
 		}
 		if (!tooltip.open) return;
-		const tokens = (inner.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
-		if (tokens.includes(tooltip.id)) return;
-		inner.setAttribute('aria-describedby', [...tokens, tooltip.id].join(' '));
-		return () => {
-			const left = (inner.getAttribute('aria-describedby') ?? '')
-				.split(/\s+/)
-				.filter((token) => token && token !== tooltip.id);
-			if (left.length > 0) inner.setAttribute('aria-describedby', left.join(' '));
-			else inner.removeAttribute('aria-describedby');
-		};
+		return addDescribedBy(inner, tooltip.id);
 	};
 </script>
 

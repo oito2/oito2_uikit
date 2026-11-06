@@ -68,7 +68,8 @@
 
 	const locale = useLocale();
 	let highlighted = $derived(highlighter.highlight(code, { language, autoDetect }));
-	let lineCount = $derived(code.split('\n').length);
+	/** The number of lines, not counting the empty one after a final line break. */
+	let lineCount = $derived(code.replace(/\r?\n$/, '').split('\n').length);
 </script>
 
 <div

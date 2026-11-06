@@ -24,6 +24,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { addDescribedBy } from '../../../internal/described-by.js';
+	import { longPress } from '../../../internal/long-press.js';
+	import { mergeProps } from '../../../internal/merge-props.js';
 	import { usePopover } from '../../popover/popover-state.svelte.js';
 	import { useHoverCard } from '../hover-card-context.js';
 
@@ -36,7 +39,6 @@
 
 	const popover = usePopover();
 	const card = useHoverCard();
-	let press: ReturnType<typeof setTimeout> | undefined;
 </script>
 
 <span
@@ -52,23 +54,19 @@
 		const target =
 			node.querySelector<HTMLElement>('a[href], button, input, [tabindex]') ?? node;
 		if (!popover.open) return;
-		target.setAttribute('aria-describedby', `${popover.id}-content`);
-		return () => target.removeAttribute('aria-describedby');
+		return addDescribedBy(target, `${popover.id}-content`);
 	}}
-	onpointerenter={(event) => {
-		if (event.pointerType === 'mouse') card.schedule(true);
-	}}
-	onpointerleave={(event) => {
-		if (event.pointerType === 'mouse') card.schedule(false);
-	}}
-	onpointerdown={(event) => {
-		if (event.pointerType !== 'mouse') press = setTimeout(() => card.openNow(), 500);
-	}}
-	onpointerup={() => clearTimeout(press)}
-	onpointercancel={() => clearTimeout(press)}
-	onfocusin={() => card.schedule(true)}
-	onfocusout={() => card.schedule(false)}
-	{...rest}
+	{@attach longPress(() => card.openNow())}
+	{...mergeProps(rest, {
+		onpointerenter: (event: PointerEvent) => {
+			if (event.pointerType === 'mouse') card.schedule(true);
+		},
+		onpointerleave: (event: PointerEvent) => {
+			if (event.pointerType === 'mouse') card.schedule(false);
+		},
+		onfocusin: () => card.schedule(true),
+		onfocusout: () => card.schedule(false)
+	})}
 >
 	{@render children()}
 </span>
