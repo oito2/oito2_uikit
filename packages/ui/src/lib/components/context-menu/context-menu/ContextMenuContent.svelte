@@ -46,6 +46,7 @@
 	initialFocus={menu.initialFocus}
 	onDismiss={() => menu.hide()}
 	onTab={() => menu.closeAll()}
+	returnFocus={() => menu.focusReturn}
 	bind:ref={menu.content}
 	{...rest}
 >

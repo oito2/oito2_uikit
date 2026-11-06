@@ -56,7 +56,7 @@
 	role="menuitem"
 	leading={Icon ? leading : undefined}
 	trailing={shortcut}
-	onHover={() => menu.openSub?.hide()}
+	onHover={() => menu.hideSubSoon()}
 	onActivate={() => {
 		const event = new Event('select', { cancelable: true });
 		onSelect?.(event);

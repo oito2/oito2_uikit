@@ -107,12 +107,14 @@
 				arrow: () => popover.arrow
 			})}
 			{@attach presence.attach}
-			{@attach focusScope({ autoFocus: focusOnOpen })}
-			{@attach dismissableLayer({
-				onDismiss: () => popover.controller.close(),
-				closeOnPointerOutside: closeOnOutsideClick,
-				inside: () => [popover.trigger, popover.anchor]
-			})}
+			{@attach popover.open ? focusScope({ autoFocus: focusOnOpen }) : undefined}
+			{@attach popover.open
+				? dismissableLayer({
+						onDismiss: () => popover.controller.close(),
+						closeOnPointerOutside: closeOnOutsideClick,
+						inside: () => [popover.trigger, popover.anchor]
+					})
+				: undefined}
 			{...rest}
 		>
 			{@render children?.()}

@@ -38,11 +38,17 @@ export interface MenuListOptions {
 	preferred?: () => HTMLElement | null | undefined;
 	/** Called when Tab is pressed, which closes the menu. */
 	onTab: () => void;
+	/**
+	 * Returns the element that takes focus when Tab closes the menu, such as its trigger,
+	 * so the browser moves on from there instead of from the end of the document.
+	 */
+	returnFocus?: () => HTMLElement | null | undefined;
 }
 
 /**
  * The keyboard of a menu or a list of options: one Tab stop, Up/Down (looping), Home and
- * End, typeahead over the item labels, and the initial focus.
+ * End (from the panel itself too, entering it at the first or last item), typeahead over
+ * the item labels, Tab returning focus to the trigger, and the initial focus.
  */
 export function menuList(options: MenuListOptions): Attachment<HTMLElement> {
 	return (list) => {
@@ -62,8 +68,21 @@ export function menuList(options: MenuListOptions): Attachment<HTMLElement> {
 		const onKeyDown = (event: KeyboardEvent) => {
 			if (event.defaultPrevented) return;
 			if (event.key === 'Tab') {
+				// Focus goes back to the trigger first; the browser's own Tab then moves on
+				// from it, as from any other control.
 				options.onTab();
+				focusElement(options.returnFocus?.());
 				return;
+			}
+			if (event.target === list && !event.ctrlKey && !event.altKey && !event.metaKey) {
+				const items = menuItems(list);
+				const first = event.key === 'ArrowDown' || event.key === 'Home';
+				const last = event.key === 'ArrowUp' || event.key === 'End';
+				if (first || last) {
+					event.preventDefault();
+					focusElement(first ? items[0] : items.at(-1));
+					return;
+				}
 			}
 			if (!isPrintableKey(event)) return;
 			const items = menuItems(list);
@@ -94,7 +113,7 @@ export function menuList(options: MenuListOptions): Attachment<HTMLElement> {
 					? items[0]
 					: null);
 		if (target) focusElement(target);
-		else focusElement(list);
+		else if (options.initialFocus !== 'keep') focusElement(list);
 		return () => {
 			typeahead.reset();
 			list.removeEventListener('keydown', onKeyDown);

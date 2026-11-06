@@ -24,9 +24,11 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { focusElement } from '../../../internal/focus.js';
 	import { directionOf } from '../../../internal/keyboard.js';
 	import type { IconComponent } from '../../icon.js';
 	import MenuItemBase from '../MenuItemBase.svelte';
+	import { menuItems } from '../menu-list.js';
 	import { useMenu } from '../menu-state.svelte.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'role'> {
@@ -52,15 +54,40 @@
 		sub.trigger = node;
 		rtl = directionOf(node) === 'rtl';
 		return () => {
-			clearTimeout(timer);
+			stopTimer();
 			if (sub.trigger === node) sub.trigger = null;
 		};
+	}
+
+	function stopTimer() {
+		clearTimeout(timer);
+		timer = undefined;
+	}
+
+	/** Opens the submenu with its first item focused, or focuses it when already open. */
+	function enter() {
+		stopTimer();
+		if (!sub.open) sub.show('first');
+		else if (sub.content) focusElement(menuItems(sub.content)[0]);
+	}
+
+	/**
+	 * Opens the submenu once the pointer rests on the trigger for a moment; moving over
+	 * it doesn't restart the wait. Focus stays on the trigger.
+	 */
+	function onHover() {
+		sub.parent?.keepSub();
+		if (sub.open || timer !== undefined) return;
+		timer = setTimeout(() => {
+			timer = undefined;
+			sub.show('keep');
+		}, 100);
 	}
 
 	function onkeydown(event: KeyboardEvent) {
 		if (event.key === (rtl ? 'ArrowLeft' : 'ArrowRight')) {
 			event.preventDefault();
-			sub.show('first');
+			enter();
 		}
 	}
 </script>
@@ -82,12 +109,9 @@
 	data-state={sub.open ? 'open' : 'closed'}
 	leading={Icon ? leading : undefined}
 	trailing={chevron}
-	onHover={() => {
-		clearTimeout(timer);
-		if (!sub.open) timer = setTimeout(() => sub.show('none'), 100);
-	}}
-	onActivate={() => sub.show('first')}
-	onpointerleave={() => clearTimeout(timer)}
+	{onHover}
+	onActivate={enter}
+	onpointerleave={stopTimer}
 	{onkeydown}
 	{@attach attach}
 	{...rest}

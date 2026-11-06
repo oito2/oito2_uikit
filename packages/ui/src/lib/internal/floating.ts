@@ -65,6 +65,9 @@ export function floating(
 		element.style.position = 'fixed';
 		element.style.left = '0';
 		element.style.top = '0';
+		if (!options.sameWidth) element.style.width = '';
+		// Set when the attachment goes away, so a positioning still in flight writes nothing.
+		let disposed = false;
 
 		const update = async () => {
 			const arrowElement = options.arrow?.() ?? null;
@@ -75,6 +78,7 @@ export function floating(
 				size({
 					padding,
 					apply({ availableWidth, availableHeight, rects }) {
+						if (disposed) return;
 						element.style.setProperty('--oito2-available-width', `${availableWidth}px`);
 						element.style.setProperty(
 							'--oito2-available-height',
@@ -90,6 +94,7 @@ export function floating(
 				strategy: 'fixed',
 				middleware
 			});
+			if (disposed) return;
 			element.style.left = `${result.x}px`;
 			element.style.top = `${result.y}px`;
 			element.dataset.placement = result.placement;
@@ -101,6 +106,10 @@ export function floating(
 			options.onPlacement?.(result.placement);
 		};
 
-		return autoUpdate(anchor, element, () => void update());
+		const cleanup = autoUpdate(anchor, element, () => void update());
+		return () => {
+			disposed = true;
+			cleanup();
+		};
 	};
 }

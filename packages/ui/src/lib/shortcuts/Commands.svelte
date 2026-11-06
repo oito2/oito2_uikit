@@ -1,7 +1,8 @@
 <script module lang="ts">
 	/**
-	 * The command ids of the scopes a key event has passed through, which replace the
-	 * commands of the same id in the scopes it reaches next, even when disabled.
+	 * The ids of the enabled commands of the scopes a key event has passed through, which
+	 * replace the commands of the same id in the scopes it reaches next. A disabled command
+	 * overrides nothing, as in the command palette.
 	 */
 	const overriddenIds = new WeakMap<Event, Set<string>>();
 </script>
@@ -27,9 +28,10 @@
   @component
   A command scope: runs its commands when their keyboard shortcuts are pressed while the
   focus is inside it (or anywhere in the window with `global`), and offers them to
-  `useCommands()` and the command palette. Inner scopes override outer commands with the
-  same id. Shortcuts without Control, Alt or Meta are ignored while typing in a text
-  field, and the chords of a sequence must follow each other within `sequenceTimeout`.
+  `useCommands()` and the command palette. Enabled commands of inner scopes override outer
+  commands with the same id; a disabled one leaves the outer command in place. Shortcuts
+  without Control, Alt or Meta are ignored while typing in a text field, and the chords of
+  a sequence must follow each other within `sequenceTimeout`.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -113,7 +115,10 @@
 
 	function onkeydown(event: KeyboardEvent) {
 		const overridden = overriddenIds.get(event) ?? new Set<string>();
-		const ids = new Set([...overridden, ...commands.map((command) => command.id)]);
+		const ids = new Set([
+			...overridden,
+			...commands.filter(isCommandEnabled).map((command) => command.id)
+		]);
 		overriddenIds.set(event, ids);
 		if (event.defaultPrevented || event.isComposing || KeyChord.isModifierKey(event.key))
 			return;

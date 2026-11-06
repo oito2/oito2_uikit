@@ -35,6 +35,11 @@
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The width of a side sheet, in pixels. Defaults to 360. */
 		size?: number;
+		/**
+		 * Returns the element that takes focus when the panel closes and the element that
+		 * had focus before it opened is gone, such as a list row its action removed.
+		 */
+		finalFocus?: () => HTMLElement | null | undefined;
 		/** The panel element. */
 		ref?: HTMLDivElement | null;
 		/** The content. */
@@ -43,6 +48,7 @@
 
 	let {
 		size = 360,
+		finalFocus,
 		ref = $bindable(null),
 		class: className,
 		children,
@@ -86,12 +92,14 @@
 			style:--oito2-sheet-rest={snaps ? `${rest_}vh` : '0px'}
 			style:--oito2-sheet-drag="{sheet.drag}px"
 			{@attach presence.attach}
-			{@attach focusScope({ trap: sheet.modal })}
-			{@attach dismissableLayer({
-				onDismiss: (reason) =>
-					reason === 'escape' ? (sheet.open = false) : sheet.dismiss(),
-				closeOnPointerOutside: sheet.modal
-			})}
+			{@attach sheet.open ? focusScope({ trap: sheet.modal, finalFocus }) : undefined}
+			{@attach sheet.open
+				? dismissableLayer({
+						onDismiss: (reason) =>
+							reason === 'escape' ? (sheet.open = false) : sheet.dismiss(),
+						closeOnPointerOutside: sheet.modal
+					})
+				: undefined}
 			{...rest}
 		>
 			{@render children?.()}

@@ -68,7 +68,22 @@ const namedKeys: Readonly<Record<string, string>> = {
 	']': ']'
 };
 
-/** The keys of punctuation `KeyboardEvent.code`s, read regardless of Shift. */
+/** The punctuation keys a shortcut can name, read from `KeyboardEvent.key` first. */
+const punctuationKeys: Readonly<Record<string, true>> = {
+	',': true,
+	'.': true,
+	'/': true,
+	';': true,
+	'-': true,
+	'=': true,
+	'[': true,
+	']': true
+};
+
+/**
+ * The keys of punctuation `KeyboardEvent.code`s, read when the key typed something else,
+ * as with Shift held.
+ */
 const punctuationCodes: Readonly<Record<string, string>> = {
 	Comma: ',',
 	Period: '.',
@@ -140,9 +155,10 @@ export class KeyChord {
 	}
 
 	/**
-	 * Creates the chord of a key event with its held modifiers. Letters follow the
-	 * keyboard layout; digits and punctuation are read from the physical key, so Shift+1
-	 * is `1` with Shift on every layout. The chord sets `control` and `meta` as pressed,
+	 * Creates the chord of a key event with its held modifiers. Letters and the
+	 * punctuation keys a shortcut can name (`, . / ; - = [ ]`) follow the keyboard layout,
+	 * so `Ctrl+-` is the key that types `-`; digits, and punctuation typed with Shift, are
+	 * read from the physical key, so Shift+1 is `1` with Shift on every layout. The chord sets `control` and `meta` as pressed,
 	 * never `primary`; `matches` resolves `primary` when comparing.
 	 */
 	static fromEvent(event: KeyboardEvent): KeyChord {
@@ -158,6 +174,7 @@ export class KeyChord {
 	static keyOf(event: KeyboardEvent): string {
 		const key = event.key;
 		if (/^[a-z]$/i.test(key)) return key.toLowerCase();
+		if (key.length === 1 && Object.hasOwn(punctuationKeys, key)) return key;
 		const code = event.code;
 		const letter = /^Key([A-Z])$/.exec(code);
 		if (letter?.[1]) return letter[1].toLowerCase();

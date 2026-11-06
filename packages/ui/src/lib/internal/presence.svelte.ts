@@ -43,7 +43,10 @@ export class Presence {
 		return this.#present;
 	}
 
-	/** Attaches the animated element: `{@attach presence.attach}`. */
+	/**
+	 * Attaches the animated element: `{@attach presence.attach}`. The exit animation must
+	 * run on this element itself; animations of its descendants aren't waited for.
+	 */
 	attach = (element: HTMLElement) => {
 		this.#element = element;
 		return () => {

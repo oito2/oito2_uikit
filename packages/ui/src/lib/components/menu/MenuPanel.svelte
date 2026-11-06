@@ -45,6 +45,8 @@
 		inside?: () => (HTMLElement | null)[];
 		onDismiss: (reason: DismissReason, event: Event) => void;
 		onTab: () => void;
+		/** The element that takes focus back when Tab closes the panel, such as the trigger. */
+		returnFocus?: () => HTMLElement | null | undefined;
 		ref?: HTMLElement | null;
 		children?: Snippet;
 	}
@@ -61,6 +63,7 @@
 		inside,
 		onDismiss,
 		onTab,
+		returnFocus,
 		ref = $bindable(null),
 		class: className,
 		children,
@@ -81,9 +84,9 @@
 			data-same-width={sameWidth ? '' : undefined}
 			{@attach floating(() => anchor, { placement, offset, sameWidth })}
 			{@attach presence.attach}
-			{@attach focusScope({ autoFocus: false })}
-			{@attach dismissableLayer({ onDismiss, inside })}
-			{@attach menuList({ initialFocus, preferred, onTab })}
+			{@attach open ? focusScope({ autoFocus: false }) : undefined}
+			{@attach open ? dismissableLayer({ onDismiss, inside }) : undefined}
+			{@attach open ? menuList({ initialFocus, preferred, onTab, returnFocus }) : undefined}
 			{...rest}
 		>
 			{@render children?.()}

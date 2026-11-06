@@ -154,9 +154,11 @@ describe('Commands', () => {
 		await expect
 			.element(page.getByTestId('available'))
 			.toHaveTextContent('Find, Save all, Quit');
+		// The disabled inner command overrides nothing: the outer one keeps its shortcut,
+		// as it keeps its place in the palette.
 		focus('target');
 		await userEvent.keyboard('{Control>}{Shift>}s{/Shift}{/Control}');
-		expect(runs).toEqual([]);
+		expect(runs).toEqual(['outer']);
 	});
 
 	it('reports clashing shortcuts', async () => {

@@ -50,6 +50,7 @@
 	inside={() => [menu.trigger]}
 	onDismiss={() => menu.hide()}
 	onTab={() => menu.closeAll()}
+	returnFocus={() => menu.focusReturn ?? menu.trigger}
 	bind:ref={menu.content}
 	{...rest}
 >

@@ -491,7 +491,7 @@
 			"Commands": {
 				"kind": "component",
 				"source": "packages/ui/src/lib/shortcuts/Commands.svelte",
-				"doc": "A command scope: runs its commands when their keyboard shortcuts are pressed while the\nfocus is inside it (or anywhere in the window with `global`), and offers them to\n`useCommands()` and the command palette. Inner scopes override outer commands with the\nsame id. Shortcuts without Control, Alt or Meta are ignored while typing in a text\nfield, and the chords of a sequence must follow each other within `sequenceTimeout`.",
+				"doc": "A command scope: runs its commands when their keyboard shortcuts are pressed while the\nfocus is inside it (or anywhere in the window with `global`), and offers them to\n`useCommands()` and the command palette. Enabled commands of inner scopes override outer\ncommands with the same id; a disabled one leaves the outer command in place. Shortcuts\nwithout Control, Alt or Meta are ignored while typing in a text field, and the chords of\na sequence must follow each other within `sequenceTimeout`.",
 				"props": [
 					{
 						"name": "commands",
@@ -2293,6 +2293,13 @@
 								"type": "boolean",
 								"optional": true,
 								"doc": "Whether a click outside the panel closes it. Defaults to true for `dialog`."
+							},
+							{
+								"name": "finalFocus",
+								"kind": "prop",
+								"type": "() => HTMLElement | null | undefined",
+								"optional": true,
+								"doc": "Returns the element that takes focus when the panel closes and the element that\nhad focus before it opened is gone, such as a list row its action removed."
 							},
 							{
 								"name": "ref",
@@ -9935,6 +9942,13 @@
 								"optional": true,
 								"doc": "The width of a side sheet, in pixels. Defaults to 360.",
 								"default": "360"
+							},
+							{
+								"name": "finalFocus",
+								"kind": "prop",
+								"type": "() => HTMLElement | null | undefined",
+								"optional": true,
+								"doc": "Returns the element that takes focus when the panel closes and the element that\nhad focus before it opened is gone, such as a list row its action removed."
 							},
 							{
 								"name": "ref",

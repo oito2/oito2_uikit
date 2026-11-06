@@ -62,6 +62,7 @@
 	inside={() => [select.trigger]}
 	onDismiss={(reason) => (reason === 'escape' ? close() : (select.open = false))}
 	onTab={() => (select.open = false)}
+	returnFocus={() => select.trigger}
 	bind:ref={select.content}
 	{...rest}
 >

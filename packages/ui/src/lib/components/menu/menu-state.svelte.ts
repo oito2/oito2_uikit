@@ -18,8 +18,12 @@ import { Controllable } from '../../internal/controllable.svelte.js';
 
 const key = Symbol('oito2.menu');
 
-/** Which item takes focus when a menu opens. */
-export type InitialFocus = 'first' | 'last' | 'none';
+/**
+ * Which item takes focus when a menu opens: the first, the last, none (the panel itself
+ * takes focus, and the arrow keys then enter it), or `keep` (focus stays where it is, as
+ * on the trigger of a submenu opened by hovering it).
+ */
+export type InitialFocus = 'first' | 'last' | 'none' | 'keep';
 
 /** The options of a `MenuState`. */
 export interface MenuOptions {
@@ -44,6 +48,12 @@ export class MenuState {
 	initialFocus: InitialFocus = 'first';
 	/** The submenu open inside this menu. */
 	openSub: MenuState | null = $state(null);
+	/**
+	 * The element that takes focus when Tab closes the menu tree, when it isn't the
+	 * trigger, such as the element focused before a context menu opened.
+	 */
+	focusReturn: HTMLElement | null = null;
+	#subTimer: ReturnType<typeof setTimeout> | undefined;
 
 	constructor(options: MenuOptions) {
 		this.id = options.id;
@@ -75,8 +85,28 @@ export class MenuState {
 		this.#open.current = true;
 	}
 
+	/**
+	 * Closes the open submenu after a short delay, as when the pointer moves over another
+	 * item, so a pointer crossing towards the submenu doesn't close it on the way;
+	 * `keepSub` cancels it.
+	 */
+	hideSubSoon(): void {
+		if (!this.openSub || this.#subTimer !== undefined) return;
+		this.#subTimer = setTimeout(() => {
+			this.#subTimer = undefined;
+			this.openSub?.hide();
+		}, 250);
+	}
+
+	/** Cancels a pending `hideSubSoon`, as when the pointer reaches the submenu. */
+	keepSub(): void {
+		clearTimeout(this.#subTimer);
+		this.#subTimer = undefined;
+	}
+
 	/** Closes the menu and its open submenus. */
 	hide(): void {
+		this.keepSub();
 		this.openSub?.hide();
 		this.openSub = null;
 		if (this.parent?.openSub === this) this.parent.openSub = null;

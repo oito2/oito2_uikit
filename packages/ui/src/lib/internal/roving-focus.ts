@@ -65,6 +65,7 @@ export function rovingFocus(options: RovingFocusOptions = {}): Attachment<HTMLEl
 			for (const each of container.querySelectorAll<HTMLElement>(
 				`[${rovingItemAttribute}]`
 			)) {
+				if (each.closest('[data-oito2-roving-group]') !== container) continue;
 				each.tabIndex = each === current ? 0 : -1;
 			}
 		};

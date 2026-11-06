@@ -36,10 +36,28 @@ export interface FocusScopeOptions {
 	 * true.
 	 */
 	restoreFocus?: boolean;
+	/**
+	 * Returns the element that takes focus when the scope goes away and the element that
+	 * had focus before it is no longer in the document, such as a trigger removed by the
+	 * action the scope confirmed.
+	 */
+	finalFocus?: () => HTMLElement | null | undefined;
 }
 
 /** The trapping scopes, the active one last. */
 const traps: HTMLElement[] = [];
+
+/** Every attached scope, the most recent last. */
+const scopes: HTMLElement[] = [];
+
+/**
+ * Whether `target` is inside a scope attached after `container`, such as a popover or a
+ * menu opened from a dialog and rendered elsewhere in the document.
+ */
+function isInScopeAbove(container: HTMLElement, target: Node): boolean {
+	const index = scopes.indexOf(container);
+	return index >= 0 && scopes.slice(index + 1).some((scope) => scope.contains(target));
+}
 
 /** Focuses the element of `container` that should take focus first. */
 function focusInitial(container: HTMLElement, autoFocus: FocusScopeOptions['autoFocus']): void {
@@ -63,21 +81,23 @@ function focusContainer(container: HTMLElement): void {
  */
 export function focusScope(options: FocusScopeOptions = {}): Attachment<HTMLElement> {
 	return (container) => {
-		const { trap = false, autoFocus = true, restoreFocus = true } = options;
+		const { trap = false, autoFocus = true, restoreFocus = true, finalFocus } = options;
 		const document = container.ownerDocument;
 		const previous = activeElement(document);
 		let lastInside: HTMLElement | null = null;
 
+		scopes.push(container);
 		if (trap) traps.push(container);
 		const isActiveTrap = () => trap && traps.at(-1) === container;
 
 		const onFocusIn = (event: FocusEvent) => {
 			const target = event.target as Node | null;
-			if (target && container.contains(target)) {
+			if (!target) return;
+			if (container.contains(target)) {
 				lastInside = target as HTMLElement;
 				return;
 			}
-			if (!isActiveTrap()) return;
+			if (!isActiveTrap() || isInScopeAbove(container, target)) return;
 			if (!focusElement(lastInside?.isConnected ? lastInside : null))
 				focusInitial(container, true);
 		};
@@ -110,11 +130,15 @@ export function focusScope(options: FocusScopeOptions = {}): Attachment<HTMLElem
 			container.removeEventListener('keydown', onKeyDown);
 			const index = traps.lastIndexOf(container);
 			if (index >= 0) traps.splice(index, 1);
-			if (!restoreFocus || !(previous instanceof HTMLElement) || !previous.isConnected)
-				return;
+			const scope = scopes.lastIndexOf(container);
+			if (scope >= 0) scopes.splice(scope, 1);
+			if (!restoreFocus) return;
+			const target =
+				previous instanceof HTMLElement && previous.isConnected ? previous : finalFocus?.();
+			if (!target) return;
 			const active = activeElement(document);
 			if (!active || active === document.body || container.contains(active))
-				focusElement(previous);
+				focusElement(target);
 		};
 	};
 }

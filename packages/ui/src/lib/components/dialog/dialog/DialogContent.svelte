@@ -37,6 +37,11 @@
 		role?: 'dialog' | 'alertdialog';
 		/** Whether a click outside the panel closes it. Defaults to true for `dialog`. */
 		closeOnOutsideClick?: boolean;
+		/**
+		 * Returns the element that takes focus when the panel closes and the element that
+		 * had focus before it opened is gone, such as a list row its action removed.
+		 */
+		finalFocus?: () => HTMLElement | null | undefined;
 		/** The panel element. */
 		ref?: HTMLDivElement | null;
 		/** The content. */
@@ -46,6 +51,7 @@
 	let {
 		role = 'dialog',
 		closeOnOutsideClick,
+		finalFocus,
 		ref = $bindable(null),
 		class: className,
 		children,
@@ -73,11 +79,13 @@
 				class={['oito2-dialog', className]}
 				data-state={dialog.open ? 'open' : 'closed'}
 				{@attach presence.attach}
-				{@attach focusScope({ trap: true })}
-				{@attach dismissableLayer({
-					onDismiss: () => (dialog.open = false),
-					closeOnPointerOutside: closeOnOutsideClick ?? role === 'dialog'
-				})}
+				{@attach dialog.open ? focusScope({ trap: true, finalFocus }) : undefined}
+				{@attach dialog.open
+					? dismissableLayer({
+							onDismiss: () => (dialog.open = false),
+							closeOnPointerOutside: closeOnOutsideClick ?? role === 'dialog'
+						})
+					: undefined}
 				{...rest}
 			>
 				{@render children()}

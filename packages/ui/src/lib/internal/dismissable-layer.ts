@@ -82,7 +82,6 @@ export function dismissableLayer(options: DismissableLayerOptions): Attachment<H
 
 		const onPointerDown = (event: PointerEvent) => {
 			if (!closeOnPointerOutside || topLayer() !== layer) return;
-			if (event.button !== 0 && event.pointerType === 'mouse') return;
 			const target = event.target as Node | null;
 			if (!target || isInside(layer, target)) return;
 			options.onDismiss('pointer-outside', event);

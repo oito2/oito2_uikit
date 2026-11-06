@@ -29,6 +29,7 @@
 
 	let {
 		children,
+		onpointerenter,
 		...rest
 	}: Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'role'> & {
 		children?: Snippet;
@@ -62,12 +63,17 @@
 		else sub.closeAll();
 	}}
 	onTab={() => sub.closeAll()}
+	returnFocus={() => sub.root.focusReturn ?? sub.root.trigger}
 	onkeydown={(event: KeyboardEvent) => {
 		if (event.key === (rtl ? 'ArrowRight' : 'ArrowLeft')) {
 			event.preventDefault();
 			event.stopPropagation();
 			back();
 		}
+	}}
+	onpointerenter={(event: PointerEvent & { currentTarget: EventTarget & HTMLDivElement }) => {
+		sub.parent?.keepSub();
+		onpointerenter?.(event);
 	}}
 	bind:ref={sub.content}
 	{...rest}

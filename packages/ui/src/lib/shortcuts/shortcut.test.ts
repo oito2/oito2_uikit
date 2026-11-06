@@ -80,6 +80,10 @@ describe('Shortcut', () => {
 		// Option on a Mac types a symbol; the key is read from its position.
 		expect(KeyChord.keyOf(keyEvent({ key: '˚', code: 'KeyK' }))).toBe('k');
 		expect(KeyChord.keyOf(keyEvent({ key: '<', code: 'Comma' }))).toBe(',');
+		// Punctuation follows the layout: the key that types it, wherever it sits.
+		expect(KeyChord.keyOf(keyEvent({ key: '-', code: 'Slash' }))).toBe('-');
+		expect(KeyChord.keyOf(keyEvent({ key: ';', code: 'Comma' }))).toBe(';');
+		expect(KeyChord.keyOf(keyEvent({ key: 'ç', code: 'Semicolon' }))).toBe(';');
 		expect(KeyChord.keyOf(keyEvent({ key: ' ', code: 'Space' }))).toBe('Space');
 		expect(KeyChord.keyOf(keyEvent({ key: 'Enter', code: 'NumpadEnter' }))).toBe('Enter');
 		expect(KeyChord.isModifierKey('Shift')).toBe(true);

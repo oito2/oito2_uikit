@@ -21,8 +21,10 @@
   `disabled`.
 -->
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { activeElement, focusElement } from '../../../internal/focus.js';
+	import { menuItems } from '../../menu/menu-list.js';
 	import { useMenu } from '../../menu/menu-state.svelte.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
@@ -46,15 +48,33 @@
 	let point = $state<{ x: number; y: number } | null>(null);
 	let press: ReturnType<typeof setTimeout> | undefined;
 
-	/** Opens the menu at `at`, or over the middle of the area from the keyboard. */
+	/**
+	 * Opens the menu at `at`, or over the middle of the area from the keyboard. A menu
+	 * already open moves to the new point and takes focus again.
+	 */
 	function open(at: { x: number; y: number } | null) {
 		if (disabled || !ref) return;
-		if (at) point = at;
+		const reopen = menu.open;
+		if (reopen) menu.hide();
+		else {
+			const focused = activeElement(ref.ownerDocument);
+			menu.focusReturn =
+				focused instanceof HTMLElement && focused !== ref.ownerDocument.body
+					? focused
+					: null;
+		}
+		if (at) point = { ...at };
 		else {
 			const box = ref.getBoundingClientRect();
 			point = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
 		}
 		menu.show(at ? 'none' : 'first');
+		// The panel stays mounted, so its initial focus is applied again by hand.
+		if (reopen)
+			void tick().then(() => {
+				const content = menu.content;
+				if (content) focusElement(at ? content : (menuItems(content)[0] ?? content));
+			});
 	}
 </script>
 
@@ -85,19 +105,22 @@
 	{...rest}
 >
 	{@render children()}
-	{#if point}
-		<span
-			class="point"
-			style:left="{point.x}px"
-			style:top="{point.y}px"
-			{@attach (node) => {
-				menu.trigger = node;
-				return () => {
-					if (menu.trigger === node) menu.trigger = null;
-				};
-			}}
-		></span>
-	{/if}
+	<!-- A new anchor for each point, so the menu is positioned again. -->
+	{#key point}
+		{#if point}
+			<span
+				class="point"
+				style:left="{point.x}px"
+				style:top="{point.y}px"
+				{@attach (node) => {
+					menu.trigger = node;
+					return () => {
+						if (menu.trigger === node) menu.trigger = null;
+					};
+				}}
+			></span>
+		{/if}
+	{/key}
 </div>
 
 <style>

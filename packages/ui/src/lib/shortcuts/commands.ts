@@ -23,7 +23,10 @@ import type { Shortcut } from './shortcut.js';
  * from the command palette.
  */
 export interface Command {
-	/** A unique identifier; an inner `Commands` scope overrides an outer command with the same id. */
+	/**
+	 * A unique identifier; an enabled command of an inner `Commands` scope overrides an
+	 * outer command with the same id, for its shortcut and in the command palette.
+	 */
 	readonly id: string;
 	/** The name shown in the command palette. */
 	readonly label: string;

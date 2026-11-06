@@ -76,9 +76,14 @@
 		}
 	});
 
-	function run(command: Command | undefined) {
+	/**
+	 * Closes the palette and runs `command` once the palette has let go of focus, so a
+	 * dialog the command opens returns focus to where it was before the palette.
+	 */
+	async function run(command: Command | undefined) {
 		if (!command) return;
 		setOpen(false);
+		await tick();
 		command.onInvoke();
 	}
 
@@ -92,19 +97,24 @@
 
 {#if presence.present}
 	<Portal>
-		<div class="oito2-command-palette-overlay" data-state={isOpen ? 'open' : 'closed'}>
+		<div
+			class="oito2-command-palette-overlay"
+			data-state={isOpen ? 'open' : 'closed'}
+			{@attach presence.attach}
+		>
 			<div
 				role="dialog"
 				aria-modal="true"
 				aria-label={locale.strings.commandPaletteHint}
 				class="oito2-command-palette"
 				data-state={isOpen ? 'open' : 'closed'}
-				{@attach presence.attach}
-				{@attach focusScope({ trap: true })}
-				{@attach dismissableLayer({
-					onDismiss: () => setOpen(false),
-					closeOnEscape: false
-				})}
+				{@attach isOpen ? focusScope({ trap: true }) : undefined}
+				{@attach isOpen
+					? dismissableLayer({
+							onDismiss: () => setOpen(false),
+							closeOnEscape: false
+						})
+					: undefined}
 			>
 				<div class="search">
 					<SearchField
@@ -120,7 +130,7 @@
 						data-autofocus=""
 						onValueChange={() => (highlight = 0)}
 						onEscape={() => setOpen(false)}
-						onSubmit={() => run(matches[highlight])}
+						onSubmit={() => void run(matches[highlight])}
 						onkeydown={(event: KeyboardEvent) => {
 							if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
 								event.preventDefault();
@@ -147,7 +157,7 @@
 								data-highlighted={index === highlight ? '' : undefined}
 								onpointermove={() => (highlight = index)}
 								onpointerdown={(event) => event.preventDefault()}
-								onclick={() => run(command)}
+								onclick={() => void run(command)}
 								onkeydown={() => {}}
 							>
 								{#if Icon}<span class="icon"
