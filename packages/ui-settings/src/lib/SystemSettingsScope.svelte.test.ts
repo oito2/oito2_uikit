@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Platform, type SystemSettings } from '@oito2/ui';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import { FakeSettingsSource } from '../tests/fake-source.js';
@@ -33,6 +33,8 @@ function gnome(layout: string, accent: string | null = null): RawSettings {
 		systemAccent: accent
 	};
 }
+
+afterEach(() => vi.restoreAllMocks());
 
 describe('SystemSettingsScope', () => {
 	it('starts from the defaults, then provides the settings read', async () => {
@@ -89,6 +91,30 @@ describe('SystemSettingsScope', () => {
 		source.emit({ ...emptyRawSettings, config: null } as unknown as RawSettings);
 		await new Promise((resolve) => setTimeout(resolve, 30));
 		await expect.element(page.getByTestId('desktop')).toHaveTextContent('unknown');
+	});
+
+	it('warns once when reads fail and keeps the defaults', async () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const source = new FakeSettingsSource(gnome('close:'));
+		source.failure = new Error('no plugin');
+		render(ScopeHarness, { source, platform: linux });
+		await expect.poll(() => source.reads).toBe(1);
+		window.dispatchEvent(new Event('focus'));
+		await expect.poll(() => source.reads).toBe(2);
+		await new Promise((resolve) => setTimeout(resolve, 30));
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(warn.mock.calls[0]?.[1]).toBe(source.failure);
+		await expect.element(page.getByTestId('desktop')).toHaveTextContent('unknown');
+	});
+
+	it('warns when it cannot follow the changes and keeps the settings read', async () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const source = new FakeSettingsSource(gnome('close:'));
+		source.subscribeFailure = new Error('no event');
+		render(ScopeHarness, { source, platform: linux });
+		await expect.element(page.getByTestId('layout')).toHaveTextContent('close|');
+		await expect.poll(() => warn.mock.calls.length).toBe(1);
+		expect(warn.mock.calls[0]?.[1]).toBe(source.subscribeFailure);
 	});
 
 	it('keeps the defaults without a source', async () => {

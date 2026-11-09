@@ -15,6 +15,7 @@
 
 import { Platform } from '@oito2/ui';
 import { isTauri } from '@tauri-apps/api/core';
+import type { LogicalSize as LogicalSizeClass, Window } from '@tauri-apps/api/window';
 import { decorationMode, setDecorationMode, type DecorationMode } from './commands.js';
 import { NativeWindowController } from './native-window-controller.svelte.js';
 
@@ -38,19 +39,78 @@ export interface InitWindowOptions {
 	 * `visible: false` so the frame changes before they appear. Defaults to true.
 	 */
 	show?: boolean;
+	/**
+	 * Cancels the call: once it aborts before the call finishes, the controller created
+	 * so far is disposed and the call resolves to `null`.
+	 */
+	signal?: AbortSignal;
 }
+
+/** The controller of each window label, from the call that created it until it is disposed. */
+const controllers = new Map<string, Promise<NativeWindowController | null>>();
 
 /**
  * Prepares the current Tauri window and returns its controller for a `WindowScope`, or
  * `null` outside Tauri (in a browser), where title bars show no window controls.
+ *
+ * One controller exists per window: while it is alive (until `dispose()`), later calls
+ * for the same window resolve to it without applying their options or `signal`. Rejects
+ * when `tauri-plugin-oito2-window` is not registered or the capability does not allow
+ * its commands.
  */
 export async function initWindow(
 	options: InitWindowOptions = {}
 ): Promise<NativeWindowController | null> {
-	if (!isTauri()) return null;
+	if (!isTauri() || options.signal?.aborted) return null;
 	const { getCurrentWindow, LogicalSize } = await import('@tauri-apps/api/window');
 	const window = getCurrentWindow();
-	if (options.decorations) await setDecorationMode(options.decorations);
+	const live = controllers.get(window.label);
+	if (live) return live;
+	const release = () => {
+		if (controllers.get(window.label) === connecting) controllers.delete(window.label);
+	};
+	const connecting: Promise<NativeWindowController | null> = connect(
+		window,
+		LogicalSize,
+		options,
+		release
+	).then(
+		(controller) => {
+			if (!controller) release();
+			return controller;
+		},
+		(error: unknown) => {
+			release();
+			throw error;
+		}
+	);
+	controllers.set(window.label, connecting);
+	return connecting;
+}
+
+/** Applies `options` to `window` and attaches its controller, or `null` once `signal` aborts. */
+async function connect(
+	window: Window,
+	LogicalSize: typeof LogicalSizeClass,
+	options: InitWindowOptions,
+	onDispose: () => void
+): Promise<NativeWindowController | null> {
+	const { signal } = options;
+	let decorations: DecorationMode;
+	try {
+		if (options.decorations) {
+			await setDecorationMode(options.decorations);
+			decorations = options.decorations;
+		} else {
+			decorations = await decorationMode();
+		}
+	} catch (error) {
+		throw new Error(
+			'oito2: tauri-plugin-oito2-window is not registered or the capability does not allow it',
+			{ cause: error }
+		);
+	}
+	if (signal?.aborted) return null;
 	if (options.title !== undefined) await window.setTitle(options.title);
 	if (options.size)
 		await window.setSize(new LogicalSize(options.size.width, options.size.height));
@@ -65,8 +125,14 @@ export async function initWindow(
 		await window.setFocus();
 	}
 	const os = Platform.current().os;
-	return NativeWindowController.attach(window, {
+	const controller = await NativeWindowController.attach(window, {
 		canShowMenu: os === 'linux' || os === 'windows',
-		decorations: options.decorations ?? (await decorationMode())
+		decorations,
+		onDispose
 	});
+	if (signal?.aborted) {
+		controller.dispose();
+		return null;
+	}
+	return controller;
 }

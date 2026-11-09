@@ -27,6 +27,7 @@ export {
 export {
 	presetColorTheme,
 	presetRoles,
+	presetSchemeName,
 	presetTheme,
 	themePresetNames,
 	themePresets,

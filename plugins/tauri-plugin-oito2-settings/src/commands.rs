@@ -15,10 +15,14 @@
 
 use crate::{RawSettings, Result};
 
-/// Reads the settings of the running platform, off the main thread.
+/// Reads the settings of the running platform, off the main thread. Fails with an
+/// `Internal` error when the reader task stops before returning.
 #[tauri::command]
 pub async fn read_settings() -> Result<RawSettings> {
     tauri::async_runtime::spawn_blocking(crate::read_raw_settings)
         .await
-        .map_err(|error| crate::Error::Unsupported(format!("settings reader stopped: {error}")))
+        .map_err(|error| {
+            eprintln!("oito2-settings: settings reader stopped: {error}");
+            crate::Error::Internal("settings reader stopped".into())
+        })
 }

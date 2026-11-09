@@ -312,6 +312,19 @@ export function presetRoles(preset: ThemePreset): ColorRoles {
 	}
 }
 
+/**
+ * Returns the `data-oito2-scheme` value of `preset` in `presets.css`: its name in
+ * kebab-case, with `-hc` appended for the high-contrast variant (`catppuccinMocha` →
+ * `catppuccin-mocha`, `catppuccin-mocha-hc`).
+ */
+export function presetSchemeName(
+	preset: ThemePreset,
+	options: { highContrast?: boolean } = {}
+): string {
+	const name = preset.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+	return options.highContrast ? `${name}-hc` : name;
+}
+
 /** Returns the complete color theme of `preset`, raised to WCAG AAA with `highContrast`. */
 export function presetColorTheme(
 	preset: ThemePreset,

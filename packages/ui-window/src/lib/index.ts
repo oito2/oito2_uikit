@@ -19,6 +19,7 @@ export {
 	showWindowMenu,
 	type DecorationMode
 } from './commands.js';
+export { isCommandError, type CommandError, type CommandErrorKind } from './errors.js';
 export {
 	NativeWindowController,
 	type NativeWindowControllerOptions,

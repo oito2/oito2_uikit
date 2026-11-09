@@ -44,7 +44,7 @@ pub fn run() {
 }
 ```
 
-`apply_decoration_mode` must run on the main thread (as `setup` does) before the window is shown. The webview can also set the frame itself through `@oito2/ui-window`'s `initWindow({ decorations })`.
+`apply_decoration_mode` must run on the main thread (as `setup` does) before the window is shown: on Linux it rejects a window that is already visible with an `Unsupported` error, since GTK switches its frame only before the window is realized. The webview can also set the frame itself through `@oito2/ui-window`'s `initWindow({ decorations })`, which calls the `set_decoration_mode` command under the same rule.
 
 ## Permissions
 
@@ -80,31 +80,31 @@ The `core:window:*` permissions cover the minimize, maximize, close, drag and re
 
 Each command acts on the calling window.
 
-| Command               | Arguments                                                            | Returns                                                                                                        |
-| --------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `set_decoration_mode` | `mode`: `native`, `undecorated` or `gtk-headerless`                  | —                                                                                                              |
-| `decoration_mode`     | —                                                                    | The mode applied through the plugin, else `native` or `undecorated` from whether the window has a system frame |
-| `show_window_menu`    | `x`, `y`: CSS pixels from the top left of the webview (0 to 100 000) | — (`Unsupported` error on macOS)                                                                               |
+| Command               | Arguments                                                            | Returns                                                                                                             |
+| --------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `set_decoration_mode` | `mode`: `native`, `undecorated` or `gtk-headerless`                  | — once the mode is applied; rejects when it cannot be (on Linux, `unsupported` when the window is already visible)  |
+| `decoration_mode`     | —                                                                    | The mode applied through the plugin, else `native` or `undecorated` from whether the window has a system frame      |
+| `show_window_menu`    | `x`, `y`: CSS pixels from the top left of the webview (0 to 100 000) | — once the menu is open (on Windows, once it closes); `unsupported` on macOS or when the window manager has no menu |
 
-A failed command rejects with `{ kind, message }`, where `kind` is `tauri`, `unsupported` or `invalidInput`. The plugin emits no events.
+Both `set_decoration_mode` and `show_window_menu` do their work on the main thread and wait for it, so the promise settles with the real outcome. A failed command rejects with `{ kind, message }`, where `kind` is `tauri`, `unsupported` or `invalidInput`. The plugin emits no events.
 
 ### Rust API
 
-| Item                                                         | Purpose                                                                               |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `init()`                                                     | Creates the plugin                                                                    |
-| `DecorationMode`                                             | `Native`, `Undecorated`, `GtkHeaderless`; `platform_default()`, `as_str()`, `FromStr` |
-| `apply_decoration_mode(&window, mode)`                       | Applies a mode to a `WebviewWindow` and records it                                    |
-| `show_window_menu(&window, x, y)`, `window_menu_supported()` | The native window menu                                                                |
-| `DecorationState`, `Error`, `Result`                         | Managed state and the serializable error type                                         |
+| Item                                                         | Purpose                                                                                 |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `init()`                                                     | Creates the plugin                                                                      |
+| `DecorationMode`                                             | `Native`, `Undecorated`, `GtkHeaderless`; `platform_default()`, `as_str()`, `FromStr`   |
+| `apply_decoration_mode(&window, mode)`                       | Applies a mode to a `WebviewWindow` and records it; main thread, hidden window on Linux |
+| `show_window_menu(&window, x, y)`, `window_menu_supported()` | The native window menu; `show_window_menu` must run on the main thread                  |
+| `DecorationState`, `Error`, `Result`                         | Managed state (`record`, `get`, `forget`) and the serializable error type               |
 
 ## Platform notes
 
-| Platform | Default mode     | Notes                                                                                                                                                                                                                                                                    |
-| -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Linux    | `gtk-headerless` | GTK client-side decorations with an empty title bar: GTK keeps the window shadow and resize edges. The window menu is GTK's (`gdk_window_show_window_menu`); it fails when the window manager has none. Needs the Tauri Linux build dependencies (WebKitGTK 4.1, GTK 3). |
-| Windows  | `undecorated`    | No system frame; the app draws the title bar. The window menu is the system menu (Restore, Move, Size, Minimize, Maximize, Close), with items enabled for the window state.                                                                                              |
-| macOS    | `native`         | `gtk-headerless` falls back to no system frame. No window menu. The showcase overlays the title bar with `"titleBarStyle": "Overlay"` and `"hiddenTitle": true` in `tauri.macos.conf.json`.                                                                              |
+| Platform | Default mode     | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linux    | `gtk-headerless` | GTK client-side decorations with an empty title bar: GTK keeps the window shadow and resize edges. The window must be configured with `"transparent": true`, or GTK draws its shadow and rounded corners on an opaque rectangle; the page then paints an opaque background itself, and on X11 without a compositor such a window shows black. The mode can only be applied to a hidden window. The window menu is GTK's (`gdk_window_show_window_menu`); it fails when the window manager has none. Needs the Tauri Linux build dependencies (WebKitGTK 4.1, GTK 3). |
+| Windows  | `undecorated`    | No system frame; the app draws the title bar. The window menu is the system menu (Restore, Move, Size, Minimize, Maximize, Close), with items enabled for the window state.                                                                                                                                                                                                                                                                                                                                                                                          |
+| macOS    | `native`         | `gtk-headerless` falls back to no system frame. No window menu. The showcase overlays the title bar with `"titleBarStyle": "Overlay"` and `"hiddenTitle": true` in `tauri.macos.conf.json`.                                                                                                                                                                                                                                                                                                                                                                          |
 
 The `menu` module is the only part of the crate that uses `unsafe` (the GDK and Win32 calls of the window menu).
 

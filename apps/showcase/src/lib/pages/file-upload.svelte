@@ -50,7 +50,8 @@
 		type: 'not an accepted type',
 		size: 'larger than 5 MB',
 		count: 'over the limit of five files',
-		directory: 'a folder'
+		directory: 'a folder',
+		unreadable: 'unreadable'
 	};
 
 	onDestroy(() => {

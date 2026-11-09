@@ -32,7 +32,7 @@ Estes passos são os mesmos no Linux, no Windows e no macOS. Todos os pacotes np
 
 ### 1. Pacotes npm
 
-`@oito2/ui` é o único pacote obrigatório; ele precisa do `svelte` 5 (`^5.57.0`) como dependência peer.
+`@oito2/ui` é o único pacote obrigatório; ele precisa do `svelte` 5 (`^5.57.0`) como dependência peer. Os demais pacotes também declaram `@oito2/ui` como dependência peer, e `@oito2/ui-files`, `@oito2/ui-window` e `@oito2/ui-settings` declaram os pacotes `@tauri-apps/*` que usam (`@tauri-apps/api` `^2.12.0`; para o `ui-files` também `@tauri-apps/plugin-dialog` `^2.8.0` e `@tauri-apps/plugin-fs` `^2.7.0`): adicione-os ao app, no mesmo major.minor dos seus crates Tauri.
 
 ```bash
 pnpm add @oito2/ui

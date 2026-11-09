@@ -166,5 +166,6 @@ export const ptBR: Localizations = {
 		max === 1
 			? `${name}: só é possível adicionar 1 arquivo`
 			: `${name}: só é possível adicionar ${max} arquivos`,
-	folderNotAccepted: (name) => `${name}: pastas não são aceitas`
+	folderNotAccepted: (name) => `${name}: pastas não são aceitas`,
+	fileUnreadable: (name) => `${name}: não foi possível ler este arquivo`
 };

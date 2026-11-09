@@ -11,7 +11,7 @@ Syntax highlighting for `@oito2/ui`: code colored with the oito2 color schemes t
 pnpm add @oito2/ui-syntax @oito2/ui svelte
 ```
 
-`svelte` (`^5.57.0`) is a peer dependency. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`): the code colors come from the `--oito2-syntax-*` roles of the enclosing theme, including the `@oito2/ui-themes` presets.
+`svelte` (`^5.57.0`) and `@oito2/ui` are peer dependencies. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`): the code colors come from the `--oito2-syntax-*` roles of the enclosing theme, including the `@oito2/ui-themes` presets.
 
 ## Setup
 

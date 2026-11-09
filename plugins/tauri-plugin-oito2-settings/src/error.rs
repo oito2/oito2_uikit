@@ -18,20 +18,20 @@ use serde::Serialize;
 /// Errors returned by the plugin's Rust API and commands.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// An error reported by Tauri.
-    #[error(transparent)]
-    Tauri(#[from] tauri::Error),
     /// The requested operation is not supported on this platform.
     #[error("unsupported: {0}")]
     Unsupported(String),
+    /// An internal failure of the plugin, such as the settings reader stopping.
+    #[error("internal error: {0}")]
+    Internal(String),
 }
 
 #[derive(Serialize)]
 #[serde(tag = "kind", content = "message")]
 #[serde(rename_all = "camelCase")]
 enum ErrorKind {
-    Tauri(String),
     Unsupported(String),
+    Internal(String),
 }
 
 impl Serialize for Error {
@@ -41,8 +41,8 @@ impl Serialize for Error {
     ) -> std::result::Result<S::Ok, S::Error> {
         let message = self.to_string();
         let kind = match self {
-            Self::Tauri(_) => ErrorKind::Tauri(message),
             Self::Unsupported(_) => ErrorKind::Unsupported(message),
+            Self::Internal(_) => ErrorKind::Internal(message),
         };
         kind.serialize(serializer)
     }

@@ -15,12 +15,13 @@
 
 import { describe, expect, it } from 'vitest';
 import type { FilesAdapter } from './adapters/adapter.js';
-import { dialogFilters } from './adapters/tauri.js';
+import { dialogFilters, dropPositionToCss } from './adapters/tauri.js';
 import { Downloads } from './downloads.js';
 import {
 	acceptAttribute,
 	baseName,
 	extensionOf,
+	extensionsForMimeType,
 	fileMatchesTypes,
 	isPreviewableImage,
 	mimeTypeOf,
@@ -75,9 +76,9 @@ describe('file types', () => {
 		expect(acceptAttribute([{ label: 'All' }, images])).toBeUndefined();
 		expect(
 			dialogFilters([
-				images,
+				{ label: 'Images', extensions: ['png', 'jpg'] },
 				{ label: 'Docs', extensions: ['.pdf'] },
-				{ mimeTypes: ['text/*'] }
+				{ mimeTypes: ['application/x-unknown'] }
 			])
 		).toEqual([
 			{ name: 'Images', extensions: ['png', 'jpg'] },
@@ -87,6 +88,36 @@ describe('file types', () => {
 			{ name: 'txt, md', extensions: ['txt', 'md'] }
 		]);
 		expect(dialogFilters([{ label: 'All' }, images])).toEqual([]);
+	});
+
+	it('maps MIME types to the extensions of the table, for the dialog filters too', () => {
+		expect(extensionsForMimeType('application/pdf')).toEqual(['pdf']);
+		expect(extensionsForMimeType('IMAGE/JPEG')).toEqual(['jpg', 'jpeg']);
+		expect(extensionsForMimeType('audio/*')).toEqual(
+			expect.arrayContaining(['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'opus'])
+		);
+		expect(extensionsForMimeType('application/x-unknown')).toEqual([]);
+		expect(dialogFilters([{ mimeTypes: ['application/pdf'] }])).toEqual([
+			{ name: 'pdf', extensions: ['pdf'] }
+		]);
+		expect(dialogFilters([{ label: 'Images', mimeTypes: ['image/*'] }])).toEqual([
+			{ name: 'Images', extensions: extensionsForMimeType('image/*') }
+		]);
+		expect(extensionsForMimeType('image/*')).toEqual(
+			expect.arrayContaining(['png', 'jpg', 'webp', 'tiff', 'heic', 'ico'])
+		);
+		const merged = dialogFilters([images])[0]?.extensions ?? [];
+		expect(merged.slice(0, 2)).toEqual(['png', 'jpg']);
+		expect(merged).toContain('webp');
+		expect(new Set(merged).size).toBe(merged.length);
+	});
+
+	it('converts drop positions to CSS pixels on Windows only', () => {
+		expect(dropPositionToCss({ x: 200, y: 100 }, true, 2)).toEqual({ x: 100, y: 50 });
+		expect(dropPositionToCss({ x: 200, y: 100 }, true, 1)).toEqual({ x: 200, y: 100 });
+		expect(dropPositionToCss({ x: 200, y: 100 }, true, 0)).toEqual({ x: 200, y: 100 });
+		expect(dropPositionToCss({ x: 200, y: 100 }, false, 2)).toEqual({ x: 200, y: 100 });
+		expect(dropPositionToCss({ x: 200, y: 100 }, false, 1)).toEqual({ x: 200, y: 100 });
 	});
 
 	it('reads names, extensions and MIME types', () => {
@@ -126,6 +157,24 @@ describe('FileUploadController', () => {
 			['e.png', 'count']
 		]);
 		expect(controller.canAddMore).toBe(false);
+	});
+
+	it('refuses a file whose size fails to read and checks the count before reading', async () => {
+		const unreadable = (name: string): PickedFile => ({
+			...file(name, 1),
+			size: () => Promise.reject(new Error('stat failed'))
+		});
+		const controller = new FileUploadController({ maxFiles: 2, maxFileSize: 100 });
+		await controller.add([unreadable('gone.txt'), file('a.txt', 1)]);
+		expect(controller.files.map((f) => f.name)).toEqual(['a.txt']);
+		expect(controller.rejected.map((r) => [r.file.name, r.reason])).toEqual([
+			['gone.txt', 'unreadable']
+		]);
+		await controller.add([file('b.txt', 1), unreadable('over.txt')]);
+		expect(controller.files.map((f) => f.name)).toEqual(['a.txt', 'b.txt']);
+		expect(controller.rejected.map((r) => [r.file.name, r.reason])).toEqual([
+			['over.txt', 'count']
+		]);
 	});
 
 	it('removes, clears the refusals and clears everything', async () => {

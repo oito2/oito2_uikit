@@ -25,20 +25,20 @@ export type DecorationMode = 'native' | 'undecorated' | 'gtk-headerless';
 
 /**
  * Applies `mode` to the current window through `tauri-plugin-oito2-window`. Call it
- * while the window is still hidden.
+ * while the window is still hidden. Rejects with a `CommandError`.
  */
 export function setDecorationMode(mode: DecorationMode): Promise<void> {
 	return invoke('plugin:oito2-window|set_decoration_mode', { mode });
 }
 
-/** Returns the decoration mode of the current window. */
+/** Returns the decoration mode of the current window. Rejects with a `CommandError`. */
 export function decorationMode(): Promise<DecorationMode> {
 	return invoke<DecorationMode>('plugin:oito2-window|decoration_mode');
 }
 
 /**
  * Shows the native window menu of the current window at `x`, `y` (CSS pixels from the
- * top left of the page), on Linux and Windows.
+ * top left of the page), on Linux and Windows. Rejects with a `CommandError`.
  */
 export function showWindowMenu(x: number, y: number): Promise<void> {
 	return invoke('plugin:oito2-window|show_window_menu', { x, y });

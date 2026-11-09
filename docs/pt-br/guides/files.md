@@ -24,10 +24,10 @@ Como deixar o usuário escolher, soltar e salvar arquivos com `@oito2/ui-files`,
 ## Instalação
 
 ```bash
-pnpm add @oito2/ui-files @oito2/ui svelte
+pnpm add @oito2/ui-files @oito2/ui svelte @tauri-apps/api @tauri-apps/plugin-dialog @tauri-apps/plugin-fs
 ```
 
-Configure `@oito2/ui` primeiro (`styles.css` e um `ThemeProvider`). `@tauri-apps/api`, `@tauri-apps/plugin-dialog` e `@tauri-apps/plugin-fs` vêm como dependências do pacote e só são carregados dentro do Tauri, por imports dinâmicos.
+Configure `@oito2/ui` primeiro (`styles.css` e um `ThemeProvider`). `@oito2/ui`, `@tauri-apps/api` (`^2.12.0`), `@tauri-apps/plugin-dialog` (`^2.8.0`) e `@tauri-apps/plugin-fs` (`^2.7.0`) são dependências peer: o app escolhe as versões (os pacotes do Tauri no mesmo major.minor dos seus crates) e uma única cópia de `@oito2/ui` é compartilhada. Instale-os também num build só para web, porque o bundler resolve os imports dinâmicos em tempo de build; eles só são carregados dentro do Tauri.
 
 ## Configuração no Tauri
 
@@ -118,7 +118,9 @@ Nenhuma entrada `fs:scope` é necessária: os caminhos que o usuário escolhe nu
 | `maxFileSize`        | Tamanho máximo em bytes                                                     |
 | `files`              | Arquivos iniciais                                                           |
 
-O controlador é reativo: leia `files`, `rejected` (cada um com um `reason`: `type`, `size`, `count` ou `directory`) e `canAddMore`; chame `add`, `remove`, `clear` e `clearRejected`. Todo `PickedFile` tem `name`, `path` (só no Tauri, senão `null`), `mimeType`, `isDirectory`, `file` (o `File` do navegador, só na web), `size()` e `bytes()`.
+No Tauri um arquivo não tem tipo MIME próprio: `fileMatchesTypes` e as prévias o derivam da extensão por uma tabela interna de tipos comuns, e o seletor de arquivos nativo só filtra por extensão. Um grupo aceito só por `mimeTypes` corresponde, portanto, a menos arquivos no Tauri do que num navegador (que informa o tipo MIME do sistema). Liste também em `extensions` as extensões que você espera, como no exemplo; `dialogFilters` mapeia padrões como `image/*` para as extensões da tabela.
+
+O controlador é reativo: leia `files`, `rejected` (cada um com um `reason`: `type`, `size`, `count`, `directory` ou `unreadable`, este último para um arquivo cujo tamanho não pôde ser lido, como um caminho que já não existe) e `canAddMore`; chame `add`, `remove`, `clear` e `clearRejected`. Todo `PickedFile` tem `name`, `path` (só no Tauri, senão `null`), `mimeType`, `isDirectory`, `file` (o `File` do navegador, só na web), `size()` e `bytes()`.
 
 Props de `FileUpload`: `controller`, `hint` (string ou snippet, substitui a linha padrão de tipos aceitos e limite de tamanho), `showPreviews` (padrão `true`), `enabled`, `adapter`, `zoneMinHeight` (padrão 160). As mensagens vêm do idioma ativo (veja [Localização](./localization.md)).
 
@@ -203,6 +205,8 @@ No Tauri, os arquivos soltos na janela chegam como **caminhos**, não como objet
 
 Ler esses caminhos funciona sem escopo configurado porque o plugin fs acrescenta cada caminho solto ao seu escopo de tempo de execução (arquivos, e pastas recursivamente). É a opção `scopeDroppedPaths` do plugin fs, que vale `true` por padrão; ela se aplica a todo webview que tenha alguma permissão do fs. Se você definir `plugins.fs.scopeDroppedPaths` como `false` no `tauri.conf.json`, os arquivos soltos deixam de poder ser lidos e você precisa conceder um `fs:scope` por conta própria. Os caminhos escolhidos no seletor de arquivos e no diálogo "Salvar como" do plugin dialog também são acrescentados ao escopo, pelo plugin dialog.
 
+O escopo cresce antes de os componentes verem o drop: uma pasta solta na janela entra no escopo de leitura e escrita do webview com a árvore inteira, pelo resto da sessão, mesmo que o `FileUploadController` recuse pastas e mesmo quando o drop cai fora da área. Nada nos componentes consegue estreitar isso. Um app que nunca aceita pastas, ou que renderiza conteúdo não confiável, deve definir `plugins.fs.scopeDroppedPaths` como `false` e conceder os diretórios de que precisa por um `fs:scope` explícito.
+
 ## Funções auxiliares
 
 | Export                                                    | Finalidade                                                                     |
@@ -210,6 +214,7 @@ Ler esses caminhos funciona sem escopo configurado porque o plugin fs acrescenta
 | `fileMatchesTypes(file, accept)`                          | Se um `PickedFile` corresponde aos tipos aceitos (inclusive padrões `image/*`) |
 | `acceptAttribute(groups)`                                 | O atributo `accept` do HTML para os grupos                                     |
 | `dialogFilters(groups)`                                   | Os filtros do plugin dialog para os grupos                                     |
+| `extensionsForMimeType(pattern)`                          | As extensões conhecidas de um tipo MIME ou padrão `tipo/*`                     |
 | `mimeTypeOf(name)`, `extensionOf(name)`, `baseName(path)` | Funções de nome e caminho                                                      |
 | `isPreviewableImage(file)`                                | Se `FileUpload` mostra uma prévia (imagens, exceto SVG)                        |
 | `webFile(file)`, `pathFile(path)`                         | Envolvem um `File` do navegador ou um caminho do Tauri como `PickedFile`       |

@@ -15,11 +15,13 @@
 
 export {
 	emptyRawSettings,
+	isRawSettings,
 	type ConfigValues,
 	type RawSettings,
 	type SettingValue
 } from './raw-settings.js';
 export { composeSystemSettings, sameSystemSettings } from './compose.js';
+export { isCommandError, type CommandError, type CommandErrorKind } from './errors.js';
 export { settingsChangedEvent, tauriSettingsSource, type SettingsSource } from './source.js';
 export { loadSystemSettings } from './load.js';
 export { default as SystemSettingsScope } from './SystemSettingsScope.svelte';

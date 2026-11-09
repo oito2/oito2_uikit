@@ -31,7 +31,18 @@ export interface NativeWindowControllerOptions {
 	 * on the root element, for CSS. Defaults to true.
 	 */
 	reflectToDocument?: boolean;
+	/** Called once, after `dispose()` has stopped following the window. */
+	onDispose?: () => void;
 }
+
+/** A point in CSS pixels from the top left of the page. */
+interface Point {
+	x: number;
+	y: number;
+}
+
+const windowAttributes = ['maximized', 'fullscreen', 'inactive'] as const;
+const pointerEvents = ['pointerdown', 'pointermove'] as const;
 
 /**
  * Controls a Tauri window: minimize, maximize and restore, close, drag, resize and the
@@ -52,36 +63,56 @@ export class NativeWindowController implements WindowController {
 
 	readonly #window: Window;
 	readonly #reflect: boolean;
+	readonly #onDispose: (() => void) | undefined;
 	#unlisten: (() => void)[] = [];
 	#generation = 0;
 	#disposed = false;
+	/** Where the pointer was last pressed or moved, for `showMenu()` without a position. */
+	#pointer: Point | null = null;
 
 	private constructor(window: Window, options: NativeWindowControllerOptions) {
 		this.#window = window;
 		this.decorations = options.decorations;
 		this.#reflect = options.reflectToDocument ?? true;
+		this.#onDispose = options.onDispose;
 		this.state = { ...this.state, canShowMenu: options.canShowMenu };
 	}
 
-	/** Creates a controller for `window`, reads its state and starts following it. */
+	/**
+	 * Creates a controller for `window`, starts following its resize and focus events and
+	 * reads its state. A controller that fails to read the state is disposed before the
+	 * error propagates.
+	 */
 	static async attach(
 		window: Window,
 		options: NativeWindowControllerOptions
 	): Promise<NativeWindowController> {
 		const controller = new NativeWindowController(window, options);
-		await controller.refresh();
-		const refresh = () => void controller.refresh();
-		const stops = await Promise.all([
-			window.onResized(refresh),
-			window.onFocusChanged(({ payload }) => controller.#update({ isActive: payload }))
-		]);
-		controller.#unlisten = stops;
-		controller.#reflectState();
+		const refresh = () => {
+			controller
+				.refresh()
+				.catch((error) => console.warn('oito2: could not read the window state', error));
+		};
+		try {
+			controller.#unlisten = await Promise.all([
+				window.onResized(refresh),
+				window.onFocusChanged(({ payload }) => controller.#update({ isActive: payload }))
+			]);
+			controller.#listenToPointer(true);
+			await controller.refresh();
+		} catch (error) {
+			controller.dispose();
+			throw error;
+		}
 		return controller;
 	}
 
-	/** Reads the maximized, full-screen and focused state from the window. */
+	/**
+	 * Reads the maximized, full-screen and focused state from the window. A read that a
+	 * newer one overtakes is dropped.
+	 */
 	async refresh(): Promise<void> {
+		if (this.#disposed) return;
 		const generation = ++this.#generation;
 		const [isMaximized, isFullScreen, isActive] = await Promise.all([
 			this.#window.isMaximized(),
@@ -95,7 +126,6 @@ export class NativeWindowController implements WindowController {
 
 	#update(change: Partial<WindowState>): void {
 		if (this.#disposed) return;
-		this.#generation++;
 		this.state = { ...this.state, ...change };
 		this.#reflectState();
 	}
@@ -110,6 +140,33 @@ export class NativeWindowController implements WindowController {
 		set('maximized', this.state.isMaximized);
 		set('fullscreen', this.state.isFullScreen);
 		set('inactive', !this.state.isActive);
+	}
+
+	/** Removes the attributes `#reflectState` set on the root element. */
+	#clearReflectedState(): void {
+		if (!this.#reflect || typeof document === 'undefined') return;
+		const root = document.documentElement;
+		delete root.dataset.oito2Decorations;
+		for (const name of windowAttributes) root.removeAttribute(`data-oito2-window-${name}`);
+	}
+
+	readonly #trackPointer = (event: PointerEvent): void => {
+		this.#pointer = { x: event.clientX, y: event.clientY };
+	};
+
+	/** Starts or stops recording the pointer position from the document's pointer events. */
+	#listenToPointer(on: boolean): void {
+		if (typeof document === 'undefined') return;
+		for (const type of pointerEvents) {
+			if (on) {
+				document.addEventListener(type, this.#trackPointer, {
+					capture: true,
+					passive: true
+				});
+			} else {
+				document.removeEventListener(type, this.#trackPointer, { capture: true });
+			}
+		}
 	}
 
 	minimize(): Promise<void> {
@@ -133,16 +190,28 @@ export class NativeWindowController implements WindowController {
 		return this.#window.startResizeDragging(direction);
 	}
 
-	async showMenu(position?: { x: number; y: number }): Promise<void> {
+	/**
+	 * Shows the native window menu at `position` (CSS pixels from the top left of the page),
+	 * or where the pointer was last pressed or moved (the top left corner before any pointer
+	 * event); does nothing unless `state.canShowMenu`.
+	 */
+	async showMenu(position?: Point): Promise<void> {
 		if (!this.state.canShowMenu) return;
-		const { x, y } = position ?? { x: 0, y: 0 };
+		const { x, y } = position ?? this.#pointer ?? { x: 0, y: 0 };
 		await showWindowMenu(Math.max(0, x), Math.max(0, y));
 	}
 
-	/** Stops following the window. */
+	/**
+	 * Stops following the window and the pointer, removes the attributes mirrored on the
+	 * root element and calls `onDispose`. Later calls do nothing.
+	 */
 	dispose(): void {
+		if (this.#disposed) return;
 		this.#disposed = true;
 		for (const stop of this.#unlisten) stop();
 		this.#unlisten = [];
+		this.#listenToPointer(false);
+		this.#clearReflectedState();
+		this.#onDispose?.();
 	}
 }

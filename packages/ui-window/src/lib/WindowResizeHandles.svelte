@@ -63,7 +63,11 @@
 			const down = (event: PointerEvent) => {
 				if (event.button !== 0) return;
 				event.preventDefault();
-				void controller?.startResize(direction);
+				controller
+					?.startResize(direction)
+					.catch((error) =>
+						console.warn('oito2: could not start resizing the window', error)
+					);
 			};
 			node.addEventListener('pointerdown', down);
 			return () => node.removeEventListener('pointerdown', down);

@@ -25,8 +25,10 @@ pub fn window_menu_supported() -> bool {
 }
 
 /// Shows the native window menu of `window` at `x`, `y`, in CSS pixels from the top left
-/// of its webview. The menu opens on the main thread after this returns; outside Linux and
-/// Windows it returns an `Unsupported` error.
+/// of its webview. Must run on the main thread, which owns the window (use
+/// `run_on_main_thread` from anywhere else). Returns an `Unsupported` error outside Linux
+/// and Windows, or when the window manager has no menu to show; on Windows it returns
+/// once the menu closes.
 pub fn show_window_menu<R: Runtime>(
     window: &WebviewWindow<R>,
     x: f64,
@@ -35,13 +37,7 @@ pub fn show_window_menu<R: Runtime>(
     if !window_menu_supported() {
         return Err(crate::Error::Unsupported("window menu".into()));
     }
-    let target = window.clone();
-    window.run_on_main_thread(move || {
-        if let Err(error) = platform::show(&target, x, y) {
-            eprintln!("oito2-window: could not show the window menu: {error}");
-        }
-    })?;
-    Ok(())
+    platform::show(window, x, y)
 }
 
 #[cfg(target_os = "linux")]

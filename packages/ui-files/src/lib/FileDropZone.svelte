@@ -111,8 +111,8 @@
 		</span>
 	{/if}
 	{#if adapter.canDropFiles}
-		<!-- The whole zone is the button; this only shows where to click. -->
-		<span class="oito2-file-drop-zone-choose">{choose}</span>
+		<!-- The whole zone is the button; this only shows where to click, so it stays out of its name. -->
+		<span class="oito2-file-drop-zone-choose" aria-hidden="true">{choose}</span>
 	{/if}
 </button>
 

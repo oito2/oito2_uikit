@@ -176,6 +176,14 @@ fn watch_files(home: &std::path::Path, changed: &std::rc::Rc<dyn Fn()>) -> Vec<g
     monitors
 }
 
+/// The GSettings schemas that hold watched keys, each once, in sorted order.
+fn watched_schemas() -> Vec<&'static str> {
+    let mut schemas: Vec<&str> = GSETTINGS_KEYS.iter().map(|(schema, _)| *schema).collect();
+    schemas.sort_unstable();
+    schemas.dedup();
+    schemas
+}
+
 /// Starts watching GSettings, the portal and the configuration files, calling `changed`
 /// after each burst of changes. Must run on the main thread, whose GLib loop delivers the
 /// change signals.
@@ -184,9 +192,7 @@ pub fn watch(changed: impl Fn() + 'static) {
 
     let mut settings = Vec::new();
     if let Some(source) = gio::SettingsSchemaSource::default() {
-        let mut schemas: Vec<&str> = GSETTINGS_KEYS.iter().map(|(schema, _)| *schema).collect();
-        schemas.dedup();
-        for schema_id in schemas {
+        for schema_id in watched_schemas() {
             if source.lookup(schema_id, true).is_none() {
                 continue;
             }
@@ -236,6 +242,24 @@ mod tests {
     use std::time::Instant;
 
     use super::*;
+
+    #[test]
+    fn lists_each_watched_schema_once() {
+        let schemas = watched_schemas();
+        assert_eq!(
+            schemas,
+            vec![
+                "org.cinnamon.desktop.wm.preferences",
+                "org.gnome.desktop.a11y.interface",
+                "org.gnome.desktop.interface",
+                "org.gnome.desktop.wm.preferences",
+                "org.mate.Marco.general",
+            ]
+        );
+        for (schema, _) in GSETTINGS_KEYS {
+            assert!(schemas.contains(schema));
+        }
+    }
 
     /// Runs the main context until `done` returns true or two seconds pass.
     fn run_until(context: &glib::MainContext, done: impl Fn() -> bool) {

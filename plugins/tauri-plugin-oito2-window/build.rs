@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// The plugin exposes no commands yet; each phase adds its own to this list.
+// The commands the plugin exposes; each gets an `allow-*` and a `deny-*` permission.
 const COMMANDS: &[&str] = &["set_decoration_mode", "decoration_mode", "show_window_menu"];
 
 fn main() {

@@ -39,13 +39,20 @@ export interface PickedFile {
  * `extensions` (with or without the dot, in any letter case) or whose MIME type is one of
  * `mimeTypes`, where `image/*` matches every image type. A group with neither accepts
  * every file.
+ *
+ * In Tauri the MIME type of a file comes from its extension through a built-in table of
+ * common types (`mimeTypeOf`), so a type outside that table is matched only when its
+ * extension is listed in `extensions` too.
  */
 export interface FileTypeGroup {
 	/** The name shown in file choosers and hints, such as `Images`. */
 	readonly label?: string;
 	/** The file extensions, such as `png` or `.jpg`. */
 	readonly extensions?: readonly string[];
-	/** The MIME types, such as `application/pdf` or `image/*`. */
+	/**
+	 * The MIME types, such as `application/pdf` or `image/*`. In Tauri they are matched
+	 * through the extensions the built-in table maps to them.
+	 */
 	readonly mimeTypes?: readonly string[];
 }
 
@@ -71,9 +78,34 @@ const mimeTypes: Readonly<Record<string, string>> = {
 	bmp: 'image/bmp',
 	svg: 'image/svg+xml',
 	avif: 'image/avif',
+	apng: 'image/apng',
+	tif: 'image/tiff',
+	tiff: 'image/tiff',
+	heic: 'image/heic',
+	heif: 'image/heif',
+	ico: 'image/x-icon',
 	pdf: 'application/pdf',
 	json: 'application/json',
+	xml: 'application/xml',
+	yaml: 'application/yaml',
+	yml: 'application/yaml',
+	rtf: 'application/rtf',
+	doc: 'application/msword',
+	docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	xls: 'application/vnd.ms-excel',
+	xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+	ppt: 'application/vnd.ms-powerpoint',
+	pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+	odt: 'application/vnd.oasis.opendocument.text',
+	ods: 'application/vnd.oasis.opendocument.spreadsheet',
+	odp: 'application/vnd.oasis.opendocument.presentation',
+	epub: 'application/epub+zip',
 	zip: 'application/zip',
+	tar: 'application/x-tar',
+	gz: 'application/gzip',
+	'7z': 'application/x-7z-compressed',
+	rar: 'application/vnd.rar',
+	wasm: 'application/wasm',
 	txt: 'text/plain',
 	md: 'text/markdown',
 	csv: 'text/csv',
@@ -83,8 +115,19 @@ const mimeTypes: Readonly<Record<string, string>> = {
 	mp3: 'audio/mpeg',
 	wav: 'audio/wav',
 	ogg: 'audio/ogg',
+	flac: 'audio/flac',
+	aac: 'audio/aac',
+	m4a: 'audio/mp4',
+	opus: 'audio/opus',
 	mp4: 'video/mp4',
-	webm: 'video/webm'
+	webm: 'video/webm',
+	mov: 'video/quicktime',
+	mkv: 'video/x-matroska',
+	avi: 'video/x-msvideo',
+	ttf: 'font/ttf',
+	otf: 'font/otf',
+	woff: 'font/woff',
+	woff2: 'font/woff2'
 };
 
 /** Returns the MIME type of a common file extension in `name`, or `null`. */
@@ -94,6 +137,21 @@ export function mimeTypeOf(name: string): string | null {
 		(extension !== null && Object.hasOwn(mimeTypes, extension) ? mimeTypes[extension] : null) ??
 		null
 	);
+}
+
+/**
+ * Returns the extensions of the built-in table (lower case, without the dot) whose MIME
+ * type is `pattern`, an exact type such as `application/pdf` or a `type/*` pattern such as
+ * `image/*`; empty when none matches.
+ */
+export function extensionsForMimeType(pattern: string): string[] {
+	const wanted = pattern.toLowerCase();
+	const matches = wanted.endsWith('/*')
+		? (type: string) => type.startsWith(wanted.slice(0, -1))
+		: (type: string) => type === wanted;
+	return Object.entries(mimeTypes)
+		.filter(([, type]) => matches(type))
+		.map(([extension]) => extension);
 }
 
 /**

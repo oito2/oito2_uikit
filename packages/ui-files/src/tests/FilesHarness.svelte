@@ -32,6 +32,7 @@
 		highContrast?: boolean;
 		adapter?: FilesAdapter;
 		controller?: FileUploadController;
+		showPreviews?: boolean;
 		dropped?: PickedFile[];
 		log?: string[];
 	}
@@ -42,6 +43,7 @@
 		highContrast = false,
 		adapter,
 		controller = new FileUploadController(),
+		showPreviews = true,
 		dropped = $bindable(),
 		log = []
 	}: Props = $props();
@@ -57,7 +59,7 @@
 				data-testid="zone"
 			/>
 		{:else if show === 'upload' || show === 'gallery'}
-			<FileUpload {controller} {adapter} />
+			<FileUpload {controller} {adapter} {showPreviews} />
 		{/if}
 		{#if show === 'download' || show === 'gallery'}
 			<div class="row">

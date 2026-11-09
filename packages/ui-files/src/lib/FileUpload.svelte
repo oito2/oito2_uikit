@@ -25,14 +25,13 @@
   zone is disabled once the controller holds its largest number of files.
 -->
 <script lang="ts">
-	import FileIcon from '@lucide/svelte/icons/file';
 	import X from '@lucide/svelte/icons/x';
 	import { IconButton, InfoBox, useFormat, useLocale, type IconComponent } from '@oito2/ui';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { FilesAdapter } from './adapters/adapter.js';
 	import FileDropZone from './FileDropZone.svelte';
-	import { isPreviewableImage, type PickedFile } from './files.js';
+	import FileRow from './FileRow.svelte';
 	import type { FileUploadController, RejectedFile } from './upload-controller.svelte.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
@@ -98,44 +97,18 @@
 				return locale.strings.tooManyFiles(name, controller.maxFiles ?? 0);
 			case 'directory':
 				return locale.strings.folderNotAccepted(name);
+			case 'unreadable':
+				return locale.strings.fileUnreadable(name);
 		}
-	}
-
-	/** Shows the size of `file` once it is read, and a thumbnail of an image file. */
-	function fileRow(node: HTMLElement, file: PickedFile): () => void {
-		let cancelled = false;
-		let url: string | null = null;
-		const size = node.querySelector<HTMLElement>('[data-size]');
-		const image = node.querySelector<HTMLImageElement>('img');
-		void file.size().then(
-			(bytes) => {
-				if (!cancelled && size) size.textContent = format.current.bytes(bytes);
-			},
-			() => {}
-		);
-		if (image) {
-			const source = file.file
-				? Promise.resolve(file.file)
-				: file.bytes().then((bytes) => new Blob([bytes as Uint8Array<ArrayBuffer>]));
-			void source.then(
-				(blob) => {
-					if (cancelled) return;
-					url = URL.createObjectURL(blob);
-					image.src = url;
-				},
-				() => {}
-			);
-		}
-		return () => {
-			cancelled = true;
-			if (url) URL.revokeObjectURL(url);
-		};
 	}
 </script>
 
 <div bind:this={ref} class={['oito2-file-upload', className]} {...rest}>
 	<FileDropZone
-		onFiles={(files) => void controller.add(files)}
+		onFiles={(files) =>
+			controller
+				.add(files)
+				.catch((error) => console.error('oito2: could not add the files', error))}
 		accept={controller.accept}
 		multiple={controller.maxFiles !== 1}
 		enabled={enabled && controller.canAddMore}
@@ -162,26 +135,7 @@
 	{#if controller.files.length > 0}
 		<ul class="oito2-file-upload-list">
 			{#each controller.files as file (file)}
-				<li class="oito2-file-upload-row" {@attach (node) => fileRow(node, file)}>
-					<span class="oito2-file-upload-thumbnail">
-						{#if showPreviews && isPreviewableImage(file)}
-							<img alt="" />
-						{:else}
-							<FileIcon aria-hidden="true" />
-						{/if}
-					</span>
-					<span class="oito2-file-upload-text">
-						<span class="oito2-file-upload-name">{file.name}</span>
-						<span class="oito2-file-upload-size" data-size></span>
-					</span>
-					{#if enabled}
-						<IconButton
-							icon={X as IconComponent}
-							label={locale.strings.removeItem(file.name)}
-							onclick={() => controller.remove(file)}
-						/>
-					{/if}
-				</li>
+				<FileRow {file} {showPreviews} {enabled} onRemove={() => controller.remove(file)} />
 			{/each}
 		</ul>
 	{/if}
@@ -206,60 +160,6 @@
 			margin: 0;
 			padding: 0;
 			list-style: none;
-		}
-
-		.oito2-file-upload-row {
-			display: flex;
-			align-items: center;
-			gap: var(--oito2-space-sm);
-			padding: var(--oito2-space-sm);
-			border: 1px solid var(--oito2-color-outline-variant);
-			border-radius: var(--oito2-radius-medium);
-		}
-
-		.oito2-file-upload-thumbnail {
-			display: flex;
-			flex: none;
-			align-items: center;
-			justify-content: center;
-			width: 40px;
-			height: 40px;
-			overflow: hidden;
-			border-radius: var(--oito2-radius-small);
-			background: var(--oito2-color-surface-container-highest);
-			color: var(--oito2-color-on-surface-variant);
-		}
-
-		.oito2-file-upload-thumbnail img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-
-		.oito2-file-upload-thumbnail :global(svg) {
-			width: var(--oito2-icon-size);
-			height: var(--oito2-icon-size);
-		}
-
-		.oito2-file-upload-text {
-			display: flex;
-			flex: 1;
-			flex-direction: column;
-			min-width: 0;
-		}
-
-		.oito2-file-upload-name {
-			overflow: hidden;
-			white-space: nowrap;
-			text-overflow: ellipsis;
-			font: var(--oito2-type-body-medium);
-			font-weight: 500;
-		}
-
-		.oito2-file-upload-size {
-			color: var(--oito2-color-on-surface-variant);
-			font: var(--oito2-type-body-small);
-			letter-spacing: var(--oito2-type-body-small-tracking);
 		}
 	}
 </style>

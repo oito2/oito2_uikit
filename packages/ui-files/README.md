@@ -8,10 +8,10 @@
 ## Installation
 
 ```bash
-pnpm add @oito2/ui-files @oito2/ui svelte
+pnpm add @oito2/ui-files @oito2/ui svelte @tauri-apps/api @tauri-apps/plugin-dialog @tauri-apps/plugin-fs
 ```
 
-`svelte` (`^5.57.0`) is a peer dependency. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`). `@tauri-apps/api`, `@tauri-apps/plugin-dialog` and `@tauri-apps/plugin-fs` come as dependencies; they are loaded only inside Tauri.
+`svelte` (`^5.57.0`), `@oito2/ui`, `@tauri-apps/api` (`^2.12.0`), `@tauri-apps/plugin-dialog` (`^2.8.0`) and `@tauri-apps/plugin-fs` (`^2.7.0`) are peer dependencies; install them even for a web-only build (the bundler resolves the dynamic imports), they are loaded only inside Tauri. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`).
 
 The components pick their platform adapter with `defaultFilesAdapter()`: inside Tauri the `tauriFilesAdapter` (native file chooser, "Save as" dialog and files dropped on the window), in a browser the `webFilesAdapter` (file input, download link and HTML drag and drop).
 
@@ -44,7 +44,7 @@ Grant these permissions to the window in a capability (`src-tauri/capabilities/*
 ]
 ```
 
-Both plugins add the chosen and dropped paths to the fs scope, so no wider scope is needed. Saving suggests the downloads directory.
+Both plugins add the chosen and dropped paths to the fs scope, so no wider scope is needed; a dropped folder enters the scope with its whole tree even though the controller refuses it — apps that never accept folders can set `plugins.fs.scopeDroppedPaths` to `false` and grant an explicit `fs:scope`. Saving suggests the downloads directory.
 
 ## Usage
 
@@ -69,7 +69,7 @@ Both plugins add the chosen and dropped paths to the fs scope, so no wider scope
 <p>{images.files.length} file(s), {images.rejected.length} refused.</p>
 ```
 
-The controller is reactive: read `files` and `rejected` (each with a `reason`: `type`, `size`, `count` or `directory`), and call `add`, `remove`, `clear` or `clearRejected`. Each `PickedFile` exposes `name`, `path` (Tauri), `mimeType`, `size()` and `bytes()`.
+The controller is reactive: read `files` and `rejected` (each with a `reason`: `type`, `size`, `count`, `directory` or `unreadable`), and call `add`, `remove`, `clear` or `clearRejected`. Each `PickedFile` exposes `name`, `path` (Tauri), `mimeType`, `size()` and `bytes()`.
 
 ```svelte
 <script lang="ts">
@@ -89,15 +89,15 @@ The controller is reactive: read `files` and `rejected` (each with a `reason`: `
 
 ## What's inside
 
-| Export                                                                                                                                       | Purpose                                                                            |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `FileUpload`                                                                                                                                 | Drop zone plus the list of accepted files, image previews and remove buttons       |
-| `FileUploadController`                                                                                                                       | Holds the files; checks `accept`, `maxFiles` and `maxFileSize` as they are added   |
-| `FileDropZone`                                                                                                                               | Just the drop zone / chooser button, with an `onFiles` callback                    |
-| `DownloadTrigger`                                                                                                                            | Button that builds a file and saves it ("Save as" in Tauri, download in a browser) |
-| `Downloads`                                                                                                                                  | `Downloads.save({ fileName, bytes, mimeType })` without a button                   |
-| `defaultFilesAdapter`, `tauriFilesAdapter`, `webFilesAdapter`                                                                                | Platform adapters; every component takes an optional `adapter` prop                |
-| `acceptAttribute`, `fileMatchesTypes`, `mimeTypeOf`, `extensionOf`, `baseName`, `isPreviewableImage`, `webFile`, `pathFile`, `dialogFilters` | File type and path helpers                                                         |
+| Export                                                                                                                                                                | Purpose                                                                            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `FileUpload`                                                                                                                                                          | Drop zone plus the list of accepted files, image previews and remove buttons       |
+| `FileUploadController`                                                                                                                                                | Holds the files; checks `accept`, `maxFiles` and `maxFileSize` as they are added   |
+| `FileDropZone`                                                                                                                                                        | Just the drop zone / chooser button, with an `onFiles` callback                    |
+| `DownloadTrigger`                                                                                                                                                     | Button that builds a file and saves it ("Save as" in Tauri, download in a browser) |
+| `Downloads`                                                                                                                                                           | `Downloads.save({ fileName, bytes, mimeType })` without a button                   |
+| `defaultFilesAdapter`, `tauriFilesAdapter`, `webFilesAdapter`                                                                                                         | Platform adapters; every component takes an optional `adapter` prop                |
+| `acceptAttribute`, `fileMatchesTypes`, `mimeTypeOf`, `extensionsForMimeType`, `extensionOf`, `baseName`, `isPreviewableImage`, `webFile`, `pathFile`, `dialogFilters` | File type and path helpers                                                         |
 
 ## Links
 

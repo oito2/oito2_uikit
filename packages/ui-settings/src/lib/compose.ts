@@ -74,7 +74,7 @@ function linuxAccent(raw: RawSettings, environment: DesktopEnvironment): string 
 		if (raw.config.kdeAccentColor) return raw.config.kdeAccentColor;
 	} else {
 		const name = raw.gsettings[`${gnomeInterface}/accent-color`];
-		if (typeof name === 'string' && name in accentColors)
+		if (typeof name === 'string' && Object.hasOwn(accentColors, name))
 			return accentColors[name as AccentColor];
 	}
 	return raw.systemAccent;

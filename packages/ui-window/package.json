@@ -48,15 +48,15 @@
 		"test": "vitest run"
 	},
 	"peerDependencies": {
+		"@oito2/ui": "workspace:^",
+		"@tauri-apps/api": "^2.12.0",
 		"svelte": "^5.57.0"
 	},
-	"dependencies": {
-		"@oito2/ui": "workspace:*",
-		"@tauri-apps/api": "catalog:"
-	},
 	"devDependencies": {
+		"@oito2/ui": "workspace:*",
 		"@sveltejs/package": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
+		"@tauri-apps/api": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
 		"playwright": "catalog:",
 		"publint": "catalog:",

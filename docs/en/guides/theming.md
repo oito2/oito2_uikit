@@ -255,6 +255,8 @@ Two optional stylesheets hold precomputed themes as custom properties, applied w
 </aside>
 ```
 
+`presetSchemeName(preset, { highContrast })` from `@oito2/ui-themes` returns the attribute value of a preset (`presetSchemeName('catppuccinMocha', { highContrast: true })` is `catppuccin-mocha-hc`), for apps that pick the preset at run time.
+
 The attribute only sets the custom properties (and `color-scheme`); paint the background yourself (`var(--oito2-color-background)` or a surface role). The rules are in the `oito2` layer, and each element with the attribute defines its own values, so it also works inside a `ThemeProvider`.
 
 ## See also

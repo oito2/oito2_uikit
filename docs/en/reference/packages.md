@@ -27,13 +27,13 @@ The first release will be `v0.1.0`; it has not been published yet.
 
 ## Common to every npm package
 
-| Field             | Value                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| License           | `GPL-3.0-only`                                                                        |
-| Module type       | ES modules (`"type": "module"`), built from `src/lib` into `dist` by `svelte-package` |
-| Export conditions | `types`, `svelte` and `default` on every JavaScript entry point                       |
-| `sideEffects`     | `["**/*.css"]` — only CSS imports have side effects                                   |
-| Peer dependency   | `svelte` `^5.57.0`                                                                    |
+| Field             | Value                                                                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| License           | `GPL-3.0-only`                                                                                                                                                                                                                 |
+| Module type       | ES modules (`"type": "module"`), built from `src/lib` into `dist` by `svelte-package`                                                                                                                                          |
+| Export conditions | `types`, `svelte` and `default` on every JavaScript entry point                                                                                                                                                                |
+| `sideEffects`     | `["**/*.css"]` — only CSS imports have side effects                                                                                                                                                                            |
+| Peer dependencies | `svelte` `^5.57.0`; in the satellite packages also `@oito2/ui` (same version) and, in the Tauri packages, `@tauri-apps/*` — the app installs them, so one copy of each is shared and the Tauri packages match the app's crates |
 
 ## `@oito2/ui`
 
@@ -61,12 +61,12 @@ Tauri: none. An app that renders `@oito2/ui` on a Node server (SSR) must add `@m
 
 ## `@oito2/ui-themes`
 
-| Entry point                    | File               | Contents                                                                                                  |
-| ------------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------- |
-| `@oito2/ui-themes`             | `dist/index.js`    | `presetTheme`, `presetColorTheme`, `presetRoles`, `themePresets`, `themePresetNames`, the source palettes |
-| `@oito2/ui-themes/presets.css` | `dist/presets.css` | Every preset and its high-contrast variant under `[data-oito2-scheme]` selectors                          |
+| Entry point                    | File               | Contents                                                                                                                      |
+| ------------------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `@oito2/ui-themes`             | `dist/index.js`    | `presetTheme`, `presetColorTheme`, `presetRoles`, `presetSchemeName`, `themePresets`, `themePresetNames`, the source palettes |
+| `@oito2/ui-themes/presets.css` | `dist/presets.css` | Every preset and its high-contrast variant under `[data-oito2-scheme]` selectors                                              |
 
-Runtime dependencies: `@oito2/ui` (same version), `@catppuccin/palette` 1.8.0. Tauri: none. See the [README](../../../packages/ui-themes/README.md).
+Peer dependency: `@oito2/ui` (same version). Runtime dependency: `@catppuccin/palette` 1.8.0. Tauri: none. See the [README](../../../packages/ui-themes/README.md).
 
 ## `@oito2/ui-syntax`
 
@@ -75,7 +75,7 @@ Runtime dependencies: `@oito2/ui` (same version), `@catppuccin/palette` 1.8.0. T
 | `@oito2/ui-syntax`           | `dist/index.js`         | `CodeBlock`, `Highlighter`, `defaultLanguages`, `HighlighterTheme`, `roleOfScope`, `scopeRoles` |
 | `@oito2/ui-syntax/fonts.css` | `dist/styles/fonts.css` | The JetBrains Mono variable font (OFL-1.1), optional                                            |
 
-Runtime dependencies: `@oito2/ui`, `highlight.js` 11.12.0. Tauri: none. See the [README](../../../packages/ui-syntax/README.md).
+Peer dependency: `@oito2/ui`. Runtime dependency: `highlight.js` 11.12.0. Tauri: none. See the [README](../../../packages/ui-syntax/README.md).
 
 ## `@oito2/ui-extras`
 
@@ -83,7 +83,7 @@ Runtime dependencies: `@oito2/ui`, `highlight.js` 11.12.0. Tauri: none. See the 
 | ------------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `@oito2/ui-extras` | `dist/index.js` | `QrCode`, `SignaturePad`, `SignatureController`, `ImageCropper`, `CropPreview`, `CropController`, `NavigationMenu`, helpers |
 
-Runtime dependencies: `@oito2/ui`, `@lucide/svelte` 1.59.0, `qrcode-generator` 2.0.4. Tauri: none. See the [README](../../../packages/ui-extras/README.md).
+Peer dependency: `@oito2/ui`. Runtime dependencies: `@lucide/svelte` 1.59.0, `qrcode-generator` 2.0.4. Tauri: none. See the [README](../../../packages/ui-extras/README.md).
 
 ## `@oito2/ui-files`
 
@@ -91,27 +91,27 @@ Runtime dependencies: `@oito2/ui`, `@lucide/svelte` 1.59.0, `qrcode-generator` 2
 | ----------------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `@oito2/ui-files` | `dist/index.js` | `FileUpload`, `FileUploadController`, `FileDropZone`, `DownloadTrigger`, `Downloads`, the adapters and file helpers |
 
-Runtime dependencies: `@oito2/ui`, `@lucide/svelte` 1.59.0, `@tauri-apps/api` 2.12.4, `@tauri-apps/plugin-dialog` 2.8.3, `@tauri-apps/plugin-fs` 2.7.1. The Tauri modules are loaded only inside Tauri.
+Peer dependencies: `@oito2/ui`, `@tauri-apps/api` `^2.12.0`, `@tauri-apps/plugin-dialog` `^2.8.0`, `@tauri-apps/plugin-fs` `^2.7.0` (installed by the app, also for a web-only build; the Tauri modules are loaded only inside Tauri). Runtime dependency: `@lucide/svelte` 1.59.0.
 
 Tauri: the official `tauri-plugin-dialog` and `tauri-plugin-fs` crates, registered in the Builder, and the permissions `dialog:allow-open`, `dialog:allow-save`, `fs:allow-stat`, `fs:allow-read-file`, `fs:allow-write-file`. See [Files](../guides/files.md) and the [README](../../../packages/ui-files/README.md).
 
 ## `@oito2/ui-window`
 
-| Entry point        | File            | Contents                                                                                                               |
-| ------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `@oito2/ui-window` | `dist/index.js` | `initWindow`, `NativeWindowController`, `WindowResizeHandles`, `setDecorationMode`, `decorationMode`, `showWindowMenu` |
+| Entry point        | File            | Contents                                                                                                                                                 |
+| ------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@oito2/ui-window` | `dist/index.js` | `initWindow`, `NativeWindowController`, `WindowResizeHandles`, `setDecorationMode`, `decorationMode`, `showWindowMenu`, `CommandError`, `isCommandError` |
 
-Runtime dependencies: `@oito2/ui`, `@tauri-apps/api` 2.12.4.
+Peer dependencies: `@oito2/ui`, `@tauri-apps/api` `^2.12.0`. No runtime dependencies.
 
 Tauri: the `tauri-plugin-oito2-window` crate with `oito2-window:default`, plus `core:window:allow-minimize`, `-toggle-maximize`, `-close`, `-start-dragging` and `-start-resize-dragging` for the title bar. Outside Tauri `initWindow()` returns `null`. See [Desktop integration](../guides/desktop-integration.md) and the [README](../../../packages/ui-window/README.md).
 
 ## `@oito2/ui-settings`
 
-| Entry point          | File            | Contents                                                                                                                                             |
-| -------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@oito2/ui-settings` | `dist/index.js` | `SystemSettingsScope`, `loadSystemSettings`, `composeSystemSettings`, `sameSystemSettings`, `tauriSettingsSource`, `settingsChangedEvent`, raw types |
+| Entry point          | File            | Contents                                                                                                                                                                                                |
+| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@oito2/ui-settings` | `dist/index.js` | `SystemSettingsScope`, `loadSystemSettings`, `composeSystemSettings`, `sameSystemSettings`, `tauriSettingsSource`, `settingsChangedEvent`, `isRawSettings`, `CommandError`, `isCommandError`, raw types |
 
-Runtime dependencies: `@oito2/ui`, `@tauri-apps/api` 2.12.4.
+Peer dependencies: `@oito2/ui`, `@tauri-apps/api` `^2.12.0`. No runtime dependencies.
 
 Tauri: the `tauri-plugin-oito2-settings` crate with `oito2-settings:default`; `core:default` covers the change event. Outside Tauri the scope keeps the platform defaults. See the [README](../../../packages/ui-settings/README.md).
 

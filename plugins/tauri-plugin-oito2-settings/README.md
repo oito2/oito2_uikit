@@ -70,7 +70,7 @@ On Linux, `init()` also starts watching the settings when the app starts.
 | `systemAccent`       | The toolkit or system accent color as `#RRGGBB`, or `null`                                                                                    |
 | `systemHighContrast` | Whether the system asks for high contrast                                                                                                     |
 
-A failed command rejects with `{ kind, message }`, where `kind` is `tauri` or `unsupported`.
+A failed command rejects with `{ kind, message }`, where `kind` is `unsupported` or `internal` (the reader task stopped before returning).
 
 ### Rust API
 
@@ -89,6 +89,8 @@ A failed command rejects with `{ kind, message }`, where `kind` is `tauri` or `u
 | Linux    | Session variables; GSettings `button-layout` (GNOME, Cinnamon, MATE/Marco), `accent-color`, `gtk-theme` and `high-contrast`; the XDG desktop portal (`org.freedesktop.appearance` accent and contrast); `kwinrc`, `kdeglobals`, Xfce's `xfwm4.xml` and the COSMIC settings under `XDG_CONFIG_HOME` (files over 1 MiB are ignored). Uses GIO through the `gtk` crate. | Yes, debounced (150 ms) |
 | Windows  | Accent color and high contrast, through the Windows Runtime (`UI::ViewManagement`)                                                                                                                                                                                                                                                                                   | No                      |
 | macOS    | Accent color (sRGB) and "Increase contrast", through AppKit                                                                                                                                                                                                                                                                                                          | No                      |
+
+Inside a Flatpak or Snap sandbox, `XDG_CONFIG_HOME` points at the sandbox (`~/.var/app/<id>/config` for Flatpak), so `kwinrc`, `kdeglobals`, `xfwm4.xml` and the COSMIC files are not found; the portal and GSettings sources still work.
 
 Where no change event is emitted, `@oito2/ui-settings` reads the settings again whenever the window regains focus.
 

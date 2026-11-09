@@ -121,9 +121,7 @@ describe('web adapter', () => {
 		});
 		render(FilesHarness, props);
 		const zone = el(page.getByTestId('zone'));
-		await expect
-			.element(page.getByTestId('zone'))
-			.toHaveAccessibleName(/^Drop files here\s*Choose files$/);
+		await expect.element(page.getByTestId('zone')).toHaveAccessibleName('Drop files here');
 		await expect.element(page.getByTestId('zone')).toHaveAccessibleDescription('PNG or PDF');
 		const transfer = new DataTransfer();
 		transfer.items.add(browserFile('a.png', png, 'image/png'));
@@ -237,8 +235,8 @@ describe('Tauri adapter', () => {
 			onHover: (dragging) => hovers.push(dragging),
 			onDrop: (files) => drops.push(files)
 		});
-		const ratio = window.devicePixelRatio || 1;
-		const at = (x: number, y: number) => ({ x: x * ratio, y: y * ratio });
+		// Outside Windows the positions arrive in CSS pixels, whatever the pixel ratio.
+		const at = (x: number, y: number) => ({ x, y });
 		// The adapter starts listening asynchronously; a drag over the element is repeated
 		// until it answers, and reported only once.
 		await expect
@@ -278,7 +276,7 @@ describe('FileUpload', () => {
 			webFile(browserFile('d.png', png, 'image/png'))
 		]);
 		render(FilesHarness, { show: 'upload', controller, adapter });
-		const zone = page.getByRole('button', { name: /Choose files/ });
+		const zone = page.getByRole('button', { name: 'Drop files here' });
 		await expect
 			.element(zone)
 			.toHaveAccessibleDescription(/^Accepted: Images · Up to .+ each$/);
@@ -297,6 +295,41 @@ describe('FileUpload', () => {
 		await page.getByRole('button', { name: 'Remove a.png' }).click();
 		expect(controller.files.map((file) => file.name)).toEqual(['d.png']);
 		await expect.element(zone).toBeEnabled();
+	});
+
+	it('refuses a file whose size fails to read and keeps the rest of the batch', async () => {
+		const controller = new FileUploadController({ maxFileSize: 1000 });
+		const unreadable: PickedFile = {
+			...webFile(browserFile('gone.png', png, 'image/png')),
+			size: () => Promise.reject(new Error('stat failed'))
+		};
+		const adapter = fakeAdapter([unreadable, webFile(browserFile('kept.txt', 'hello'))]);
+		render(FilesHarness, { show: 'upload', controller, adapter });
+		await page.getByRole('button', { name: 'Drop files here' }).click();
+		await expect.element(page.getByText("gone.png: this file can't be read")).toBeVisible();
+		await expect.element(page.getByText('kept.txt')).toBeVisible();
+		expect(controller.files.map((file) => file.name)).toEqual(['kept.txt']);
+		expect(controller.rejected.map((r) => r.reason)).toEqual(['unreadable']);
+	});
+
+	it('drops the preview when showPreviews turns off and rebuilds it when it turns on', async () => {
+		const controller = new FileUploadController();
+		await controller.add([webFile(browserFile('a.png', png, 'image/png'))]);
+		const props = $state({
+			show: 'upload',
+			controller,
+			adapter: fakeAdapter([]),
+			showPreviews: true
+		});
+		render(FilesHarness, props);
+		const src = () => document.querySelector('li img')?.getAttribute('src') ?? null;
+		await expect.poll(src).toMatch(/^blob:/);
+		const first = src();
+		props.showPreviews = false;
+		await expect.poll(() => document.querySelector('li img')).toBeNull();
+		props.showPreviews = true;
+		await expect.poll(src).toMatch(/^blob:/);
+		expect(src()).not.toBe(first);
 	});
 });
 

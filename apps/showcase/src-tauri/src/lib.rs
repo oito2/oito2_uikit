@@ -20,12 +20,19 @@ use tauri_plugin_oito2_window::{DecorationMode, apply_decoration_mode};
 mod commands;
 
 /// Reads the decoration mode from `OITO2_DECORATIONS` (`native`,
-/// `undecorated` or `gtk-headerless`), falling back to the platform default.
+/// `undecorated` or `gtk-headerless`), falling back to the platform default
+/// when it is unset or, with a message on stderr, when it is not a mode.
 pub(crate) fn requested_decoration_mode() -> DecorationMode {
-    std::env::var("OITO2_DECORATIONS")
-        .ok()
-        .and_then(|value| value.parse().ok())
-        .unwrap_or_else(DecorationMode::platform_default)
+    let Ok(value) = std::env::var("OITO2_DECORATIONS") else {
+        return DecorationMode::platform_default();
+    };
+    match value.parse() {
+        Ok(mode) => mode,
+        Err(error) => {
+            eprintln!("oito2: ignoring OITO2_DECORATIONS: {error}");
+            DecorationMode::platform_default()
+        }
+    }
 }
 
 /// Starts the showcase app.

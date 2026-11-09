@@ -13,8 +13,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { baseName, mimeTypeOf, type FileTypeGroup, type PickedFile } from '../files.js';
+import { Platform } from '@oito2/ui';
+import {
+	baseName,
+	extensionsForMimeType,
+	mimeTypeOf,
+	type FileTypeGroup,
+	type PickedFile
+} from '../files.js';
 import type { FilesAdapter } from './adapter.js';
+
+/** Converts a drag-drop position to CSS pixels: wry reports physical pixels on Windows only. */
+export function dropPositionToCss(
+	position: { x: number; y: number },
+	isWindows: boolean,
+	ratio: number
+): { x: number; y: number } {
+	const scale = isWindows ? ratio || 1 : 1;
+	return { x: position.x / scale, y: position.y / scale };
+}
 
 /** Returns a `PickedFile` for the file system `path`; `isDirectory` marks a folder. */
 export function pathFile(path: string, options: { isDirectory?: boolean } = {}): PickedFile {
@@ -34,19 +51,25 @@ export function pathFile(path: string, options: { isDirectory?: boolean } = {}):
 	};
 }
 
-/** Returns the dialog filters of `groups`: one per group with extensions, named by its label or extensions. */
+/**
+ * Returns the dialog filters of `groups`: one per group, named by its label or extensions,
+ * with the group's extensions and those the built-in table maps to its MIME types. A group
+ * that yields no extension is left out, and a group without filters yields no filter at all.
+ */
 export function dialogFilters(
 	groups: readonly FileTypeGroup[]
 ): { name: string; extensions: string[] }[] {
 	if (groups.some((group) => !group.extensions?.length && !group.mimeTypes?.length)) return [];
-	return groups
-		.filter((group) => (group.extensions?.length ?? 0) > 0)
-		.map((group) => {
-			const extensions = (group.extensions ?? []).map((extension) =>
-				extension.replace(/^\./, '')
-			);
-			return { name: group.label ?? extensions.join(', '), extensions };
-		});
+	return groups.flatMap((group) => {
+		const extensions = [
+			...new Set([
+				...(group.extensions ?? []).map((extension) => extension.replace(/^\./, '')),
+				...(group.mimeTypes ?? []).flatMap(extensionsForMimeType)
+			])
+		];
+		if (extensions.length === 0) return [];
+		return [{ name: group.label ?? extensions.join(', '), extensions }];
+	});
 }
 
 /**
@@ -57,7 +80,11 @@ export function dialogFilters(
  * The app registers `tauri-plugin-dialog` and `tauri-plugin-fs` and grants
  * `dialog:allow-open`, `dialog:allow-save`, `fs:allow-stat`, `fs:allow-read-file` and
  * `fs:allow-write-file`; both plugins add the chosen and dropped paths to the fs scope, so
- * no wider scope is needed. The suggested save location is the downloads directory.
+ * no wider scope is needed. A dropped folder is added to the fs plugin's runtime scope
+ * recursively (its `scopeDroppedPaths` option, on by default) even though
+ * `FileUploadController` refuses it; an app that never accepts folders can set
+ * `plugins.fs.scopeDroppedPaths` to `false` and grant an explicit `fs:scope` instead. The
+ * suggested save location is the downloads directory.
  */
 export function tauriFilesAdapter(): FilesAdapter {
 	return {
@@ -104,45 +131,50 @@ export function tauriFilesAdapter(): FilesAdapter {
 					onHover(dragging);
 				}
 			};
-			/** Whether the physical `position` of the event lies inside the element. */
+			const isWindows = Platform.current().isWindows;
+			/** Whether the `position` of the event, converted to CSS pixels, lies inside the element. */
 			const inside = (position: { x: number; y: number }) => {
-				const ratio = window.devicePixelRatio || 1;
-				const x = position.x / ratio;
-				const y = position.y / ratio;
+				const { x, y } = dropPositionToCss(position, isWindows, window.devicePixelRatio);
 				const box = element.getBoundingClientRect();
 				return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
 			};
-			void (async () => {
-				const { getCurrentWebview } = await import('@tauri-apps/api/webview');
+			(async () => {
+				const [{ getCurrentWebview }, { stat }] = await Promise.all([
+					import('@tauri-apps/api/webview'),
+					import('@tauri-apps/plugin-fs')
+				]);
 				const stop = await getCurrentWebview().onDragDropEvent(async (event) => {
-					const payload = event.payload;
-					if (payload.type === 'leave') {
-						hover(false);
-						return;
-					}
-					const over = inside(payload.position);
-					if (payload.type !== 'drop') {
-						hover(over);
-						return;
-					}
-					hover(false);
-					if (!over) return;
-					const { stat } = await import('@tauri-apps/plugin-fs');
-					const files: PickedFile[] = [];
-					for (const path of payload.paths) {
-						try {
-							files.push(
-								pathFile(path, { isDirectory: (await stat(path)).isDirectory })
-							);
-						} catch {
-							// A dragged item that isn't on the file system is skipped.
+					try {
+						const payload = event.payload;
+						if (payload.type === 'leave') {
+							hover(false);
+							return;
 						}
+						const over = inside(payload.position);
+						if (payload.type !== 'drop') {
+							hover(over);
+							return;
+						}
+						hover(false);
+						if (!over) return;
+						const files: PickedFile[] = [];
+						for (const path of payload.paths) {
+							try {
+								files.push(
+									pathFile(path, { isDirectory: (await stat(path)).isDirectory })
+								);
+							} catch {
+								// A dragged item that isn't on the file system is skipped.
+							}
+						}
+						if (files.length > 0) onDrop(files);
+					} catch (error) {
+						console.error('oito2: could not handle the dropped files', error);
 					}
-					if (files.length > 0) onDrop(files);
 				});
 				if (stopped) stop();
 				else unlisten = stop;
-			})();
+			})().catch((error) => console.error('oito2: drop target unavailable', error));
 			return () => {
 				stopped = true;
 				unlisten?.();

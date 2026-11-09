@@ -32,7 +32,7 @@ These steps are the same on Linux, Windows and macOS. Every npm package and both
 
 ### 1. npm packages
 
-`@oito2/ui` is the only required package; it needs `svelte` 5 (`^5.57.0`) as a peer dependency.
+`@oito2/ui` is the only required package; it needs `svelte` 5 (`^5.57.0`) as a peer dependency. The other packages declare `@oito2/ui` as a peer dependency too, and `@oito2/ui-files`, `@oito2/ui-window` and `@oito2/ui-settings` declare the `@tauri-apps/*` packages they use (`@tauri-apps/api` `^2.12.0`; for `ui-files` also `@tauri-apps/plugin-dialog` `^2.8.0` and `@tauri-apps/plugin-fs` `^2.7.0`): add them to the app, on the same major.minor as its Tauri crates.
 
 ```bash
 pnpm add @oito2/ui

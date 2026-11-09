@@ -14,11 +14,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //! Window chrome integration for `@oito2/ui`: the frame of each window (client-side
-//! decorations on Linux, no system frame on Windows, the overlaid title bar on macOS)
-//! and the native window menu.
+//! decorations on Linux, no system frame on Windows, the native frame on macOS) and
+//! the native window menu.
 
 use tauri::{
-    Manager, Runtime,
+    Manager, RunEvent, Runtime, WindowEvent,
     plugin::{Builder, TauriPlugin},
 };
 
@@ -33,7 +33,8 @@ pub use error::{Error, Result};
 pub use menu::{show_window_menu, window_menu_supported};
 
 /// Creates the plugin. It exposes the `set_decoration_mode`, `decoration_mode` and
-/// `show_window_menu` commands to the webview.
+/// `show_window_menu` commands to the webview, and forgets the recorded mode of each
+/// window when it is destroyed.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("oito2-window")
         .invoke_handler(tauri::generate_handler![
@@ -44,6 +45,17 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
         .setup(|app, _api| {
             app.manage(DecorationState::default());
             Ok(())
+        })
+        .on_event(|app, event| {
+            if let RunEvent::WindowEvent {
+                label,
+                event: WindowEvent::Destroyed,
+                ..
+            } = event
+                && let Some(state) = app.try_state::<DecorationState>()
+            {
+                state.forget(label);
+            }
         })
         .build()
 }

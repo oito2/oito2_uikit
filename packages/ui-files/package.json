@@ -28,7 +28,8 @@
 	"files": [
 		"dist",
 		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
+		"!dist/**/*.spec.*",
+		"!dist/**/__screenshots__"
 	],
 	"sideEffects": [
 		"**/*.css"
@@ -48,18 +49,22 @@
 		"test": "vitest run"
 	},
 	"peerDependencies": {
+		"@oito2/ui": "workspace:^",
+		"@tauri-apps/api": "^2.12.0",
+		"@tauri-apps/plugin-dialog": "^2.8.0",
+		"@tauri-apps/plugin-fs": "^2.7.0",
 		"svelte": "^5.57.0"
 	},
 	"dependencies": {
-		"@lucide/svelte": "catalog:",
-		"@oito2/ui": "workspace:*",
-		"@tauri-apps/api": "catalog:",
-		"@tauri-apps/plugin-dialog": "catalog:",
-		"@tauri-apps/plugin-fs": "catalog:"
+		"@lucide/svelte": "catalog:"
 	},
 	"devDependencies": {
+		"@oito2/ui": "workspace:*",
 		"@sveltejs/package": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
+		"@tauri-apps/api": "catalog:",
+		"@tauri-apps/plugin-dialog": "catalog:",
+		"@tauri-apps/plugin-fs": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
 		"axe-core": "catalog:",
 		"playwright": "catalog:",

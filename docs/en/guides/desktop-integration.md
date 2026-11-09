@@ -68,7 +68,7 @@ pub fn run() {
 }
 ```
 
-`apply_decoration_mode` must run on the main thread before the window is shown, which `setup` guarantees. `DecorationMode::platform_default()` is `gtk-headerless` on Linux, `undecorated` on Windows and `native` on macOS. On Linux, `tauri_plugin_oito2_settings::init()` also starts watching the settings.
+`apply_decoration_mode` must run on the main thread before the window is shown, which `setup` guarantees; on Linux it fails with `unsupported: window already visible` for a window that is already shown (GTK cannot switch a visible window to client-side decorations), and the webview's `setDecorationMode` rejects the same way. `DecorationMode::platform_default()` is `gtk-headerless` on Linux, `undecorated` on Windows and `native` on macOS. On Linux, `tauri_plugin_oito2_settings::init()` also starts watching the settings.
 
 The showcase additionally reads the mode from the `OITO2_DECORATIONS` environment variable (`native`, `undecorated` or `gtk-headerless`) to try the other frames; that is showcase code, not a plugin feature.
 
@@ -97,10 +97,12 @@ Tauri merges `tauri.linux.conf.json` and `tauri.macos.conf.json` over it on thos
 
 | File                    | Added keys                                                                                          | Effect                                                                                   |
 | ----------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `tauri.linux.conf.json` | `"transparent": true`                                                                               | A transparent window, as the showcase uses with the `gtk-headerless` frame               |
+| `tauri.linux.conf.json` | `"transparent": true`                                                                               | An RGBA window, which `gtk-headerless` needs: see below                                  |
 | `tauri.macos.conf.json` | `"titleBarStyle": "Overlay"`, `"hiddenTitle": true`, `"trafficLightPosition": { "x": 16, "y": 17 }` | Keeps the native frame and traffic lights, and lets the app's header bar draw under them |
 
 There is no Windows override: the `undecorated` default removes the system frame.
+
+`"transparent": true` on Linux gives the window an RGBA visual, so the shadow and rounded corners that GTK draws around a `gtk-headerless` window are not painted on an opaque rectangle. The page must then paint its own opaque background (the `ThemeProvider` host and `body` of the showcase do), and on X11 without a compositor such a window shows black. Apps that use the `native` or `undecorated` frame on Linux do not need it.
 
 ```json
 {
@@ -189,9 +191,16 @@ Then nest the scopes in the root layout. `SystemSettingsScope` goes **outside** 
 	let controller: NativeWindowController | null = $state(null);
 
 	onMount(() => {
+		const abort = new AbortController();
 		// The Rust setup already applied the frame and showed the window.
-		void initWindow({ show: false }).then((value) => (controller = value));
-		return () => controller?.dispose();
+		initWindow({ show: false, signal: abort.signal }).then(
+			(value) => (controller = value),
+			(error) => console.error('oito2: could not connect the window', error)
+		);
+		return () => {
+			abort.abort();
+			controller?.dispose();
+		};
 	});
 </script>
 
@@ -223,6 +232,8 @@ Then nest the scopes in the root layout. `SystemSettingsScope` goes **outside** 
 	}
 </style>
 ```
+
+`initWindow` resolves to the same controller when it is called again for a window whose controller is still alive, and to `null` when its `signal` aborts before it finishes (the controller it was creating is disposed), so a layout that unmounts before the window is ready leaks nothing. It rejects with `oito2: tauri-plugin-oito2-window is not registered or the capability does not allow it` (the Tauri error as `cause`) when the plugin or the `oito2-window:default` permission is missing.
 
 A Tauri app built with SvelteKit is a client-only SPA (`export const ssr = false` in the root `+layout.ts`, `adapter-static` with `fallback: 'index.html'`), as the showcase is.
 
@@ -287,7 +298,7 @@ Components read the settings through `useSystemSettings()` from `@oito2/ui`:
 </p>
 ```
 
-`SystemSettingsScope` reads the settings once mounted, follows the change event the plugin emits on Linux, and reads them again whenever the window regains focus (the only update path on Windows and macOS). Its optional props are `initialSettings`, `source`, `platform` and `onSettingsChange`. To read the settings once without a component, call `loadSystemSettings()`. What each platform reports is in the [`@oito2/ui-settings` README](../../../packages/ui-settings/README.md#platform-coverage) and in [System settings](../architecture/system-settings.md).
+`SystemSettingsScope` reads the settings once mounted, follows the change event the plugin emits on Linux, and reads them again whenever the window regains focus (the only update path on Windows and macOS). Its optional props are `initialSettings`, `source`, `platform` and `onSettingsChange`. To read the settings once without a component, call `loadSystemSettings()`. When a read or the subscription fails (no plugin, no permission), the scope keeps the current settings and prints one `console.warn` with the cause. Inside a Flatpak or Snap sandbox, `XDG_CONFIG_HOME` points at the sandbox's own directory (`~/.var/app/<id>/config` for Flatpak), so the plugin does not find `kwinrc`, `kdeglobals`, `xfwm4.xml` or the COSMIC files there; the XDG desktop portal and GSettings sources still work. What each platform reports is in the [`@oito2/ui-settings` README](../../../packages/ui-settings/README.md#platform-coverage) and in [System settings](../architecture/system-settings.md).
 
 ## Running the same code in a browser
 

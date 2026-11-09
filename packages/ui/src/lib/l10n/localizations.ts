@@ -230,6 +230,8 @@ export interface Localizations {
 	tooManyFiles(name: string, max: number): string;
 	/** Why `name` was refused: it is a folder, not a file. */
 	folderNotAccepted(name: string): string;
+	/** Why the file `name` was refused: its size couldn't be read. */
+	fileUnreadable(name: string): string;
 	/** The button that saves a file to the device. */
 	readonly download: string;
 	/** Why a download button is disabled on platforms that can't save files. */

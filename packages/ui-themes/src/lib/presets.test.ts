@@ -17,7 +17,13 @@ import { flavors } from '@catppuccin/palette';
 import { describe, expect, it } from 'vitest';
 import parity from '../../../ui/src/fixtures/parity/schemes.json';
 import { draculaPalettes, everforestPalettes, nordPalette, rosePinePalettes } from './palettes.js';
-import { presetColorTheme, themePresetNames, themePresets, type ThemePreset } from './presets.js';
+import {
+	presetColorTheme,
+	presetSchemeName,
+	themePresetNames,
+	themePresets,
+	type ThemePreset
+} from './presets.js';
 
 describe('presets match oito2_ui', () => {
 	it('has the same palettes', () => {
@@ -53,5 +59,28 @@ describe('presets match oito2_ui', () => {
 			highContrast: entry.highContrast
 		});
 		expect(JSON.parse(JSON.stringify(theme))).toEqual(entry.theme);
+	});
+});
+
+describe('presetSchemeName', () => {
+	it('names the preset in kebab-case with a high-contrast suffix', () => {
+		expect(presetSchemeName('everforestLight')).toBe('everforest-light');
+		expect(presetSchemeName('rosePineMoon', { highContrast: false })).toBe('rose-pine-moon');
+		expect(presetSchemeName('catppuccinMocha', { highContrast: true })).toBe(
+			'catppuccin-mocha-hc'
+		);
+		expect(presetSchemeName('dracula')).toBe('dracula');
+	});
+
+	it('matches a selector of presets.css for every preset', async () => {
+		const css = await import('node:fs/promises').then((fs) =>
+			fs.readFile(new URL('./presets.css', import.meta.url), 'utf8')
+		);
+		for (const preset of themePresetNames) {
+			for (const highContrast of [false, true]) {
+				const name = presetSchemeName(preset, { highContrast });
+				expect(css, name).toContain(`[data-oito2-scheme='${name}']`);
+			}
+		}
 	});
 });

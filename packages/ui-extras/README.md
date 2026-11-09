@@ -11,7 +11,7 @@ Optional `@oito2/ui` components with heavier or niche needs: QR codes, a signatu
 pnpm add @oito2/ui-extras @oito2/ui svelte
 ```
 
-`svelte` (`^5.57.0`) is a peer dependency. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`); the components use its tokens and localized strings.
+`svelte` (`^5.57.0`) and `@oito2/ui` are peer dependencies. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`); the components use its tokens and localized strings.
 
 ## Usage
 

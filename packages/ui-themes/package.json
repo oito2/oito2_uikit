@@ -28,7 +28,8 @@
 	"files": [
 		"dist",
 		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
+		"!dist/**/*.spec.*",
+		"!dist/**/__screenshots__"
 	],
 	"sideEffects": [
 		"**/*.css"
@@ -49,13 +50,14 @@
 		"test": "vitest run"
 	},
 	"peerDependencies": {
+		"@oito2/ui": "workspace:^",
 		"svelte": "^5.57.0"
 	},
 	"dependencies": {
-		"@catppuccin/palette": "catalog:",
-		"@oito2/ui": "workspace:*"
+		"@catppuccin/palette": "catalog:"
 	},
 	"devDependencies": {
+		"@oito2/ui": "workspace:*",
 		"@sveltejs/package": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@vitest/browser-playwright": "catalog:",

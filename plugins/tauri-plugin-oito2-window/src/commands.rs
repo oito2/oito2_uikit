@@ -20,20 +20,15 @@ use crate::{DecorationMode, DecorationState, Error, Result};
 /// The largest coordinate accepted for the window menu position, in CSS pixels.
 const MAX_COORDINATE: f64 = 100_000.0;
 
-/// Applies `mode` to the calling window on the main thread. The window should still be
-/// hidden, so the frame changes before the user sees it.
+/// Applies `mode` to the calling window on the main thread and resolves once it is
+/// applied, or rejects with the error. On Linux the window must still be hidden.
 #[tauri::command]
 pub async fn set_decoration_mode<R: Runtime>(
     window: WebviewWindow<R>,
     mode: DecorationMode,
 ) -> Result<()> {
     let target = window.clone();
-    window.run_on_main_thread(move || {
-        if let Err(error) = crate::apply_decoration_mode(&target, mode) {
-            eprintln!("oito2-window: could not apply decoration mode {mode:?}: {error}");
-        }
-    })?;
-    Ok(())
+    on_main_thread(&window, move || crate::apply_decoration_mode(&target, mode)).await
 }
 
 /// Returns the decoration mode of the calling window: the one applied through the plugin,
@@ -54,11 +49,29 @@ pub async fn decoration_mode<R: Runtime>(window: WebviewWindow<R>) -> Result<Dec
 }
 
 /// Shows the native window menu of the calling window at `x`, `y` (CSS pixels from the
-/// top left of the webview), on Linux and Windows.
+/// top left of the webview), on Linux and Windows. The menu is shown on the main thread;
+/// the command resolves once it is open (on Windows, once it closes) or rejects with the
+/// error.
 #[tauri::command]
 pub async fn show_window_menu<R: Runtime>(window: WebviewWindow<R>, x: f64, y: f64) -> Result<()> {
     let (x, y) = validate_position(x, y)?;
-    crate::show_window_menu(&window, x, y)
+    let target = window.clone();
+    on_main_thread(&window, move || crate::show_window_menu(&target, x, y)).await
+}
+
+/// Runs `task` on the main thread of `window` and returns its result. Fails with
+/// `Unsupported` when the main thread drops the task without running it.
+async fn on_main_thread<R: Runtime>(
+    window: &WebviewWindow<R>,
+    task: impl FnOnce() -> Result<()> + Send + 'static,
+) -> Result<()> {
+    let (tx, mut rx) = tauri::async_runtime::channel(1);
+    window.run_on_main_thread(move || {
+        let _ = tx.try_send(task());
+    })?;
+    rx.recv()
+        .await
+        .unwrap_or_else(|| Err(Error::Unsupported("main thread stopped".into())))
 }
 
 /// Checks that a menu position is a finite point inside a plausible window.

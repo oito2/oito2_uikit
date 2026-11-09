@@ -19,6 +19,7 @@ export {
 	acceptAttribute,
 	baseName,
 	extensionOf,
+	extensionsForMimeType,
 	fileMatchesTypes,
 	isPreviewableImage,
 	mimeTypeOf,

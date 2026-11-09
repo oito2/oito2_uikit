@@ -30,7 +30,8 @@ const ownStrings = [
 	'code',
 	'zoom',
 	'pauseRotation',
-	'startRotation'
+	'startRotation',
+	'fileUnreadable'
 ];
 
 describe.each([

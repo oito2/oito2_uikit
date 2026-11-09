@@ -11,7 +11,7 @@ The 13 named color presets for `@oito2/ui`: Everforest, Rosé Pine, Nord, Dracul
 pnpm add @oito2/ui-themes @oito2/ui svelte
 ```
 
-`svelte` (`^5.57.0`) is a peer dependency. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`).
+`svelte` (`^5.57.0`) and `@oito2/ui` are peer dependencies. Set up `@oito2/ui` first (its `styles.css` and a `ThemeProvider`).
 
 ## Usage
 
@@ -78,6 +78,7 @@ import '@oito2/ui-themes/presets.css';
 | -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `themePresets`, `themePresetNames`, `ThemePreset`                          | Preset names with their display label and `isDark` flag           |
 | `presetTheme(preset)`                                                      | Theme source for `ThemeProvider` (`light` / `dark` props)         |
+| `presetSchemeName(preset, { highContrast })`                               | The `data-oito2-scheme` value of the preset in `presets.css`      |
 | `presetColorTheme(preset, { highContrast })`                               | The complete `ColorTheme`, raised to WCAG AAA with `highContrast` |
 | `presetRoles(preset)`                                                      | The role colors mapped from the preset's palette                  |
 | `everforestPalettes`, `rosePinePalettes`, `nordPalette`, `draculaPalettes` | The source palettes (Catppuccin comes from `@catppuccin/palette`) |

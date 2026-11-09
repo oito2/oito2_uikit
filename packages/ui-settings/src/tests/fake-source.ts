@@ -22,6 +22,10 @@ export class FakeSettingsSource implements SettingsSource {
 	reads = 0;
 	/** When set, reads wait for it before answering. */
 	gate: Promise<void> | null = null;
+	/** When set, reads reject with it. */
+	failure: unknown = null;
+	/** When set, subscribing rejects with it. */
+	subscribeFailure: unknown = null;
 	#listeners = new Set<(raw: RawSettings) => void>();
 
 	constructor(current: RawSettings) {
@@ -32,10 +36,12 @@ export class FakeSettingsSource implements SettingsSource {
 		this.reads++;
 		const value = this.current;
 		if (this.gate) await this.gate;
+		if (this.failure) throw this.failure;
 		return value;
 	}
 
 	async subscribe(listener: (raw: RawSettings) => void): Promise<() => void> {
+		if (this.subscribeFailure) throw this.subscribeFailure;
 		this.#listeners.add(listener);
 		return () => this.#listeners.delete(listener);
 	}

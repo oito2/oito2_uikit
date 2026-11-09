@@ -153,5 +153,6 @@ export const en: Localizations = {
 	fileTooLarge: (name, size) => `${name}: larger than ${size}`,
 	tooManyFiles: (name, max) =>
 		max === 1 ? `${name}: only 1 file can be added` : `${name}: only ${max} files can be added`,
-	folderNotAccepted: (name) => `${name}: folders are not accepted`
+	folderNotAccepted: (name) => `${name}: folders are not accepted`,
+	fileUnreadable: (name) => `${name}: this file can't be read`
 };

@@ -19,14 +19,22 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { afterEach, describe, expect, it } from 'vitest';
 import { NativeWindowController } from './native-window-controller.svelte.js';
 
-/** Mocks a main window whose state commands answer from `state`, recording every command. */
-function mockWindow(state: { maximized: boolean; fullscreen: boolean; focused: boolean }) {
+/**
+ * Mocks a main window whose state commands answer from `state`, recording every command.
+ * While `gate.current` is set, `is_maximized` answers only after it resolves.
+ */
+function mockWindow(
+	state: { maximized: boolean; fullscreen: boolean; focused: boolean },
+	gate: { current: Promise<void> | null } = { current: null }
+) {
 	const calls: { cmd: string; args: unknown }[] = [];
 	mockWindows('main');
 	mockIPC(
 		(cmd, args) => {
 			calls.push({ cmd, args });
-			if (cmd === 'plugin:window|is_maximized') return state.maximized;
+			if (cmd === 'plugin:window|is_maximized') {
+				return gate.current ? gate.current.then(() => state.maximized) : state.maximized;
+			}
 			if (cmd === 'plugin:window|is_fullscreen') return state.fullscreen;
 			if (cmd === 'plugin:window|is_focused') return state.focused;
 			return null;
@@ -36,12 +44,7 @@ function mockWindow(state: { maximized: boolean; fullscreen: boolean; focused: b
 	return calls;
 }
 
-afterEach(() => {
-	clearMocks();
-	for (const name of ['maximized', 'fullscreen', 'inactive']) {
-		document.documentElement.removeAttribute(`data-oito2-window-${name}`);
-	}
-});
+afterEach(() => clearMocks());
 
 describe('NativeWindowController', () => {
 	it('reads the window state and mirrors it on the root element', async () => {
@@ -61,6 +64,9 @@ describe('NativeWindowController', () => {
 		expect(root.hasAttribute('data-oito2-window-maximized')).toBe(true);
 		expect(root.hasAttribute('data-oito2-window-inactive')).toBe(true);
 		controller.dispose();
+		expect(root.dataset.oito2Decorations).toBeUndefined();
+		expect(root.hasAttribute('data-oito2-window-maximized')).toBe(false);
+		expect(root.hasAttribute('data-oito2-window-inactive')).toBe(false);
 	});
 
 	it('runs the window actions through the Tauri window API', async () => {
@@ -107,6 +113,27 @@ describe('NativeWindowController', () => {
 		withoutMenu.dispose();
 	});
 
+	it('shows the menu where the pointer last was when no position is given', async () => {
+		const calls = mockWindow({ maximized: false, fullscreen: false, focused: true });
+		const controller = await NativeWindowController.attach(getCurrentWindow(), {
+			canShowMenu: true,
+			decorations: 'undecorated'
+		});
+		document.dispatchEvent(new PointerEvent('pointermove', { clientX: 120, clientY: 30 }));
+		calls.length = 0;
+		await controller.showMenu();
+		expect(calls).toEqual([
+			{ cmd: 'plugin:oito2-window|show_window_menu', args: { x: 120, y: 30 } }
+		]);
+		controller.dispose();
+		document.dispatchEvent(new PointerEvent('pointermove', { clientX: 7, clientY: 8 }));
+		calls.length = 0;
+		await controller.showMenu();
+		expect(calls).toEqual([
+			{ cmd: 'plugin:oito2-window|show_window_menu', args: { x: 120, y: 30 } }
+		]);
+	});
+
 	it('follows resize and focus events', async () => {
 		const state = { maximized: false, fullscreen: false, focused: true };
 		mockWindow(state);
@@ -121,6 +148,27 @@ describe('NativeWindowController', () => {
 		await expect.poll(() => controller.state.isActive).toBe(false);
 		await emit('tauri://focus');
 		await expect.poll(() => controller.state.isActive).toBe(true);
+		controller.dispose();
+	});
+
+	it('applies a slow state read that a focus event overtakes', async () => {
+		const state = { maximized: false, fullscreen: false, focused: true };
+		const gate: { current: Promise<void> | null } = { current: null };
+		mockWindow(state, gate);
+		const controller = await NativeWindowController.attach(getCurrentWindow(), {
+			canShowMenu: false,
+			decorations: 'native'
+		});
+		let release: () => void = () => {};
+		gate.current = new Promise((resolve) => (release = resolve));
+		state.maximized = true;
+		await emit('tauri://resize', { width: 800, height: 600 });
+		await emit('tauri://blur');
+		await expect.poll(() => controller.state.isActive).toBe(false);
+		expect(controller.state.isMaximized).toBe(false);
+		release();
+		await expect.poll(() => controller.state.isMaximized).toBe(true);
+		expect(controller.state.isActive).toBe(true);
 		controller.dispose();
 	});
 });

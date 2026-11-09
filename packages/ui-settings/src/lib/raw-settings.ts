@@ -50,6 +50,28 @@ export interface RawSettings {
 	readonly systemHighContrast: boolean;
 }
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+	typeof value === 'object' && value !== null;
+const isStringOrNull = (value: unknown): value is string | null =>
+	typeof value === 'string' || value === null;
+
+/**
+ * Whether `value` has the shape of a `RawSettings`: `gsettings` and `config` are objects,
+ * `systemHighContrast` a boolean and the session variables and `systemAccent` strings or
+ * null.
+ */
+export function isRawSettings(value: unknown): value is RawSettings {
+	return (
+		isObject(value) &&
+		isObject(value.gsettings) &&
+		isObject(value.config) &&
+		typeof value.systemHighContrast === 'boolean' &&
+		isStringOrNull(value.xdgCurrentDesktop) &&
+		isStringOrNull(value.desktopSession) &&
+		isStringOrNull(value.systemAccent)
+	);
+}
+
 /** Settings with nothing read: no session, no keys, no files. */
 export const emptyRawSettings: RawSettings = Object.freeze({
 	xdgCurrentDesktop: null,

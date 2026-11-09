@@ -12100,6 +12100,11 @@
 				"source": "packages/ui-files/src/lib/files.ts",
 				"doc": "Returns the lower-case extension of `name` without the dot, or `null` when it has none."
 			},
+			"extensionsForMimeType": {
+				"kind": "function",
+				"source": "packages/ui-files/src/lib/files.ts",
+				"doc": "Returns the extensions of the built-in table (lower case, without the dot) whose MIME\ntype is `pattern`, an exact type such as `application/pdf` or a `type/*` pattern such as\n`image/*`; empty when none matches."
+			},
 			"fileMatchesTypes": {
 				"kind": "function",
 				"source": "packages/ui-files/src/lib/files.ts",
@@ -12123,7 +12128,7 @@
 			"FileTypeGroup": {
 				"kind": "interface",
 				"source": "packages/ui-files/src/lib/files.ts",
-				"doc": "A group of accepted file types, such as \"Images\": files whose name ends with one of\n`extensions` (with or without the dot, in any letter case) or whose MIME type is one of\n`mimeTypes`, where `image/*` matches every image type. A group with neither accepts\nevery file."
+				"doc": "A group of accepted file types, such as \"Images\": files whose name ends with one of\n`extensions` (with or without the dot, in any letter case) or whose MIME type is one of\n`mimeTypes`, where `image/*` matches every image type. A group with neither accepts\nevery file.\n\nIn Tauri the MIME type of a file comes from its extension through a built-in table of\ncommon types (`mimeTypeOf`), so a type outside that table is matched only when its\nextension is listed in `extensions` too."
 			},
 			"PickedFile": {
 				"kind": "interface",
@@ -12133,12 +12138,12 @@
 			"FileUploadController": {
 				"kind": "class",
 				"source": "packages/ui-files/src/lib/upload-controller.svelte.ts",
-				"doc": "The files of a file upload, checked against the `accept`ed types, `maxFileSize` and\n`maxFiles` as they are added; directories are always refused.\n\nIts state is reactive. `add` keeps the files that pass the checks and lists the others in\n`rejected`, which holds the refusals of the last `add` only."
+				"doc": "The files of a file upload, checked against the `accept`ed types, `maxFileSize` and\n`maxFiles` as they are added; directories and files whose size can't be read are always\nrefused.\n\nIts state is reactive. `add` keeps the files that pass the checks and lists the others in\n`rejected`, which holds the refusals of the last `add` only."
 			},
 			"FileRejection": {
 				"kind": "type",
 				"source": "packages/ui-files/src/lib/upload-controller.svelte.ts",
-				"doc": "Why a `FileUploadController` refused a file: its type, its size, the file count, or because it is a directory."
+				"doc": "Why a `FileUploadController` refused a file: its type, its size, the file count, because\nit is a directory, or because its size couldn't be read."
 			},
 			"FileUploadControllerOptions": {
 				"kind": "interface",
@@ -12173,7 +12178,7 @@
 			"dialogFilters": {
 				"kind": "function",
 				"source": "packages/ui-files/src/lib/adapters/tauri.ts",
-				"doc": "Returns the dialog filters of `groups`: one per group with extensions, named by its label or extensions."
+				"doc": "Returns the dialog filters of `groups`: one per group, named by its label or extensions,\nwith the group's extensions and those the built-in table maps to its MIME types. A group\nthat yields no extension is left out, and a group without filters yields no filter at all."
 			},
 			"pathFile": {
 				"kind": "function",
@@ -12183,7 +12188,7 @@
 			"tauriFilesAdapter": {
 				"kind": "function",
 				"source": "packages/ui-files/src/lib/adapters/tauri.ts",
-				"doc": "Returns the Tauri adapter: the file chooser and \"Save as\" dialogs of the dialog plugin,\nfile sizes and contents read and written through the fs plugin, and files dropped on the\nwindow from the webview's drag and drop events, kept to those over the element.\n\nThe app registers `tauri-plugin-dialog` and `tauri-plugin-fs` and grants\n`dialog:allow-open`, `dialog:allow-save`, `fs:allow-stat`, `fs:allow-read-file` and\n`fs:allow-write-file`; both plugins add the chosen and dropped paths to the fs scope, so\nno wider scope is needed. The suggested save location is the downloads directory."
+				"doc": "Returns the Tauri adapter: the file chooser and \"Save as\" dialogs of the dialog plugin,\nfile sizes and contents read and written through the fs plugin, and files dropped on the\nwindow from the webview's drag and drop events, kept to those over the element.\n\nThe app registers `tauri-plugin-dialog` and `tauri-plugin-fs` and grants\n`dialog:allow-open`, `dialog:allow-save`, `fs:allow-stat`, `fs:allow-read-file` and\n`fs:allow-write-file`; both plugins add the chosen and dropped paths to the fs scope, so\nno wider scope is needed. A dropped folder is added to the fs plugin's runtime scope\nrecursively (its `scopeDroppedPaths` option, on by default) even though\n`FileUploadController` refuses it; an app that never accepts folders can set\n`plugins.fs.scopeDroppedPaths` to `false` and grant an explicit `fs:scope` instead. The\nsuggested save location is the downloads directory."
 			},
 			"Downloads": {
 				"kind": "constant",
@@ -12393,22 +12398,37 @@
 			"decorationMode": {
 				"kind": "function",
 				"source": "packages/ui-window/src/lib/commands.ts",
-				"doc": "Returns the decoration mode of the current window."
+				"doc": "Returns the decoration mode of the current window. Rejects with a `CommandError`."
 			},
 			"setDecorationMode": {
 				"kind": "function",
 				"source": "packages/ui-window/src/lib/commands.ts",
-				"doc": "Applies `mode` to the current window through `tauri-plugin-oito2-window`. Call it\nwhile the window is still hidden."
+				"doc": "Applies `mode` to the current window through `tauri-plugin-oito2-window`. Call it\nwhile the window is still hidden. Rejects with a `CommandError`."
 			},
 			"showWindowMenu": {
 				"kind": "function",
 				"source": "packages/ui-window/src/lib/commands.ts",
-				"doc": "Shows the native window menu of the current window at `x`, `y` (CSS pixels from the\ntop left of the page), on Linux and Windows."
+				"doc": "Shows the native window menu of the current window at `x`, `y` (CSS pixels from the\ntop left of the page), on Linux and Windows. Rejects with a `CommandError`."
 			},
 			"DecorationMode": {
 				"kind": "type",
 				"source": "packages/ui-window/src/lib/commands.ts",
 				"doc": "How a window frame is drawn: the system frame (`native`), none at all\n(`undecorated`, the app draws the title bar and resize handles), or GTK client-side\ndecorations with an empty title bar (`gtk-headerless`, Linux: GTK keeps the shadow and\nresize edges)."
+			},
+			"isCommandError": {
+				"kind": "function",
+				"source": "packages/ui-window/src/lib/errors.ts",
+				"doc": "Whether `value` is a `CommandError`: an object with a known `kind` and a string `message`."
+			},
+			"CommandError": {
+				"kind": "interface",
+				"source": "packages/ui-window/src/lib/errors.ts",
+				"doc": "The value a command of `tauri-plugin-oito2-window` rejects with."
+			},
+			"CommandErrorKind": {
+				"kind": "type",
+				"source": "packages/ui-window/src/lib/errors.ts",
+				"doc": "The kinds of error `tauri-plugin-oito2-window` rejects a command with."
 			},
 			"NativeWindowController": {
 				"kind": "class",
@@ -12428,7 +12448,7 @@
 			"initWindow": {
 				"kind": "function",
 				"source": "packages/ui-window/src/lib/init-window.ts",
-				"doc": "Prepares the current Tauri window and returns its controller for a `WindowScope`, or\n`null` outside Tauri (in a browser), where title bars show no window controls."
+				"doc": "Prepares the current Tauri window and returns its controller for a `WindowScope`, or\n`null` outside Tauri (in a browser), where title bars show no window controls.\n\nOne controller exists per window: while it is alive (until `dispose()`), later calls\nfor the same window resolve to it without applying their options or `signal`. Rejects\nwhen `tauri-plugin-oito2-window` is not registered or the capability does not allow\nits commands."
 			},
 			"InitWindowOptions": {
 				"kind": "interface",
@@ -12464,6 +12484,11 @@
 				"source": "packages/ui-settings/src/lib/raw-settings.ts",
 				"doc": "Settings with nothing read: no session, no keys, no files."
 			},
+			"isRawSettings": {
+				"kind": "function",
+				"source": "packages/ui-settings/src/lib/raw-settings.ts",
+				"doc": "Whether `value` has the shape of a `RawSettings`: `gsettings` and `config` are objects,\n`systemHighContrast` a boolean and the session variables and `systemAccent` strings or\nnull."
+			},
 			"ConfigValues": {
 				"kind": "interface",
 				"source": "packages/ui-settings/src/lib/raw-settings.ts",
@@ -12489,6 +12514,21 @@
 				"source": "packages/ui-settings/src/lib/compose.ts",
 				"doc": "Whether two settings are the same, field by field."
 			},
+			"isCommandError": {
+				"kind": "function",
+				"source": "packages/ui-settings/src/lib/errors.ts",
+				"doc": "Whether `value` is a `CommandError`: an object with a known `kind` and a string `message`."
+			},
+			"CommandError": {
+				"kind": "interface",
+				"source": "packages/ui-settings/src/lib/errors.ts",
+				"doc": "The value a command of `tauri-plugin-oito2-settings` rejects with."
+			},
+			"CommandErrorKind": {
+				"kind": "type",
+				"source": "packages/ui-settings/src/lib/errors.ts",
+				"doc": "The kinds of error `tauri-plugin-oito2-settings` rejects a command with."
+			},
 			"settingsChangedEvent": {
 				"kind": "constant",
 				"source": "packages/ui-settings/src/lib/source.ts",
@@ -12497,7 +12537,7 @@
 			"tauriSettingsSource": {
 				"kind": "constant",
 				"source": "packages/ui-settings/src/lib/source.ts",
-				"doc": "Reads the settings through `tauri-plugin-oito2-settings`."
+				"doc": "Reads the settings through `tauri-plugin-oito2-settings`. `read` rejects with a\n`TypeError` when the plugin's answer is not a `RawSettings`; `subscribe` ignores change\nevents whose payload is not one."
 			},
 			"SettingsSource": {
 				"kind": "interface",
@@ -12599,6 +12639,11 @@
 				"kind": "function",
 				"source": "packages/ui-themes/src/lib/presets.ts",
 				"doc": "Returns the role colors of `preset`, mapped from its theme family's palette."
+			},
+			"presetSchemeName": {
+				"kind": "function",
+				"source": "packages/ui-themes/src/lib/presets.ts",
+				"doc": "Returns the `data-oito2-scheme` value of `preset` in `presets.css`: its name in\nkebab-case, with `-hc` appended for the high-contrast variant (`catppuccinMocha` →\n`catppuccin-mocha`, `catppuccin-mocha-hc`)."
 			},
 			"presetTheme": {
 				"kind": "function",

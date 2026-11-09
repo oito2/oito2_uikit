@@ -24,10 +24,10 @@ How to let users pick, drop and save files with `@oito2/ui-files`, in a Tauri ap
 ## Install
 
 ```bash
-pnpm add @oito2/ui-files @oito2/ui svelte
+pnpm add @oito2/ui-files @oito2/ui svelte @tauri-apps/api @tauri-apps/plugin-dialog @tauri-apps/plugin-fs
 ```
 
-Set up `@oito2/ui` first (`styles.css` and a `ThemeProvider`). `@tauri-apps/api`, `@tauri-apps/plugin-dialog` and `@tauri-apps/plugin-fs` come as dependencies of the package and are only loaded inside Tauri, through dynamic imports.
+Set up `@oito2/ui` first (`styles.css` and a `ThemeProvider`). `@oito2/ui`, `@tauri-apps/api` (`^2.12.0`), `@tauri-apps/plugin-dialog` (`^2.8.0`) and `@tauri-apps/plugin-fs` (`^2.7.0`) are peer dependencies: the app picks their versions (the Tauri packages on the same major.minor as its crates), and a single copy of `@oito2/ui` is shared. Install them for a web-only build too, because the bundler resolves the dynamic imports at build time; they are only loaded inside Tauri.
 
 ## Tauri setup
 
@@ -114,11 +114,13 @@ No `fs:scope` entry is needed: the paths the user chooses in a dialog, and the p
 | Controller option | Effect                                                                           |
 | ----------------- | -------------------------------------------------------------------------------- |
 | `accept`          | `FileTypeGroup[]` (`label`, `extensions`, `mimeTypes`); empty accepts everything |
-| `maxFiles`        | Largest number of files; `FileUpload` disables its zone once it is reached       |
-| `maxFileSize`     | Largest size in bytes                                                            |
-| `files`           | Initial files                                                                    |
 
-The controller is reactive: read `files`, `rejected` (each with a `reason`: `type`, `size`, `count` or `directory`) and `canAddMore`; call `add`, `remove`, `clear` and `clearRejected`. Every `PickedFile` has `name`, `path` (Tauri only, else `null`), `mimeType`, `isDirectory`, `file` (the browser `File`, web only), `size()` and `bytes()`.
+In Tauri a file has no MIME type of its own: `fileMatchesTypes` and the previews derive it from the extension through a built-in table of common types, and the native file chooser only filters by extension. A group accepted only by `mimeTypes` therefore matches fewer files in Tauri than in a browser (which reports the system's MIME type). List the extensions you expect in `extensions` as well, as the example does; `dialogFilters` maps `image/*`-style patterns to the extensions of the table.
+| `maxFiles` | Largest number of files; `FileUpload` disables its zone once it is reached |
+| `maxFileSize` | Largest size in bytes |
+| `files` | Initial files |
+
+The controller is reactive: read `files`, `rejected` (each with a `reason`: `type`, `size`, `count`, `directory` or `unreadable`, the last one for a file whose size could not be read, such as a path that no longer exists) and `canAddMore`; call `add`, `remove`, `clear` and `clearRejected`. Every `PickedFile` has `name`, `path` (Tauri only, else `null`), `mimeType`, `isDirectory`, `file` (the browser `File`, web only), `size()` and `bytes()`.
 
 `FileUpload` props: `controller`, `hint` (string or snippet, replaces the default line of accepted types and size limit), `showPreviews` (default `true`), `enabled`, `adapter`, `zoneMinHeight` (default 160). The messages come from the active locale (see [Localization](./localization.md)).
 
@@ -203,6 +205,8 @@ In Tauri, files dropped on the window arrive as **paths**, not file objects. The
 
 Reading those paths works without a configured scope because the fs plugin adds every dropped path to its runtime scope (files, and folders recursively). That is the fs plugin's `scopeDroppedPaths` option, which defaults to `true`; it applies to every webview that has an fs permission. If you set `plugins.fs.scopeDroppedPaths` to `false` in `tauri.conf.json`, dropped files can no longer be read and you must grant an `fs:scope` yourself. Paths chosen in the dialog plugin's file chooser and "Save as" dialog are likewise added to the scope by the dialog plugin.
 
+The scope grows before the components see the drop: a folder dropped on the window enters the read and write scope of the webview with its whole tree, for the rest of the session, even though `FileUploadController` refuses folders and even when the drop lands outside the zone. Nothing in the components can narrow that. An app that never accepts folders, or that renders untrusted content, should set `plugins.fs.scopeDroppedPaths` to `false` and grant the directories it needs through an explicit `fs:scope`.
+
 ## Helpers
 
 | Export                                                    | Purpose                                                                    |
@@ -210,6 +214,7 @@ Reading those paths works without a configured scope because the fs plugin adds 
 | `fileMatchesTypes(file, accept)`                          | Whether a `PickedFile` matches the accepted types (`image/*` patterns too) |
 | `acceptAttribute(groups)`                                 | The HTML `accept` attribute for the groups                                 |
 | `dialogFilters(groups)`                                   | The dialog plugin's filters for the groups                                 |
+| `extensionsForMimeType(pattern)`                          | The known extensions of a MIME type or `type/*` pattern                    |
 | `mimeTypeOf(name)`, `extensionOf(name)`, `baseName(path)` | Name and path helpers                                                      |
 | `isPreviewableImage(file)`                                | Whether `FileUpload` shows a preview (images except SVG)                   |
 | `webFile(file)`, `pathFile(path)`                         | Wrap a browser `File` or a Tauri path as a `PickedFile`                    |

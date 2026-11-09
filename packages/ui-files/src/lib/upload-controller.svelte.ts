@@ -15,8 +15,11 @@
 
 import { fileMatchesTypes, type FileTypeGroup, type PickedFile } from './files.js';
 
-/** Why a `FileUploadController` refused a file: its type, its size, the file count, or because it is a directory. */
-export type FileRejection = 'type' | 'size' | 'count' | 'directory';
+/**
+ * Why a `FileUploadController` refused a file: its type, its size, the file count, because
+ * it is a directory, or because its size couldn't be read.
+ */
+export type FileRejection = 'type' | 'size' | 'count' | 'directory' | 'unreadable';
 
 /** A file a `FileUploadController` refused, with the reason. */
 export interface RejectedFile {
@@ -38,7 +41,8 @@ export interface FileUploadControllerOptions {
 
 /**
  * The files of a file upload, checked against the `accept`ed types, `maxFileSize` and
- * `maxFiles` as they are added; directories are always refused.
+ * `maxFiles` as they are added; directories and files whose size can't be read are always
+ * refused.
  *
  * Its state is reactive. `add` keeps the files that pass the checks and lists the others in
  * `rejected`, which holds the refusals of the last `add` only.
@@ -104,10 +108,16 @@ export class FileUploadController {
 			let reason: FileRejection | null = null;
 			if (file.isDirectory) reason = 'directory';
 			else if (!fileMatchesTypes(file, this.accept)) reason = 'type';
-			else if (this.maxFileSize !== null && (await file.size()) > this.maxFileSize)
-				reason = 'size';
 			else if (this.maxFiles !== null && this.#files.length + added.length >= this.maxFiles)
 				reason = 'count';
+			else if (this.maxFileSize !== null) {
+				// The size is read last, so files refused by the checks above cost no read.
+				try {
+					if ((await file.size()) > this.maxFileSize) reason = 'size';
+				} catch {
+					reason = 'unreadable';
+				}
+			}
 			if (reason === null) added.push(file);
 			else rejected.push({ file, reason });
 		}

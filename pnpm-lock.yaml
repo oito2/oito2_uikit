@@ -352,6 +352,12 @@ importers:
       '@tauri-apps/api':
         specifier: 'catalog:'
         version: 2.12.4
+      '@tauri-apps/plugin-dialog':
+        specifier: 'catalog:'
+        version: 2.8.3
+      '@tauri-apps/plugin-fs':
+        specifier: 'catalog:'
+        version: 2.7.1
     devDependencies:
       '@playwright/test':
         specifier: 'catalog:'
@@ -441,13 +447,13 @@ importers:
       '@lucide/svelte':
         specifier: 'catalog:'
         version: 1.59.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))
-      '@oito2/ui':
-        specifier: workspace:*
-        version: link:../ui
       qrcode-generator:
         specifier: 'catalog:'
         version: 2.0.4
     devDependencies:
+      '@oito2/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@sveltejs/package':
         specifier: 'catalog:'
         version: 3.0.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)
@@ -493,9 +499,16 @@ importers:
       '@lucide/svelte':
         specifier: 'catalog:'
         version: 1.59.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))
+    devDependencies:
       '@oito2/ui':
         specifier: workspace:*
         version: link:../ui
+      '@sveltejs/package':
+        specifier: 'catalog:'
+        version: 3.0.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)
+      '@sveltejs/vite-plugin-svelte':
+        specifier: 'catalog:'
+        version: 7.3.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))
       '@tauri-apps/api':
         specifier: 'catalog:'
         version: 2.12.4
@@ -505,13 +518,6 @@ importers:
       '@tauri-apps/plugin-fs':
         specifier: 'catalog:'
         version: 2.7.1
-    devDependencies:
-      '@sveltejs/package':
-        specifier: 'catalog:'
-        version: 3.0.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)
-      '@sveltejs/vite-plugin-svelte':
-        specifier: 'catalog:'
-        version: 7.3.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 5.0.5(playwright@1.64.1)(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))(vitest@5.0.5)
@@ -544,20 +550,19 @@ importers:
         version: 3.1.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vitest@5.0.5)
 
   packages/ui-settings:
-    dependencies:
+    devDependencies:
       '@oito2/ui':
         specifier: workspace:*
         version: link:../ui
-      '@tauri-apps/api':
-        specifier: 'catalog:'
-        version: 2.12.4
-    devDependencies:
       '@sveltejs/package':
         specifier: 'catalog:'
         version: 3.0.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)
       '@sveltejs/vite-plugin-svelte':
         specifier: 'catalog:'
         version: 7.3.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))
+      '@tauri-apps/api':
+        specifier: 'catalog:'
+        version: 2.12.4
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 5.0.5(playwright@1.64.1)(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))(vitest@5.0.5)
@@ -588,13 +593,13 @@ importers:
 
   packages/ui-syntax:
     dependencies:
-      '@oito2/ui':
-        specifier: workspace:*
-        version: link:../ui
       highlight.js:
         specifier: 'catalog:'
         version: 11.12.0
     devDependencies:
+      '@oito2/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@oito2/ui-themes':
         specifier: workspace:*
         version: link:../ui-themes
@@ -676,10 +681,10 @@ importers:
       '@catppuccin/palette':
         specifier: 'catalog:'
         version: 1.8.0
+    devDependencies:
       '@oito2/ui':
         specifier: workspace:*
         version: link:../ui
-    devDependencies:
       '@sveltejs/package':
         specifier: 'catalog:'
         version: 3.0.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)
@@ -718,20 +723,19 @@ importers:
         version: 3.1.0(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vitest@5.0.5)
 
   packages/ui-window:
-    dependencies:
+    devDependencies:
       '@oito2/ui':
         specifier: workspace:*
         version: link:../ui
-      '@tauri-apps/api':
-        specifier: 'catalog:'
-        version: 2.12.4
-    devDependencies:
       '@sveltejs/package':
         specifier: 'catalog:'
         version: 3.0.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(typescript@6.0.3)
       '@sveltejs/vite-plugin-svelte':
         specifier: 'catalog:'
         version: 7.3.1(svelte@5.57.3(@typescript-eslint/types@8.72.1))(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))
+      '@tauri-apps/api':
+        specifier: 'catalog:'
+        version: 2.12.4
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 5.0.5(playwright@1.64.1)(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))(vitest@5.0.5)

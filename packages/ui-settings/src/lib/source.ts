@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import type { RawSettings } from './raw-settings.js';
+import { isRawSettings, type RawSettings } from './raw-settings.js';
 
 /** Where a settings scope reads the platform settings from. */
 export interface SettingsSource {
@@ -29,14 +29,22 @@ export interface SettingsSource {
 /** The event `tauri-plugin-oito2-settings` emits with the new values. */
 export const settingsChangedEvent = 'oito2-settings://changed';
 
-/** Reads the settings through `tauri-plugin-oito2-settings`. */
+/**
+ * Reads the settings through `tauri-plugin-oito2-settings`. `read` rejects with a
+ * `TypeError` when the plugin's answer is not a `RawSettings`; `subscribe` ignores change
+ * events whose payload is not one.
+ */
 export const tauriSettingsSource: SettingsSource = {
 	async read() {
 		const { invoke } = await import('@tauri-apps/api/core');
-		return invoke<RawSettings>('plugin:oito2-settings|read_settings');
+		const raw: unknown = await invoke('plugin:oito2-settings|read_settings');
+		if (!isRawSettings(raw)) throw new TypeError('oito2: unexpected settings payload');
+		return raw;
 	},
 	async subscribe(listener) {
 		const { listen } = await import('@tauri-apps/api/event');
-		return listen<RawSettings>(settingsChangedEvent, (event) => listener(event.payload));
+		return listen<unknown>(settingsChangedEvent, (event) => {
+			if (isRawSettings(event.payload)) listener(event.payload);
+		});
 	}
 };

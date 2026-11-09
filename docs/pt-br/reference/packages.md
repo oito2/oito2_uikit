@@ -27,13 +27,13 @@ O primeiro release será o `v0.1.0`; ele ainda não foi publicado.
 
 ## Comum a todos os pacotes npm
 
-| Campo                   | Valor                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| Licença                 | `GPL-3.0-only`                                                                          |
-| Tipo de módulo          | Módulos ES (`"type": "module"`), gerados de `src/lib` para `dist` pelo `svelte-package` |
-| Condições de exportação | `types`, `svelte` e `default` em todo ponto de entrada JavaScript                       |
-| `sideEffects`           | `["**/*.css"]` — só os imports de CSS têm efeitos colaterais                            |
-| Dependência peer        | `svelte` `^5.57.0`                                                                      |
+| Campo                   | Valor                                                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Licença                 | `GPL-3.0-only`                                                                                                                                                                                                                           |
+| Tipo de módulo          | Módulos ES (`"type": "module"`), gerados de `src/lib` para `dist` pelo `svelte-package`                                                                                                                                                  |
+| Condições de exportação | `types`, `svelte` e `default` em todo ponto de entrada JavaScript                                                                                                                                                                        |
+| `sideEffects`           | `["**/*.css"]` — só os imports de CSS têm efeitos colaterais                                                                                                                                                                             |
+| Dependências peer       | `svelte` `^5.57.0`; nos pacotes satélites também `@oito2/ui` (mesma versão) e, nos pacotes Tauri, `@tauri-apps/*` — o app os instala, para que uma única cópia de cada seja compartilhada e os pacotes Tauri acompanhem os crates do app |
 
 ## `@oito2/ui`
 
@@ -61,12 +61,12 @@ Tauri: nenhum. Um app que renderiza `@oito2/ui` num servidor Node (SSR) precisa 
 
 ## `@oito2/ui-themes`
 
-| Ponto de entrada               | Arquivo            | Conteúdo                                                                                                   |
-| ------------------------------ | ------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `@oito2/ui-themes`             | `dist/index.js`    | `presetTheme`, `presetColorTheme`, `presetRoles`, `themePresets`, `themePresetNames`, as paletas de origem |
-| `@oito2/ui-themes/presets.css` | `dist/presets.css` | Cada preset e a sua variante de alto contraste sob seletores `[data-oito2-scheme]`                         |
+| Ponto de entrada               | Arquivo            | Conteúdo                                                                                                                       |
+| ------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `@oito2/ui-themes`             | `dist/index.js`    | `presetTheme`, `presetColorTheme`, `presetRoles`, `presetSchemeName`, `themePresets`, `themePresetNames`, as paletas de origem |
+| `@oito2/ui-themes/presets.css` | `dist/presets.css` | Cada preset e a sua variante de alto contraste sob seletores `[data-oito2-scheme]`                                             |
 
-Dependências de execução: `@oito2/ui` (mesma versão), `@catppuccin/palette` 1.8.0. Tauri: nenhum. Veja o [README](../../../packages/ui-themes/README.md).
+Dependência peer: `@oito2/ui` (mesma versão). Dependência de execução: `@catppuccin/palette` 1.8.0. Tauri: nenhum. Veja o [README](../../../packages/ui-themes/README.md).
 
 ## `@oito2/ui-syntax`
 
@@ -75,7 +75,7 @@ Dependências de execução: `@oito2/ui` (mesma versão), `@catppuccin/palette` 
 | `@oito2/ui-syntax`           | `dist/index.js`         | `CodeBlock`, `Highlighter`, `defaultLanguages`, `HighlighterTheme`, `roleOfScope`, `scopeRoles` |
 | `@oito2/ui-syntax/fonts.css` | `dist/styles/fonts.css` | A fonte variável JetBrains Mono (OFL-1.1), opcional                                             |
 
-Dependências de execução: `@oito2/ui`, `highlight.js` 11.12.0. Tauri: nenhum. Veja o [README](../../../packages/ui-syntax/README.md).
+Dependência peer: `@oito2/ui`. Dependência de execução: `highlight.js` 11.12.0. Tauri: nenhum. Veja o [README](../../../packages/ui-syntax/README.md).
 
 ## `@oito2/ui-extras`
 
@@ -83,7 +83,7 @@ Dependências de execução: `@oito2/ui`, `highlight.js` 11.12.0. Tauri: nenhum.
 | ------------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `@oito2/ui-extras` | `dist/index.js` | `QrCode`, `SignaturePad`, `SignatureController`, `ImageCropper`, `CropPreview`, `CropController`, `NavigationMenu`, funções |
 
-Dependências de execução: `@oito2/ui`, `@lucide/svelte` 1.59.0, `qrcode-generator` 2.0.4. Tauri: nenhum. Veja o [README](../../../packages/ui-extras/README.md).
+Dependência peer: `@oito2/ui`. Dependências de execução: `@lucide/svelte` 1.59.0, `qrcode-generator` 2.0.4. Tauri: nenhum. Veja o [README](../../../packages/ui-extras/README.md).
 
 ## `@oito2/ui-files`
 
@@ -91,27 +91,27 @@ Dependências de execução: `@oito2/ui`, `@lucide/svelte` 1.59.0, `qrcode-gener
 | ----------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `@oito2/ui-files` | `dist/index.js` | `FileUpload`, `FileUploadController`, `FileDropZone`, `DownloadTrigger`, `Downloads`, os adaptadores e funções de arquivo |
 
-Dependências de execução: `@oito2/ui`, `@lucide/svelte` 1.59.0, `@tauri-apps/api` 2.12.4, `@tauri-apps/plugin-dialog` 2.8.3, `@tauri-apps/plugin-fs` 2.7.1. Os módulos do Tauri só são carregados dentro do Tauri.
+Dependências peer: `@oito2/ui`, `@tauri-apps/api` `^2.12.0`, `@tauri-apps/plugin-dialog` `^2.8.0`, `@tauri-apps/plugin-fs` `^2.7.0` (instaladas pelo app, também num build só para web; os módulos do Tauri só são carregados dentro do Tauri). Dependência de execução: `@lucide/svelte` 1.59.0.
 
 Tauri: os crates oficiais `tauri-plugin-dialog` e `tauri-plugin-fs`, registrados no Builder, e as permissões `dialog:allow-open`, `dialog:allow-save`, `fs:allow-stat`, `fs:allow-read-file`, `fs:allow-write-file`. Veja [Arquivos](../guides/files.md) e o [README](../../../packages/ui-files/README.md).
 
 ## `@oito2/ui-window`
 
-| Ponto de entrada   | Arquivo         | Conteúdo                                                                                                               |
-| ------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `@oito2/ui-window` | `dist/index.js` | `initWindow`, `NativeWindowController`, `WindowResizeHandles`, `setDecorationMode`, `decorationMode`, `showWindowMenu` |
+| Ponto de entrada   | Arquivo         | Conteúdo                                                                                                                                                 |
+| ------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@oito2/ui-window` | `dist/index.js` | `initWindow`, `NativeWindowController`, `WindowResizeHandles`, `setDecorationMode`, `decorationMode`, `showWindowMenu`, `CommandError`, `isCommandError` |
 
-Dependências de execução: `@oito2/ui`, `@tauri-apps/api` 2.12.4.
+Dependências peer: `@oito2/ui`, `@tauri-apps/api` `^2.12.0`. Sem dependências de execução.
 
 Tauri: o crate `tauri-plugin-oito2-window` com `oito2-window:default`, mais `core:window:allow-minimize`, `-toggle-maximize`, `-close`, `-start-dragging` e `-start-resize-dragging` para a barra de título. Fora do Tauri, `initWindow()` devolve `null`. Veja [Integração com o desktop](../guides/desktop-integration.md) e o [README](../../../packages/ui-window/README.md).
 
 ## `@oito2/ui-settings`
 
-| Ponto de entrada     | Arquivo         | Conteúdo                                                                                                                                                |
-| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@oito2/ui-settings` | `dist/index.js` | `SystemSettingsScope`, `loadSystemSettings`, `composeSystemSettings`, `sameSystemSettings`, `tauriSettingsSource`, `settingsChangedEvent`, tipos brutos |
+| Ponto de entrada     | Arquivo         | Conteúdo                                                                                                                                                                                                   |
+| -------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@oito2/ui-settings` | `dist/index.js` | `SystemSettingsScope`, `loadSystemSettings`, `composeSystemSettings`, `sameSystemSettings`, `tauriSettingsSource`, `settingsChangedEvent`, `isRawSettings`, `CommandError`, `isCommandError`, tipos brutos |
 
-Dependências de execução: `@oito2/ui`, `@tauri-apps/api` 2.12.4.
+Dependências peer: `@oito2/ui`, `@tauri-apps/api` `^2.12.0`. Sem dependências de execução.
 
 Tauri: o crate `tauri-plugin-oito2-settings` com `oito2-settings:default`; `core:default` cobre o evento de mudança. Fora do Tauri, o escopo mantém os padrões da plataforma. Veja o [README](../../../packages/ui-settings/README.md).
 

@@ -13,7 +13,7 @@ Window chrome integration for `@oito2/ui` on Tauri v2: client-side decorations a
 pnpm add @oito2/ui-window @oito2/ui svelte
 ```
 
-`svelte` (`^5.57.0`) is a peer dependency; `@tauri-apps/api` comes as a dependency.
+`svelte` (`^5.57.0`), `@oito2/ui` and `@tauri-apps/api` (`^2.12.0`) are peer dependencies; install them alongside.
 
 ### Tauri setup
 
@@ -74,9 +74,16 @@ On macOS the default mode keeps the native frame; to draw the app's header under
 	let controller: NativeWindowController | null = $state(null);
 
 	onMount(() => {
+		const abort = new AbortController();
 		// The Rust setup already applied the frame and showed the window.
-		void initWindow({ show: false }).then((value) => (controller = value));
-		return () => controller?.dispose();
+		initWindow({ show: false, signal: abort.signal }).then(
+			(value) => (controller = value),
+			(error) => console.error('oito2: could not connect the window', error)
+		);
+		return () => {
+			abort.abort();
+			controller?.dispose();
+		};
 	});
 </script>
 
@@ -93,14 +100,17 @@ Without a Rust `setup`, let the webview apply the frame and show the window inst
 
 ## What's inside
 
-| Export                                | Purpose                                                                                                                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `initWindow(options)`                 | Prepares the current window (frame, title, size, minimum size, center, show) and returns a `NativeWindowController`, or `null` outside Tauri                             |
-| `NativeWindowController`              | The `WindowController` for `WindowScope`: `state`, `decorations`, `minimize()`, `toggleMaximize()`, `close()`, `startDrag()`, `startResize()`, `showMenu()`, `dispose()` |
-| `WindowResizeHandles`                 | Invisible edge and corner handles that resize an `undecorated` Linux window                                                                                              |
-| `setDecorationMode`, `decorationMode` | Set or read the frame of the current window                                                                                                                              |
-| `showWindowMenu(x, y)`                | Opens the native window menu (Linux and Windows)                                                                                                                         |
-| `DecorationMode` (type)               | `native`, `undecorated` or `gtk-headerless`                                                                                                                              |
+| Export                                  | Purpose                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `initWindow(options)`                   | Prepares the current window (frame, title, size, minimum size, center, show) and returns a `NativeWindowController`, or `null` outside Tauri or once its `signal` aborts. One controller exists per window: later calls return it until it is disposed. Rejects with a clear error when the plugin is not registered or allowed |
+| `NativeWindowController`                | The `WindowController` for `WindowScope`: `state`, `decorations`, `minimize()`, `toggleMaximize()`, `close()`, `startDrag()`, `startResize()`, `showMenu()`, `dispose()`                                                                                                                                                        |
+| `WindowResizeHandles`                   | Invisible edge and corner handles that resize an `undecorated` Linux window                                                                                                                                                                                                                                                     |
+| `setDecorationMode`, `decorationMode`   | Set or read the frame of the current window                                                                                                                                                                                                                                                                                     |
+| `showWindowMenu(x, y)`                  | Opens the native window menu (Linux and Windows)                                                                                                                                                                                                                                                                                |
+| `DecorationMode` (type)                 | `native`, `undecorated` or `gtk-headerless`                                                                                                                                                                                                                                                                                     |
+| `CommandError` (type), `isCommandError` | The `{ kind, message }` value the plugin's commands reject with (`tauri`, `unsupported` or `invalidInput`), and its type guard                                                                                                                                                                                                  |
+
+`showMenu()` without a position opens the menu where the pointer was last pressed or moved.
 
 ### Decoration modes
 

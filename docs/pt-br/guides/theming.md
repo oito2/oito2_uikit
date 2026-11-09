@@ -255,6 +255,8 @@ Duas folhas de estilo opcionais trazem temas pré-calculados como propriedades p
 </aside>
 ```
 
+`presetSchemeName(preset, { highContrast })` de `@oito2/ui-themes` devolve o valor do atributo de um preset (`presetSchemeName('catppuccinMocha', { highContrast: true })` é `catppuccin-mocha-hc`), para apps que escolhem o preset em tempo de execução.
+
 O atributo só define as propriedades personalizadas (e `color-scheme`); pinte o fundo você mesmo (`var(--oito2-color-background)` ou um papel de superfície). As regras ficam na camada `oito2`, e cada elemento com o atributo define os seus próprios valores, então ele também funciona dentro de um `ThemeProvider`.
 
 ## Veja também

@@ -28,7 +28,8 @@
 	"files": [
 		"dist",
 		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
+		"!dist/**/*.spec.*",
+		"!dist/**/__screenshots__"
 	],
 	"sideEffects": [
 		"**/*.css"
@@ -49,13 +50,14 @@
 		"test": "vitest run"
 	},
 	"peerDependencies": {
+		"@oito2/ui": "workspace:^",
 		"svelte": "^5.57.0"
 	},
 	"dependencies": {
-		"@oito2/ui": "workspace:*",
 		"highlight.js": "catalog:"
 	},
 	"devDependencies": {
+		"@oito2/ui": "workspace:*",
 		"@oito2/ui-themes": "workspace:*",
 		"@sveltejs/package": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",

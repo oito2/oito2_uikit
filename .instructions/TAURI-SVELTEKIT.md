@@ -1,149 +1,172 @@
-# Svelte 5 + SvelteKit Frontend Standard for Tauri v2
+# Tauri v2 Frontend — SvelteKit (SPA / static)
 
-Frontend complement of `TAURI.md` for this repository: the `@oito2/*` Svelte component libraries and the SvelteKit showcase app. Always apply it together with `TAURI.md`; when both cover a topic, `TAURI.md` rules the Rust and configuration side and this file rules the webview side.
+Complement for Tauri v2 apps whose webview is **SvelteKit + TypeScript built as a static SPA**, as produced by the `svelte-ts` template of `create-tauri-app`. It **complements `TAURI.md` and must always be used together with it** — the Rust, capability, CSP, IPC and build rules live there.
 
----
-
-## Stack
-
-| Tool | Version line | Notes |
-|---|---|---|
-| Node | 24 LTS | `engines.node >= 24`, `engine-strict=true` |
-| pnpm | 12 (pinned in `packageManager`) | Enabled through `corepack enable` |
-| Svelte | 5 | Runes mode everywhere (`compilerOptions.runes: true`) |
-| SvelteKit | 3 | Showcase only; the libraries don't depend on it |
-| Vite | 8 | |
-| TypeScript | 6.0 | **Not 7**: SvelteKit, `@sveltejs/package`, `svelte-check` and `typescript-eslint` still require 6 |
-| Vitest | 5 | Browser mode with the Playwright provider |
-| `@sveltejs/package` | 3 | Standalone; builds `src/lib` into `dist` |
-| Tauri | 2.12 | `@tauri-apps/api` and `@tauri-apps/cli` on the same major.minor as the `tauri` crate |
-
-Every version lives once in the `catalog:` of `pnpm-workspace.yaml`; package manifests refer to it with `"catalog:"`. Internal packages use `"workspace:*"`. Upgrade a version in the catalog only, and check the peer ranges (`npm view <pkg> peerDependencies`) before moving a major.
-
-### WebView baseline
-
-| Platform | Minimum WebView | Systems |
-|---|---|---|
-| Linux | WebKitGTK 2.50 | Ubuntu 22.04+, Debian 12+, Linux Mint 21+, Zorin OS 17+, current Fedora |
-| Windows | WebView2 Evergreen | Windows 10 22H2 and 11 |
-| macOS | Safari/WebKit 26 | macOS 14 Sonoma and later |
-
-- Every CSS, DOM and JavaScript feature a library uses must work on the whole baseline. Check new features with the showcase page `/spikes/baseline`.
-- Known gaps on WebKitGTK 2.50: `field-sizing` (use it only as progressive enhancement, with a script fallback that sizes the field from its `scrollHeight`) and `scrollbar-color` (not needed: `ScrollArea` draws its own scrollbar).
-- Available on the whole baseline: anchor positioning, the Popover API, View Transitions, scroll-driven animations, `@starting-style`, `color-mix()`, `oklch()`, `light-dark()`, `:has()`, CSS nesting, `@layer`, container queries, `<dialog>` and `inert`. Overlay positioning still goes through `@floating-ui/dom`.
-- The baseline is reviewed in April 2027, when Ubuntu 22.04 leaves standard support: it then moves to WebKitGTK 2.52 and the fallbacks above are removed.
+Last verified: 2026-11-04
 
 ---
 
-## Repository Layout
+## SPA Mode (Mandatory)
 
-```text
-packages/<name>/          # @oito2/<name> library (no SvelteKit)
-├── package.json          # exports → dist, "svelte" condition, sideEffects: ["**/*.css"]
-├── svelte.config.js      # runes mode
-├── vite.config.ts        # svelte() + Vitest projects "browser" and "node"
-├── tsconfig.json         # extends ../../tsconfig.base.json
-└── src/lib/              # sources; svelte-package copies non-TS files (CSS, fonts) as they are
-apps/showcase/            # SvelteKit 3 app + src-tauri/ (see TAURI.md)
-plugins/tauri-plugin-*/   # Rust plugins (see TAURI.md)
+Tauri has no Node.js server: SvelteKit runs only in the webview.
+
+| File | Required setting |
+|---|---|
+| `svelte.config.js` | `adapter: adapter({ fallback: "index.html" })` from `@sveltejs/adapter-static` |
+| `src/routes/+layout.ts` | `export const ssr = false;` |
+| `src-tauri/tauri.conf.json` | `build.frontendDist: "../build"`; `build.devUrl` port = `server.port` in `vite.config.js` (template: `1420`) |
+
+- Do **not** add `export const prerender = true` to the root layout: prerendered `load` functions run at build time without access to Tauri APIs. Use SPA mode without prerendering unless the user asks for SSG.
+- No server-only features: no `+page.server.ts`, `+layout.server.ts`, `+server.ts`, form actions, `hooks.server.ts` or `$env/static/private` / `$env/dynamic/private`. Backend logic goes into Rust commands.
+- With `ssr = false`, `window` and the Tauri API are available in components and in universal `load` functions — no `browser` checks needed for them.
+- Keep the template's `vite.config.js` Tauri options (`clearScreen: false`, `strictPort: true`, `TAURI_DEV_HOST`, `watch.ignored: ["**/src-tauri/**"]`).
+
+```javascript
+// svelte.config.js
+import adapter from "@sveltejs/adapter-static";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
+
+/** @type {import('@sveltejs/kit').Config} */
+const config = {
+  preprocess: vitePreprocess(),
+  kit: {
+    adapter: adapter({ fallback: "index.html" }),
+  },
+};
+
+export default config;
 ```
 
-- Libraries are built with `svelte-package` and checked with `publint`. The showcase consumes the **built** packages: run `pnpm build` at the root before `pnpm tauri dev` or after changing a library.
-- Import relative TypeScript modules with the `.js` extension (`import { x } from './x.js'`); `svelte-package` keeps import paths as written.
-- Assets that ship with a library (fonts, their `OFL.txt`) live under `src/lib/assets/` and are referenced with relative `url()`s, so they survive packaging.
+---
+
+## Project Layout
+
+```text
+src/
+├── app.html
+├── lib/
+│   ├── api/            # errors.ts + typed command wrappers (TAURI.md → Frontend IPC)
+│   ├── state/          # shared reactive state in *.svelte.ts modules
+│   └── components/
+└── routes/
+    ├── +layout.ts      # export const ssr = false;
+    └── ...
+```
 
 ---
 
-## SvelteKit 3 (showcase)
+## Invoking Commands
 
-- The Kit configuration lives in `vite.config.ts`, inside `sveltekit({ ... })` (adapter, `paths`, compiler options). There is no `svelte.config.js` in the app.
-- App-internal imports use the `#lib` subpath import (`import x from '#lib/spikes/bridge.js'`), declared in the app's `package.json` `imports`. `$lib` is not used.
-- `tsconfig.json` extends `$app/tsconfig` and adds `"types": ["$app/types", "node"]`.
-- The app is a client-only SPA: `export const ssr = false` in the root `+layout.ts`, `adapter-static` with `fallback: 'index.html'`.
-- Links go through `resolve()` from `$app/paths`, so the GitHub Pages build under `BASE_PATH=/oito2_uikit` works. Never hardcode root-relative URLs.
+Wrappers, argument casing and `CommandError` follow `TAURI.md` → Frontend IPC, with the API folder at `src/lib/api/` (imported as `$lib/api/...`). Components and state modules call the wrappers.
 
 ---
 
-## Component Conventions
+## State
 
-- **Atomic components** (one concept, no parts) are single `.svelte` files exported by name: `import { Button } from '@oito2/ui'`.
-- **Compound components** export a namespace of parts: `export * as Tabs from './components/tabs/index.js'` → `<Tabs.Root>`, `<Tabs.List>`, `<Tabs.Trigger>`, `<Tabs.Content>`. `Root` creates the state class and publishes it with `setContext`; the parts read it.
-- **No `Oito2` prefix** in component or type names; the npm scope is the namespace. CSS uses `--oito2-*` variables, `.oito2-*` classes and `data-oito2-*` attributes.
-- **Props:** `class`, a `$bindable` `ref`, `...rest` spread on the root element, `disabled`, and controllable state (`value`/`open`/`checked` with `bind:`, an `on<Name>Change` callback and a `default<Name>` for uncontrolled use).
-- **Snippets** for customizable content (`icon`, `label`, `trailing`, `empty`).
-- **State and controllers** are classes in `.svelte.ts` files with `$state`/`$derived` fields. No Svelte stores.
-- **Context:** each provider has a `set<Name>(get)` function, which takes a getter so props and `$state` stay reactive, and a `use<Name>()` function that returns a live ref (`.current`, or named getters) with a documented fallback when no provider exists. A provider component (`SystemScope`, `LocaleProvider`) only calls `set<Name>` and renders its children.
-- **Reusable behaviors** are attachments (`{@attach ...}`), not `use:` actions.
-- **Interaction primitives** live in `packages/ui/src/lib/internal/` and are not exported: focus scope, roving focus, typeahead, dismissable layer, `Portal`, floating positioning, presence, scroll lock, live region and `Controllable`. Components build on them instead of re-implementing focus or dismissal.
-- **Icons** are `@lucide/svelte` components imported one by one (`import X from '@lucide/svelte/icons/x'`); props that take an icon are typed `IconComponent`.
-- **Components** live in `packages/ui/src/lib/components/<group>/`; compound parts sit in a subfolder with an `index.ts` (`export { default as Root } …`).
-- **Overlays** render through `Portal`, which targets the host the closest `ThemeProvider` renders at the end of its `div`, so they keep the theme; they are positioned with `position: fixed`.
-- **SSR-safe:** no `window`, `document` or `navigator` access at module level; touch the DOM only inside `$effect`, attachments, event handlers or `onMount`.
-- **Behavior is written in-house** following the WAI-ARIA Authoring Practices pattern of each widget (roles, keyboard, focus). The only positioning dependency is `@floating-ui/dom`. Ark UI is a conceptual reference: never copy its code.
-- **Strings** come from the `@oito2/ui` localizations (en and pt-BR) and can be overridden by a prop.
-- **TSDoc in English** on every public export and prop; it feeds the generated API docs.
+- Use **Svelte 5 runes** (`$state`, `$derived`, `$effect`) for new code; follow the project's existing approach (runes or `svelte/store`) when extending older code.
+- Shared state lives in `.svelte.ts` modules under `$lib/state/`. A module **cannot export reassigned `$state`** — export an object and mutate its properties, or export getter functions.
+- The Rust side is the source of truth for persisted data; frontend state is a cache of command results.
+- Track `busy` and `error` for every async command the UI waits on.
 
-## Styling
+```typescript
+// src/lib/state/counter.svelte.ts
+import { increment } from "$lib/api/counter";
+import type { CommandError } from "$lib/api/errors";
 
-- Plain CSS with custom properties; no CSS framework.
-- Every component rule sits inside `@layer oito2 { ... }` in the component's scoped `<style>`, so unlayered app CSS always wins.
-- Read tokens through `var(--oito2-...)`; never hardcode a color, radius, spacing or size that has a token.
-- Token values live only in `packages/ui/src/lib/tokens/values.ts` (a module without imports). `tokens.css` is generated from it: after changing a value run `pnpm generate`; CI runs `pnpm generate:check`. Parity with oito2_ui is tested against `packages/*/src/fixtures/parity/*.json` (in `ui`, `ui-syntax` and `ui-extras`), exported by `tools/parity` (`flutter test` there).
-- Colors come from the active theme's custom properties: `--oito2-color-<role>` (Material 3 roles in kebab-case, plus `background`, `primary-text`, `error-text`, `success`, `warning`, `info` and `link`), `--oito2-chrome-<surface>` and `--oito2-syntax-<role>`. Text uses the text-safe roles (`on-surface`, `on-surface-variant`, `primary-text`, `error-text`, status colors); `primary` and `error` are fills.
-- Style states through data attributes (`data-state`, `data-disabled`, `data-orientation`, `data-highlighted`, `data-placement`).
-- Density: pointer sizes by default; touch sizes under `@media (pointer: coarse)` or `[data-oito2-density='touch']`. Components read the density variables of `density.css` (`--oito2-control-height`, `--oito2-icon-size`, `--oito2-toggle-size`…), never a fixed pointer size.
-- Selected controls use `--oito2-color-selected-fill` and `--oito2-color-on-selected-fill`; the focus ring is a 2-pixel `outline` in `--oito2-color-primary-text`.
-- Motion respects `prefers-reduced-motion`.
+export const counter = $state({ value: 0, error: null as CommandError | null, busy: false });
+
+export async function bump(by: number): Promise<void> {
+  counter.busy = true;
+  counter.error = null;
+  try {
+    counter.value = await increment(by);
+  } catch (e) {
+    counter.error = e as CommandError;
+  } finally {
+    counter.busy = false;
+  }
+}
+```
+
+### Events
+
+Register `listen()` in `$effect` and unlisten in the cleanup — SvelteKit's client router does not unregister listeners when a route changes.
+
+```svelte
+<script lang="ts">
+  import { listen } from "@tauri-apps/api/event";
+
+  let lastSync = $state<number | null>(null);
+
+  $effect(() => {
+    const unlistenPromise = listen<number>("sync-complete", (event) => {
+      lastSync = event.payload;
+    });
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten());
+    };
+  });
+</script>
+```
 
 ---
 
-## Tauri on the Webview Side
+## Markup Safety
 
-- Libraries must work outside Tauri (the showcase also ships as a web build). Guard native calls with `isTauri()` from `@tauri-apps/api/core`, and load Tauri-only modules with a dynamic `import()` behind that guard in library code.
-- Window actions use `getCurrentWindow()` from `@tauri-apps/api/window`; plugin calls use `invoke('plugin:<name>|<command>')` wrapped in a typed function of the plugin's `@oito2/ui-*` package.
-- Every window action or plugin command the showcase uses needs its permission in `src-tauri/capabilities/` (least privilege, see `TAURI.md`).
-- System settings reach components through `SystemScope`; apps wrap their content in `SystemSettingsScope` (`@oito2/ui-settings`), which reads `tauri-plugin-oito2-settings` and keeps the platform defaults outside Tauri. Plugins return raw values; the TypeScript side composes them, so the rules stay testable without the platform.
-- Title bars get their window through `WindowScope` (`@oito2/ui`), fed by `initWindow()` from `@oito2/ui-window`, which returns `null` outside Tauri; components never call `getCurrentWindow()` themselves.
-- `tauri-plugin-oito2-window` is the only crate that may use `unsafe`, and only in `src/menu.rs` (native window menu); every other crate keeps the workspace `unsafe_code = "forbid"`.
-- Tests mock IPC with `@tauri-apps/api/mocks` (`mockIPC`, `mockWindows`, `clearMocks`).
-- `@material/material-color-utilities` (used by the color schemes) imports its own modules without file extensions, which only a bundler resolves. Every Vitest config inlines it (`test.server.deps.inline`), build scripts load the sources through Vite's module runner, and an app that renders `@oito2/ui` on a Node server (SSR) must add it to `ssr.noExternal`. Tauri apps, which are client-only SPAs, need nothing.
+General rules: `TAURI.md` → Markup safety. Render data with `{expression}` (escaped); **never** use `{@html ...}` with untrusted data.
 
 ---
 
-## Tests
+## Lint, Format and Tests
 
-| File name | Runs in | Use for |
+| Tool | How to add | Purpose |
 |---|---|---|
-| `*.test.ts` | Node | Pure logic: tokens, colors, parsers, collections, formatting |
-| `*.svelte.test.ts` | Chromium and WebKit | Components (`vitest-browser-svelte` `render`, `page` locators) |
-| `*.browser.test.ts` | Chromium and WebKit | DOM/CSS behavior without a component (fonts, focus utilities) |
-| `apps/showcase/tests/*.spec.ts` | Chromium and WebKit (`@playwright/test`, on the built showcase) | Every showcase page (light/LTR/en and dark/RTL/pt-BR: no errors, no horizontal overflow, axe) and the shell |
+| `svelte-check` | Template (`npm run check`) | Type-checks `.svelte` and `.ts` |
+| ESLint | `npx sv add eslint` | `eslint-plugin-svelte` + `typescript-eslint` |
+| Prettier | `npx sv add prettier` | `prettier-plugin-svelte` |
+| Vitest | `npx sv add vitest` | Unit/component tests |
 
-- Chromium stands in for WebView2, WebKit for WebKitGTK and WKWebView. A test that passes in only one engine is a bug, not a flaky test.
-- Visual goldens use Vitest's `toMatchScreenshot`; reference images live in `__screenshots__/` next to the test and are committed. Regenerate them only on purpose (`vitest run --update`).
-- `expect.requireAssertions` is on: every test asserts something.
-- Accessibility: component galleries run `axe-core` inside the browser tests (keep the gallery inside the viewport, axe measures contrast only there); axe checks on every showcase page from phase F14.
-- Test harnesses import `styles.css` and wrap their content in a `ThemeProvider`: without the tokens the controls have no size.
-- The local machine needs `libavif16` for Playwright's WebKit (`sudo apt-get install libavif16`).
+Mock the backend with `@tauri-apps/api/mocks` and call `clearMocks()` after each test:
+
+```typescript
+import { afterEach, expect, test } from "vitest";
+import { clearMocks, mockIPC } from "@tauri-apps/api/mocks";
+import { counter, bump } from "$lib/state/counter.svelte";
+
+afterEach(() => clearMocks());
+
+test("bump stores the command result", async () => {
+  mockIPC((cmd) => (cmd === "increment" ? 5 : undefined));
+  await bump(1);
+  expect(counter.value).toBe(5);
+});
+```
 
 ---
 
-## Headers
+## Anti-Patterns
 
-Every hand-written source file starts with the GPL-3.0 notice of `tools/templates/` in its comment syntax: `header.txt` for `.ts`/`.js`/`.rs`, `header.css.txt` for `.css`, `header.html.txt` for `.svelte`/`.html`, and `header.hash.txt` for `.toml`/`.yaml`. JSON files carry no header.
+| Anti-pattern | Why | Instead |
+|---|---|---|
+| `adapter-node` / `adapter-auto` | Needs a server Tauri does not have | `adapter-static` with `fallback: "index.html"` |
+| `prerender = true` with Tauri calls in `load` | `load` runs at build time without Tauri APIs | SPA mode, `ssr = false` |
+| `+page.server.ts`, form actions, private env | No server at runtime | Rust commands |
+| `{@html data}` | XSS with IPC access | `{data}` |
+| `listen()` without cleanup | Duplicate handlers after navigation | `$effect` returning the unlisten call |
+| Exporting a reassigned `$state` variable | Not allowed across modules | Export an object or getters |
 
 ---
 
 ## Quality
 
-Run from the repository root before reporting a task as done (Prettier reads `.prettierignore` from the current directory only, so always run it from the root):
+Frontend checks; they add to the `TAURI.md` Quality section, which runs after them.
 
 ```bash
-pnpm lint      # prettier --check + eslint
-pnpm check     # svelte-check in every package and the showcase
-pnpm test      # Vitest node + browser projects
-pnpm build     # svelte-package + publint, showcase static build
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
+npm run check
+npx eslint .
+npx prettier --check .
+npx vitest run
+npm run build
 ```
+
+Run only the tools the project has configured.

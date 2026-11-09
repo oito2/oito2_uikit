@@ -130,7 +130,7 @@ function presetsCss(): string {
 	const rules: string[] = [];
 	for (const preset of presets.themePresetNames) {
 		for (const highContrast of [false, true]) {
-			const name = `${kebab(preset)}${highContrast ? '-hc' : ''}`;
+			const name = presets.presetSchemeName(preset, { highContrast });
 			const scheme = presets.presetColorTheme(preset, { highContrast });
 			rules.push(theme.colorThemeRule(scheme, `[data-oito2-scheme='${name}']`, '\t'));
 		}

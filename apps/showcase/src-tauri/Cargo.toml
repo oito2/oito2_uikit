@@ -19,8 +19,6 @@ tauri-build = { workspace = true }
 
 [dependencies]
 tauri = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
 tauri-plugin-dialog = { workspace = true }
 tauri-plugin-fs = { workspace = true }
 tauri-plugin-oito2-window = { path = "../../../plugins/tauri-plugin-oito2-window" }

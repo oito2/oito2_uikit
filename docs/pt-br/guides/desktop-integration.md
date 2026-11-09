@@ -68,7 +68,7 @@ pub fn run() {
 }
 ```
 
-`apply_decoration_mode` precisa rodar na thread principal antes de a janela aparecer, o que o `setup` garante. `DecorationMode::platform_default()` é `gtk-headerless` no Linux, `undecorated` no Windows e `native` no macOS. No Linux, `tauri_plugin_oito2_settings::init()` também começa a vigiar as configurações.
+`apply_decoration_mode` precisa rodar na thread principal antes de a janela aparecer, o que o `setup` garante; no Linux ele falha com `unsupported: window already visible` para uma janela já mostrada (o GTK não consegue passar uma janela visível para decorações do lado do cliente), e o `setDecorationMode` do webview rejeita do mesmo jeito. `DecorationMode::platform_default()` é `gtk-headerless` no Linux, `undecorated` no Windows e `native` no macOS. No Linux, `tauri_plugin_oito2_settings::init()` também começa a vigiar as configurações.
 
 O showcase lê ainda o modo da variável de ambiente `OITO2_DECORATIONS` (`native`, `undecorated` ou `gtk-headerless`) para experimentar as outras molduras; isso é código do showcase, não um recurso do plugin.
 
@@ -97,10 +97,12 @@ O Tauri mescla `tauri.linux.conf.json` e `tauri.macos.conf.json` sobre ele nesse
 
 | Arquivo                 | Chaves acrescentadas                                                                                | Efeito                                                                                               |
 | ----------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `tauri.linux.conf.json` | `"transparent": true`                                                                               | Uma janela transparente, como o showcase usa com a moldura `gtk-headerless`                          |
+| `tauri.linux.conf.json` | `"transparent": true`                                                                               | Uma janela RGBA, de que o `gtk-headerless` precisa: veja abaixo                                      |
 | `tauri.macos.conf.json` | `"titleBarStyle": "Overlay"`, `"hiddenTitle": true`, `"trafficLightPosition": { "x": 16, "y": 17 }` | Mantém a moldura e os botões de semáforo nativos, e deixa a header bar do app ser desenhada sob eles |
 
 Não há sobreposição para o Windows: o padrão `undecorated` remove a moldura do sistema.
+
+`"transparent": true` no Linux dá à janela um visual RGBA, para que a sombra e os cantos arredondados que o GTK desenha em volta de uma janela `gtk-headerless` não sejam pintados sobre um retângulo opaco. A página precisa então pintar o seu próprio fundo opaco (o host do `ThemeProvider` e o `body` do showcase o fazem), e no X11 sem compositor uma janela assim aparece preta. Apps que usam a moldura `native` ou `undecorated` no Linux não precisam disso.
 
 ```json
 {
@@ -189,9 +191,16 @@ Depois aninhe os escopos no layout raiz. `SystemSettingsScope` fica **por fora**
 	let controller: NativeWindowController | null = $state(null);
 
 	onMount(() => {
+		const abort = new AbortController();
 		// The Rust setup already applied the frame and showed the window.
-		void initWindow({ show: false }).then((value) => (controller = value));
-		return () => controller?.dispose();
+		initWindow({ show: false, signal: abort.signal }).then(
+			(value) => (controller = value),
+			(error) => console.error('oito2: could not connect the window', error)
+		);
+		return () => {
+			abort.abort();
+			controller?.dispose();
+		};
 	});
 </script>
 
@@ -223,6 +232,8 @@ Depois aninhe os escopos no layout raiz. `SystemSettingsScope` fica **por fora**
 	}
 </style>
 ```
+
+`initWindow` resolve para o mesmo controlador quando é chamado de novo para uma janela cujo controlador ainda está vivo, e para `null` quando o seu `signal` é abortado antes de terminar (o controlador que estava criando é descartado), então um layout que desmonta antes de a janela estar pronta não deixa nada vazando. Ele rejeita com `oito2: tauri-plugin-oito2-window is not registered or the capability does not allow it` (o erro do Tauri como `cause`) quando o plugin ou a permissão `oito2-window:default` está faltando.
 
 Um app Tauri feito com SvelteKit é uma SPA só de cliente (`export const ssr = false` no `+layout.ts` raiz, `adapter-static` com `fallback: 'index.html'`), como o showcase.
 
@@ -287,7 +298,7 @@ Os componentes leem as configurações com `useSystemSettings()` de `@oito2/ui`:
 </p>
 ```
 
-`SystemSettingsScope` lê as configurações ao ser montado, acompanha o evento de mudança que o plugin emite no Linux e lê de novo sempre que a janela recupera o foco (o único caminho de atualização no Windows e no macOS). As suas props opcionais são `initialSettings`, `source`, `platform` e `onSettingsChange`. Para ler as configurações uma vez, sem componente, chame `loadSystemSettings()`. O que cada plataforma informa está no [README de `@oito2/ui-settings`](../../../packages/ui-settings/README.md#platform-coverage) e em [Configurações do sistema](../architecture/system-settings.md).
+`SystemSettingsScope` lê as configurações ao ser montado, acompanha o evento de mudança que o plugin emite no Linux e lê de novo sempre que a janela recupera o foco (o único caminho de atualização no Windows e no macOS). As suas props opcionais são `initialSettings`, `source`, `platform` e `onSettingsChange`. Para ler as configurações uma vez, sem componente, chame `loadSystemSettings()`. Quando uma leitura ou a assinatura falha (sem plugin, sem permissão), o escopo mantém as configurações atuais e imprime um `console.warn` com a causa. Dentro de um sandbox Flatpak ou Snap, `XDG_CONFIG_HOME` aponta para o diretório do próprio sandbox (`~/.var/app/<id>/config` no Flatpak), por isso o plugin não encontra ali `kwinrc`, `kdeglobals`, `xfwm4.xml` nem os arquivos do COSMIC; as fontes do portal XDG e do GSettings continuam funcionando. O que cada plataforma informa está no [README de `@oito2/ui-settings`](../../../packages/ui-settings/README.md#platform-coverage) e em [Configurações do sistema](../architecture/system-settings.md).
 
 ## Rodando o mesmo código num navegador
 

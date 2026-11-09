@@ -59,6 +59,8 @@
 		untrack(() => initialSettings ?? fallbackSystemSettings(platform))
 	);
 	let generation = 0;
+	// A failed read is reported once per instance; later failures keep the settings silently.
+	let readFailureReported = false;
 
 	/**
 	 * Applies new values unless a newer read already did, and only when they change; values
@@ -84,7 +86,14 @@
 		const from = ++generation;
 		source.read().then(
 			(raw) => apply(raw, from),
-			() => {}
+			(error: unknown) => {
+				if (readFailureReported) return;
+				readFailureReported = true;
+				console.warn(
+					'oito2: could not read the system settings; keeping the current ones',
+					error
+				);
+			}
 		);
 	}
 
@@ -99,7 +108,12 @@
 				if (disposed) unsubscribe();
 				else stop = unsubscribe;
 			})
-			.catch(() => {});
+			.catch((error: unknown) => {
+				console.warn(
+					'oito2: could not follow the system settings changes; keeping the current ones',
+					error
+				);
+			});
 		window.addEventListener('focus', refresh);
 		return () => {
 			disposed = true;

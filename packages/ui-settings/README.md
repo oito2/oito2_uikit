@@ -13,7 +13,7 @@ System integration for `@oito2/ui` on Tauri v2: desktop environment detection, w
 pnpm add @oito2/ui-settings @oito2/ui svelte
 ```
 
-`svelte` (`^5.57.0`) is a peer dependency; `@tauri-apps/api` comes as a dependency.
+`svelte` (`^5.57.0`), `@oito2/ui` and `@tauri-apps/api` (`^2.12.0`) are peer dependencies; install them alongside.
 
 ### Tauri setup
 
@@ -59,7 +59,7 @@ Wrap the app content in `SystemSettingsScope`, outside the `ThemeProvider`, so t
 </SystemSettingsScope>
 ```
 
-The scope reads the settings once mounted, follows the changes the plugin reports (Linux) and reads them again whenever the window regains focus. Its props are all optional: `initialSettings`, `source`, `platform` and an `onSettingsChange` callback.
+The scope reads the settings once mounted, follows the changes the plugin reports (Linux) and reads them again whenever the window regains focus. Its props are all optional: `initialSettings`, `source`, `platform` and an `onSettingsChange` callback. When a read or the subscription fails (for example without the plugin or its permission), the scope keeps the current settings and logs one `console.warn` with the cause per instance.
 
 Components read the result with `useSystemSettings()` from `@oito2/ui`:
 
@@ -80,15 +80,17 @@ To read the settings once without a component, call `loadSystemSettings()`; it r
 
 ## What's inside
 
-| Export                                                            | Purpose                                                                               |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `SystemSettingsScope`                                             | A `SystemScope` fed by the plugin, kept up to date                                    |
-| `loadSystemSettings(options)`                                     | Reads the `SystemSettings` once                                                       |
-| `composeSystemSettings(raw, platform)`                            | Turns the plugin's `RawSettings` into `SystemSettings` (pure, testable without Tauri) |
-| `sameSystemSettings(a, b)`                                        | Field-by-field comparison                                                             |
-| `tauriSettingsSource`, `SettingsSource` (type)                    | The source that calls the plugin; pass another `source` to the scope for tests        |
-| `settingsChangedEvent`                                            | `'oito2-settings://changed'`, the event the plugin emits                              |
-| `RawSettings`, `ConfigValues`, `SettingValue`, `emptyRawSettings` | The raw values the plugin reports                                                     |
+| Export                                                            | Purpose                                                                                                             |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `SystemSettingsScope`                                             | A `SystemScope` fed by the plugin, kept up to date                                                                  |
+| `loadSystemSettings(options)`                                     | Reads the `SystemSettings` once                                                                                     |
+| `composeSystemSettings(raw, platform)`                            | Turns the plugin's `RawSettings` into `SystemSettings` (pure, testable without Tauri)                               |
+| `sameSystemSettings(a, b)`                                        | Field-by-field comparison                                                                                           |
+| `tauriSettingsSource`, `SettingsSource` (type)                    | The source that calls the plugin; pass another `source` to the scope for tests                                      |
+| `settingsChangedEvent`                                            | `'oito2-settings://changed'`, the event the plugin emits                                                            |
+| `RawSettings`, `ConfigValues`, `SettingValue`, `emptyRawSettings` | The raw values the plugin reports                                                                                   |
+| `isRawSettings(value)`                                            | Whether a value has the shape of `RawSettings`; `tauriSettingsSource` rejects reads and ignores events that fail it |
+| `CommandError` (type), `isCommandError`                           | The `{ kind, message }` value the plugin's commands reject with (`unsupported` or `internal`), and its type guard   |
 
 ### Platform coverage
 

@@ -37,8 +37,7 @@ pub enum DecorationMode {
 
 impl DecorationMode {
     /// The mode used when none is requested: GTK client-side decorations on
-    /// Linux, the native frame on macOS (where the configuration overlays the
-    /// title bar and keeps the traffic lights), no system frame elsewhere.
+    /// Linux, the native frame on macOS, no system frame elsewhere.
     pub fn platform_default() -> Self {
         if cfg!(target_os = "linux") {
             Self::GtkHeaderless
@@ -78,14 +77,19 @@ impl FromStr for DecorationMode {
     }
 }
 
-/// Applies `mode` to `window`. Must run on the main thread, before the window
-/// is shown, so GTK can switch to client-side decorations.
+/// Applies `mode` to `window` and records it. Must run on the main thread. On
+/// Linux the window must still be hidden, so GTK can switch its frame before
+/// it is realized: a visible window is rejected with an `Unsupported` error.
 pub fn apply_decoration_mode<R: Runtime>(
     window: &WebviewWindow<R>,
     mode: DecorationMode,
 ) -> crate::Result<()> {
+    #[cfg(target_os = "linux")]
+    if window.is_visible()? {
+        return Err(crate::Error::Unsupported("window already visible".into()));
+    }
     match mode {
-        DecorationMode::Native => window.set_decorations(true)?,
+        DecorationMode::Native => apply_native(window)?,
         DecorationMode::Undecorated => window.set_decorations(false)?,
         DecorationMode::GtkHeaderless => apply_gtk_headerless(window)?,
     }
@@ -115,13 +119,41 @@ impl DecorationState {
             .ok()
             .and_then(|modes| modes.get(label).copied())
     }
+
+    /// Drops the mode recorded for the window `label`, once the window is destroyed.
+    pub fn forget(&self, label: &str) {
+        if let Ok(mut modes) = self.0.lock() {
+            modes.remove(label);
+        }
+    }
 }
 
+/// Restores the system frame: removes the client-side title bar a previous
+/// [`DecorationMode::GtkHeaderless`] set, then turns the decorations back on.
+#[cfg(target_os = "linux")]
+fn apply_native<R: Runtime>(window: &WebviewWindow<R>) -> crate::Result<()> {
+    use gtk::prelude::*;
+
+    window.gtk_window()?.set_titlebar(None::<&gtk::Widget>);
+    window.set_decorations(true)?;
+    Ok(())
+}
+
+#[cfg(not(target_os = "linux"))]
+fn apply_native<R: Runtime>(window: &WebviewWindow<R>) -> crate::Result<()> {
+    window.set_decorations(true)?;
+    Ok(())
+}
+
+/// Sets an empty, hidden title bar on the GTK window. The window is marked
+/// decorated first, since GTK draws the client-side shadow and resize edges
+/// only on a decorated window.
 #[cfg(target_os = "linux")]
 fn apply_gtk_headerless<R: Runtime>(window: &WebviewWindow<R>) -> crate::Result<()> {
     use gtk::prelude::*;
 
     let gtk_window = window.gtk_window()?;
+    gtk_window.set_decorated(true);
     let titlebar = gtk::Box::new(gtk::Orientation::Horizontal, 0);
     titlebar.set_no_show_all(true);
     titlebar.hide();
@@ -191,6 +223,18 @@ mod tests {
         assert_eq!(state.get("main"), None);
         state.record("main", DecorationMode::GtkHeaderless);
         assert_eq!(state.get("main"), Some(DecorationMode::GtkHeaderless));
+    }
+
+    #[test]
+    fn forgets_a_window() {
+        let state = DecorationState::default();
+        state.record("main", DecorationMode::Native);
+        state.record("settings", DecorationMode::Undecorated);
+        state.forget("main");
+        assert_eq!(state.get("main"), None);
+        assert_eq!(state.get("settings"), Some(DecorationMode::Undecorated));
+        state.forget("missing");
+        assert_eq!(state.get("settings"), Some(DecorationMode::Undecorated));
     }
 
     #[test]

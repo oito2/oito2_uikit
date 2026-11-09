@@ -15,11 +15,8 @@
 
 import { colorThemeVariables } from '@oito2/ui/theme';
 import { afterEach, describe, expect, it } from 'vitest';
-import { presetColorTheme, themePresetNames } from './presets.js';
+import { presetColorTheme, presetSchemeName, themePresetNames } from './presets.js';
 import './presets.css';
-
-// Converts camelCase to kebab-case.
-const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 
 describe('presets.css', () => {
 	afterEach(() => {
@@ -30,7 +27,7 @@ describe('presets.css', () => {
 		themePresetNames.flatMap((preset) => [[preset, false] as const, [preset, true] as const])
 	)('applies %s (high contrast: %s)', (preset, highContrast) => {
 		const element = document.createElement('div');
-		element.dataset.oito2Scheme = `${kebab(preset)}${highContrast ? '-hc' : ''}`;
+		element.dataset.oito2Scheme = presetSchemeName(preset, { highContrast });
 		document.body.append(element);
 		const style = getComputedStyle(element);
 		const theme = presetColorTheme(preset, { highContrast });

@@ -23,11 +23,13 @@ use crate::raw::{ConfigValues, files};
 /// The largest configuration file read, in bytes; larger files are ignored.
 const MAX_FILE_SIZE: u64 = 1024 * 1024;
 
-/// Returns the configuration directory: `XDG_CONFIG_HOME` when it is set, else
-/// `HOME/.config`, or `None` without either.
+/// Returns the configuration directory: `XDG_CONFIG_HOME` when it is set to an absolute
+/// path, else `HOME/.config`, or `None` without either.
 pub fn config_home(xdg_config_home: Option<&str>, home: Option<&str>) -> Option<PathBuf> {
     match (xdg_config_home, home) {
-        (Some(xdg), _) if !xdg.is_empty() => Some(PathBuf::from(xdg)),
+        (Some(xdg), _) if !xdg.is_empty() && Path::new(xdg).is_absolute() => {
+            Some(PathBuf::from(xdg))
+        }
         (_, Some(home)) if !home.is_empty() => Some(Path::new(home).join(".config")),
         _ => None,
     }
@@ -115,6 +117,11 @@ mod tests {
             config_home(Some(""), Some("/home/a")),
             Some(PathBuf::from("/home/a/.config"))
         );
+        assert_eq!(
+            config_home(Some("relative/config"), Some("/home/a")),
+            Some(PathBuf::from("/home/a/.config"))
+        );
+        assert_eq!(config_home(Some("relative/config"), None), None);
         assert_eq!(config_home(None, None), None);
     }
 

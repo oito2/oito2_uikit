@@ -24,7 +24,9 @@
 		"@oito2/ui-syntax": "workspace:*",
 		"@oito2/ui-themes": "workspace:*",
 		"@oito2/ui-window": "workspace:*",
-		"@tauri-apps/api": "catalog:"
+		"@tauri-apps/api": "catalog:",
+		"@tauri-apps/plugin-dialog": "catalog:",
+		"@tauri-apps/plugin-fs": "catalog:"
 	},
 	"devDependencies": {
 		"@playwright/test": "catalog:",

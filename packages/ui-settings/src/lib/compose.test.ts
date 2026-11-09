@@ -105,6 +105,17 @@ describe('GNOME family', () => {
 		expect(settings.accentColor).toBe(accentColors.purple);
 	});
 
+	it('ignores an accent-color name outside the palette, even a prototype key', () => {
+		const settings = composeSystemSettings(
+			raw('GNOME', {
+				gsettings: { [`${gnomeInterface}/accent-color`]: 'toString' },
+				systemAccent: '#123456'
+			}),
+			linux
+		);
+		expect(settings.accentColor).toBe('#123456');
+	});
+
 	it('uses the toolkit accent without accent-color', () => {
 		const settings = composeSystemSettings(raw('GNOME', { systemAccent: '#123456' }), linux);
 		expect(settings.accentColor).toBe('#123456');

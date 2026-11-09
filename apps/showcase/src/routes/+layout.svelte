@@ -84,9 +84,16 @@
 
 	onMount(() => {
 		if (!tauri) return;
+		const abort = new AbortController();
 		// The Rust setup already applied the frame and showed the window.
-		void initWindow({ show: false }).then((value) => (native = value));
-		return () => native?.dispose();
+		initWindow({ show: false, signal: abort.signal }).then(
+			(value) => (native = value),
+			(error) => console.error('oito2: could not connect the window', error)
+		);
+		return () => {
+			abort.abort();
+			native?.dispose();
+		};
 	});
 
 	// A Tauri debug build started with OITO2_SPIKE opens that spike page and reports back.
