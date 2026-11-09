@@ -21,18 +21,18 @@ Obrigado por ajudar! Este guia cobre o ambiente de desenvolvimento, as verifica�
 
 ## Ambiente de desenvolvimento
 
-| Ferramenta                             | Versão                                                        |
-| -------------------------------------- | ------------------------------------------------------------- |
-| Node.js                                | 24 LTS ou mais recente                                        |
-| pnpm                                   | a fixada no `package.json` (`corepack enable`)                |
-| Rust                                   | fixada no `rust-toolchain.toml`; o rustup instala             |
-| Dependências de sistema do Tauri v2    | veja abaixo                                                   |
-| Flutter (só para regenerar a paridade) | stable, com um checkout do oito2_ui em `.references/oito2_ui` |
+| Ferramenta                             | Versão                                                                                                      |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Node.js                                | 24 LTS ou mais recente                                                                                      |
+| pnpm                                   | a fixada no `package.json` (`corepack enable`, ou `npm install -g pnpm@<versão>` com a do `packageManager`) |
+| Rust                                   | fixada no `rust-toolchain.toml`; o rustup instala                                                           |
+| Dependências de sistema do Tauri v2    | veja abaixo                                                                                                 |
+| Flutter (só para regenerar a paridade) | stable, com um checkout do oito2_ui em `.references/oito2_ui`                                               |
 
 Pacotes de sistema no Linux (Debian/Ubuntu):
 
 ```bash
-sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev
 # WebKit do Playwright, usado pelos testes de navegador
 sudo apt install libavif16
 ```
@@ -44,7 +44,7 @@ Prepare o repositório:
 ```bash
 git clone https://github.com/oito2/oito2_uikit.git
 cd oito2_uikit
-corepack enable
+corepack enable   # Node 25 e posteriores vêm sem Corepack: npm install -g pnpm@<versão do packageManager>
 pnpm install
 pnpm --filter @oito2/ui exec playwright install chromium webkit
 pnpm build
@@ -76,7 +76,7 @@ Rode a partir da raiz do repositório:
 
 | Comando                                                 | O que faz                                                                |
 | ------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `pnpm lint`                                             | Prettier `--check` e ESLint                                              |
+| `pnpm lint`                                             | Prettier `--check`, ESLint e a verificação dos cabeçalhos de licença     |
 | `pnpm format`                                           | Prettier `--write` (sempre a partir da raiz)                             |
 | `pnpm check`                                            | `svelte-check` em todos os pacotes e no showcase                         |
 | `pnpm build`                                            | `svelte-package` + `publint` nos pacotes, build estático do showcase     |
@@ -126,13 +126,15 @@ cd tools/parity
 flutter test
 ```
 
+O [workflow Parity](../../.github/workflows/parity.yml) roda a mesma exportação toda segunda-feira (e sob demanda, pela aba Actions) contra o oito2_ui atual e falha quando alguma fixture mudaria. Uma execução com falha significa que o oito2_ui avançou: regenere as fixtures localmente, porte a mudança e faça commit do novo JSON.
+
 ## Convenções
 
 - **Runes do Svelte 5** em todo lugar; comportamentos reutilizáveis são attachments, o estado mora em classes `.svelte.ts`, sem stores.
 - **Acessibilidade**: o comportamento segue o padrão do WAI-ARIA Authoring Practices de cada widget; as galerias rodam o axe nos testes de navegador.
 - **Estilo**: CSS puro dentro de `@layer oito2`, valores pelos tokens `var(--oito2-…)`, estados por atributos `data-*`.
 - **Rust**: `cargo fmt`, clippy com `-D warnings`, sem `unwrap`/`expect`/`panic!` nos caminhos de comando, `unsafe` só em `tauri-plugin-oito2-window/src/menu.rs`.
-- **Cabeçalho de licença**: todo arquivo-fonte escrito à mão começa com o aviso GPL-3.0 de `tools/templates/` na sintaxe de comentário da linguagem (arquivos JSON e Markdown não levam).
+- **Cabeçalho de licença**: todo arquivo-fonte escrito à mão começa com o aviso GPL-3.0 de `tools/templates/` na sintaxe de comentário da linguagem (`header.txt` para `//`, `header.css.txt`, `header.html.txt`, `header.sharp.txt` para `#`); `pnpm lint:headers` (parte do `pnpm lint`) impõe isso. Arquivos JSON, Markdown, o `app.html`, os manifestos e os workflows não levam.
 - **Idioma**: código, comentários, mensagens de commit e documentação em inglês; `docs/pt-br/` espelha `docs/en/` em português do Brasil.
 - **TSDoc** em inglês em todo export público e prop: ele alimenta a referência de API.
 

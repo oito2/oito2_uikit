@@ -871,9 +871,9 @@ export function stripLicense(source: string): string {
 		.replace(/^\s*\/\/ Copyright[\s\S]*?licenses\/>\.\s*/, '');
 }
 
-/** The address of the page source on GitHub. */
+/** The address of the page source on GitHub, at the commit the showcase was built from. */
 export function sourceUrl(slug: string): string {
-	return `https://github.com/oito2/oito2_uikit/blob/main/apps/showcase/src/lib/pages/${slug}.svelte`;
+	return `https://github.com/oito2/oito2_uikit/blob/${__OITO2_SOURCE_REF__}/apps/showcase/src/lib/pages/${slug}.svelte`;
 }
 
 /** Returns the pages whose title contains `query`, ignoring case and accents. */

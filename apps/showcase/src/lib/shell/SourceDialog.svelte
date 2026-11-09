@@ -19,6 +19,7 @@
 <script lang="ts">
 	import { Button, Dialog } from '@oito2/ui';
 	import { CodeBlock } from '@oito2/ui-syntax';
+	import { onExternalClick } from '../api/open-external.js';
 	import { loadSource, sourceUrl, type ShowcasePage } from '../catalog.js';
 
 	interface Props {
@@ -48,7 +49,11 @@
 			<CodeBlock code={source} language="html" showLineNumbers label="{page.slug}.svelte" />
 		</div>
 		<Dialog.Actions>
-			<Button variant="text" href={sourceUrl(page.slug)} target="_blank"
+			<Button
+				variant="text"
+				href={sourceUrl(page.slug)}
+				target="_blank"
+				onclick={(event) => onExternalClick(event, sourceUrl(page.slug))}
 				>Open on GitHub</Button
 			>
 			<Dialog.Close>Close</Dialog.Close>

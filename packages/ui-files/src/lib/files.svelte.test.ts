@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, wait } from '@oito2/ui-test-utils';
 import { emit } from '@tauri-apps/api/event';
 import { clearMocks, mockIPC, mockWindows } from '@tauri-apps/api/mocks';
 import axe from 'axe-core';
@@ -25,9 +26,6 @@ import { tauriFilesAdapter } from './adapters/tauri.js';
 import { webFilesAdapter } from './adapters/web.js';
 import { webFile, type PickedFile } from './files.js';
 import { FileUploadController } from './upload-controller.svelte.js';
-
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** A one-pixel red PNG. */
 const png = Uint8Array.from(

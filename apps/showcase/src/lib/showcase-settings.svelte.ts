@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import type { AccentColor } from '@oito2/ui';
-import type { ThemePreset } from '@oito2/ui-themes';
+import { accentColors, type AccentColor } from '@oito2/ui';
+import { themePresetNames, type ThemePreset } from '@oito2/ui-themes';
 
 const storageKey = 'oito2-showcase-settings';
 
@@ -40,6 +40,21 @@ export type ShowcaseDensity = 'auto' | 'pointer' | 'touch';
 /** The desktops the browser build can imitate, or the real platform (\`system\`). */
 export type SimulatedDesktop = 'system' | 'gnome' | 'kde' | 'xfce' | 'cosmic' | 'windows' | 'macos';
 
+const modes = ['light', 'dark', 'system'] as const;
+const desktops = ['system', 'gnome', 'kde', 'xfce', 'cosmic', 'windows', 'macos'] as const;
+const languages = ['system', 'en', 'pt-BR'] as const;
+const densities = ['auto', 'pointer', 'touch'] as const;
+
+/** Whether `value` names an accent color. */
+export function isAccentColor(value: unknown): value is AccentColor {
+	return typeof value === 'string' && Object.hasOwn(accentColors, value);
+}
+
+/** Whether `value` names a theme preset. */
+export function isThemePreset(value: unknown): value is ThemePreset {
+	return (themePresetNames as readonly unknown[]).includes(value);
+}
+
 const defaults: Stored = {
 	mode: 'system',
 	accent: 'system',
@@ -52,11 +67,40 @@ const defaults: Stored = {
 	density: 'auto'
 };
 
-// Reads the stored settings; private windows and blocked storage fall back to the defaults.
+// Returns `value` when it is one of `allowed`, and `fallback` otherwise.
+function pick<T>(value: unknown, allowed: readonly T[], fallback: T): T {
+	return (allowed as readonly unknown[]).includes(value) ? (value as T) : fallback;
+}
+
+// Reads the stored settings field by field, so a value that is no longer valid falls back to
+// its default; private windows and blocked storage fall back to all the defaults.
 function load(): Stored {
 	try {
 		const raw = globalThis.localStorage?.getItem(storageKey);
-		return raw ? { ...defaults, ...(JSON.parse(raw) as Partial<Stored>) } : defaults;
+		if (!raw) return defaults;
+		const parsed: unknown = JSON.parse(raw);
+		if (typeof parsed !== 'object' || parsed === null) return defaults;
+		const stored = parsed as Record<keyof Stored, unknown>;
+		return {
+			mode: pick(stored.mode, modes, defaults.mode),
+			accent:
+				stored.accent === 'system' || isAccentColor(stored.accent)
+					? stored.accent
+					: defaults.accent,
+			highContrast:
+				typeof stored.highContrast === 'boolean' || stored.highContrast === 'system'
+					? stored.highContrast
+					: defaults.highContrast,
+			scheme:
+				stored.scheme === 'base' || isThemePreset(stored.scheme)
+					? stored.scheme
+					: defaults.scheme,
+			desktop: pick(stored.desktop, desktops, defaults.desktop),
+			compact: stored.compact === true,
+			rtl: stored.rtl === true,
+			language: pick(stored.language, languages, defaults.language),
+			density: pick(stored.density, densities, defaults.density)
+		};
 	} catch {
 		return defaults;
 	}

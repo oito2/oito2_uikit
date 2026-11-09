@@ -29,8 +29,12 @@
 		type AccentColor,
 		type IconComponent
 	} from '@oito2/ui';
-	import { themePresetNames, themePresets, type ThemePreset } from '@oito2/ui-themes';
-	import type { ShowcaseSettings } from '../showcase-settings.svelte.js';
+	import { themePresetNames, themePresets } from '@oito2/ui-themes';
+	import {
+		isAccentColor,
+		isThemePreset,
+		type ShowcaseSettings
+	} from '../showcase-settings.svelte.js';
 
 	let { settings }: { settings: ShowcaseSettings } = $props();
 
@@ -62,12 +66,15 @@
 		<Menu.RadioGroup
 			value={schemeValue}
 			onValueChange={(value) => {
-				const [kind, name] = value.split(':') as [string, string];
-				if (kind === 'accent') {
+				// A value is `accent:<color>` or `preset:<name>`; anything else is ignored.
+				const at = value.indexOf(':');
+				const kind = value.slice(0, at);
+				const name = value.slice(at + 1);
+				if (kind === 'accent' && (name === 'system' || isAccentColor(name))) {
 					settings.scheme = 'base';
-					settings.accent = name as AccentColor | 'system';
-				} else {
-					settings.scheme = name as ThemePreset;
+					settings.accent = name;
+				} else if (kind === 'preset' && isThemePreset(name)) {
+					settings.scheme = name;
 				}
 			}}
 		>

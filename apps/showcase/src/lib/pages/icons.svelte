@@ -32,12 +32,6 @@
 		return needle === '' ? all : all.filter((icon) => icon.name.toLowerCase().includes(needle));
 	});
 
-	// A new search starts from the first page of results.
-	$effect(() => {
-		void query;
-		shown = pageSize;
-	});
-
 	/** Copies the import of the icon `name` and says so. */
 	async function copy(name: string): Promise<void> {
 		const line = `import { ${name} } from '@oito2/ui/icons';`;
@@ -50,60 +44,55 @@
 	}
 </script>
 
-<main>
+<main class="showcase-page">
 	<p>
 		The {all.length} Lucide icons that <code>@oito2/ui/icons</code> re-exports. Click an icon to copy
 		its import.
 	</p>
-	<div class="search">
-		<SearchField bind:value={query} placeholder="Search icons" aria-label="Search icons" />
-		<span role="status">{matches.length} icons</span>
-	</div>
-	<ul class="grid">
-		{#each matches.slice(0, shown) as icon (icon.name)}
-			<li>
-				<button
-					type="button"
-					class="icon"
-					title={icon.name}
-					onclick={() => copy(icon.name)}
-				>
-					<icon.component aria-hidden="true" />
-					<span class="name">{icon.name}</span>
-				</button>
-			</li>
-		{/each}
-	</ul>
-	{#if matches.length > shown}
-		<Button variant="tonal" onclick={() => (shown += pageSize)}>
-			Show more ({matches.length - shown} left)
-		</Button>
-	{/if}
+
+	<section aria-labelledby="icons-browse">
+		<h2 id="icons-browse">Search and copy</h2>
+		<div class="row icons-search">
+			<!-- A new search starts from the first page of results. -->
+			<SearchField
+				bind:value={query}
+				onValueChange={() => (shown = pageSize)}
+				placeholder="Search icons"
+				aria-label="Search icons"
+			/>
+			<span role="status">{matches.length} icons</span>
+		</div>
+		<ul class="icons-grid">
+			{#each matches.slice(0, shown) as icon (icon.name)}
+				<li>
+					<button
+						type="button"
+						class="icon"
+						title={icon.name}
+						onclick={() => copy(icon.name)}
+					>
+						<icon.component aria-hidden="true" />
+						<span class="name">{icon.name}</span>
+					</button>
+				</li>
+			{/each}
+		</ul>
+		{#if matches.length > shown}
+			<div class="row">
+				<Button variant="tonal" onclick={() => (shown += pageSize)}>
+					Show more ({matches.length - shown} left)
+				</Button>
+			</div>
+		{/if}
+	</section>
 </main>
 
 <style>
-	main {
-		display: grid;
-		gap: var(--oito2-space-md);
-		padding: var(--oito2-space-xl);
-	}
-
-	p {
-		margin: 0;
-	}
-
-	.search {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--oito2-space-md);
-	}
-
-	.search :global(.oito2-search-field) {
+	.icons-search :global(.oito2-search-field) {
 		width: min(360px, 100%);
 	}
 
-	.grid {
+	.icons-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
 		gap: var(--oito2-space-xs);

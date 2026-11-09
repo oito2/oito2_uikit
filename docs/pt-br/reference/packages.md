@@ -131,11 +131,11 @@ Os seus comandos, permissões e eventos estão em [Plugins Tauri](./tauri-plugin
 
 ## Pacotes privados
 
-| Pacote                 | Caminho                   | Observações                                                                                         |
-| ---------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
-| `@oito2/ui-test-utils` | `packages/ui-test-utils`  | `"private": true`, ignorado pelo Changesets; o seu ponto de entrada não exporta nada por enquanto   |
-| `@oito2/showcase`      | `apps/showcase`           | `"private": true`, ignorado pelo Changesets; o release distribui os seus instaladores, não o pacote |
-| `oito2-uikit-showcase` | `apps/showcase/src-tauri` | `publish = false`; binário `oito2-uikit-showcase`, identificador `io.github.oito2.uikit-showcase`   |
+| Pacote                 | Caminho                   | Observações                                                                                                                                                                                                    |
+| ---------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@oito2/ui-test-utils` | `packages/ui-test-utils`  | `"private": true`, ignorado pelo Changesets; exporta os auxiliares dos testes de navegador que os pacotes compartilham (`el`, `wait`, `settleAnimations`, `settleFonts`, `frames`, `pointer`, `stubClipboard`) |
+| `@oito2/showcase`      | `apps/showcase`           | `"private": true`, ignorado pelo Changesets; o release distribui os seus instaladores, não o pacote                                                                                                            |
+| `oito2-uikit-showcase` | `apps/showcase/src-tauri` | `publish = false`; binário `oito2-uikit-showcase`, identificador `io.github.oito2.uikit-showcase`                                                                                                              |
 
 ## Veja também
 

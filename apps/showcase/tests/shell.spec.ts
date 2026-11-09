@@ -36,6 +36,40 @@ test('a deep link opens its page and the list follows the selection', async ({ p
 	expect(errors).toEqual([]);
 });
 
+test('the start page selects the first page without stacking a history entry', async ({ page }) => {
+	await page.goto('/button');
+	await expect(page.getByRole('heading', { level: 1, name: 'Button' })).toBeVisible();
+	await page.goto('/');
+	await expect(page).toHaveURL(/\/accordion$/);
+	await page.goBack();
+	await expect(page).toHaveURL(/\/button$/);
+	await expect(page.getByRole('heading', { level: 1, name: 'Button' })).toBeVisible();
+});
+
+test('invalid stored settings fall back to the defaults', async ({ page }) => {
+	await page.addInitScript(() => {
+		localStorage.setItem(
+			'oito2-showcase-settings',
+			JSON.stringify({ scheme: 'nope', language: 'xx', mode: 42 })
+		);
+	});
+	const errors = collectErrors(page);
+	await page.goto('/button');
+	await expect(page.getByRole('heading', { level: 1, name: 'Button' })).toBeVisible();
+	expect(errors).toEqual([]);
+});
+
+test('each layout shows one level-one heading', async ({ page }) => {
+	await page.goto('/button');
+	await expect(page.getByRole('heading', { level: 1, name: 'Button' })).toBeVisible();
+	await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+	await setAppearance(page, { mode: 'light', rtl: false, language: 'en', compact: true });
+	await page.goto('/button');
+	await expect(page.getByRole('navigation').first()).toBeVisible();
+	await expect(page.getByRole('heading', { level: 1, name: 'Button' })).toBeVisible();
+	await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+});
+
 test('the search filters the list, ignoring case', async ({ page }) => {
 	await page.goto('/button');
 	await page.getByRole('searchbox', { name: 'Search pages' }).fill('TILE');

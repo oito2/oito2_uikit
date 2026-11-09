@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el } from '@oito2/ui-test-utils';
 import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
@@ -22,9 +23,6 @@ import OverlaysF9Harness from '../../tests/OverlaysF9Harness.svelte';
 
 /** Returns the text of the focused element. */
 const focused = () => document.activeElement?.textContent?.trim();
-
-/** Returns the element of a locator. */
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
 
 /** Waits for the next task, after which the layers listen for outside presses. */
 const settle = () => new Promise((resolve) => setTimeout(resolve, 30));

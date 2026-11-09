@@ -72,6 +72,7 @@
 		"@material/material-color-utilities": "catalog:"
 	},
 	"devDependencies": {
+		"@oito2/ui-test-utils": "workspace:*",
 		"@sveltejs/package": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@vitest/browser-playwright": "catalog:",

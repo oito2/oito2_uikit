@@ -43,7 +43,7 @@
 	let showCopyButton = $state(true);
 
 	let pasted = $state((codeSamples.rust ?? '').trimEnd());
-	let guess = $derived(Highlighter.instance.highlight(pasted, { autoDetect: true }).language);
+	let detected = $state<string | null>(null);
 
 	const terminal = '$ pnpm add @oito2/ui-syntax\nDone in 1.2s';
 
@@ -109,8 +109,13 @@
 			Code
 			<TextArea bind:value={pasted} rows={4} spellcheck="false" />
 		</label>
-		<p role="status">Detected: {guess ?? 'none'}</p>
-		<CodeBlock code={pasted} autoDetect label="Detected code" />
+		<p role="status">Detected: {detected ?? 'none'}</p>
+		<CodeBlock
+			code={pasted}
+			autoDetect
+			label="Detected code"
+			onLanguageDetected={(language) => (detected = language)}
+		/>
 	</section>
 
 	<section aria-labelledby="code-block-plain">

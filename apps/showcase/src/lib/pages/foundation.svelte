@@ -18,8 +18,10 @@
 <script lang="ts">
 	import {
 		Contrast,
+		ListCollection,
 		LocaleProvider,
 		Platform,
+		Select,
 		SystemScope,
 		accentColors,
 		fallbackSystemSettings,
@@ -28,16 +30,23 @@
 		spacing,
 		typography
 	} from '@oito2/ui';
-	import FormatSample from './FormatSample.svelte';
+	import FormatSample from './parts/FormatSample.svelte';
 
 	const platform = Platform.current();
 	const settings = fallbackSystemSettings(platform);
+	const locales = new ListCollection(
+		[
+			{ value: 'en', label: 'English' },
+			{ value: 'pt-BR', label: 'Português (Brasil)' }
+		],
+		{ getValue: (choice) => choice.value, getLabel: (choice) => choice.label }
+	);
 	let locale = $state('en');
 </script>
 
-<main>
-	<section>
-		<h2>Platform</h2>
+<main class="showcase-page">
+	<section aria-labelledby="foundation-platform">
+		<h2 id="foundation-platform">Platform</h2>
 		<dl>
 			<dt>Operating system</dt>
 			<dd>{platform.os}</dd>
@@ -55,8 +64,8 @@
 		</dl>
 	</section>
 
-	<section>
-		<h2>Accent colors</h2>
+	<section aria-labelledby="foundation-accents">
+		<h2 id="foundation-accents">Accent colors</h2>
 		<ul class="swatches">
 			{#each Object.entries(accentColors) as [name, color] (name)}
 				<li style:--swatch={color} style:--on-swatch={Contrast.foregroundFor(color)}>
@@ -67,8 +76,8 @@
 		</ul>
 	</section>
 
-	<section>
-		<h2>Type scale</h2>
+	<section aria-labelledby="foundation-type">
+		<h2 id="foundation-type">Type scale</h2>
 		{#each Object.entries(typography.scale) as [name, style] (name)}
 			<p
 				class="type-sample"
@@ -81,8 +90,8 @@
 		{/each}
 	</section>
 
-	<section>
-		<h2>Radius, spacing and sizes</h2>
+	<section aria-labelledby="foundation-tokens">
+		<h2 id="foundation-tokens">Radius, spacing and sizes</h2>
 		<div class="tokens">
 			{#each Object.entries(radius) as [name, value] (name)}
 				<div class="radius" style:border-radius="{value}px">radius.{name} · {value}</div>
@@ -100,15 +109,19 @@
 		</ul>
 	</section>
 
-	<section>
-		<h2>Formatting and strings</h2>
-		<label>
-			Language
-			<select bind:value={locale}>
-				<option value="en">English</option>
-				<option value="pt-BR">Português (Brasil)</option>
-			</select>
-		</label>
+	<section aria-labelledby="foundation-format">
+		<h2 id="foundation-format">Formatting and strings</h2>
+		<div class="row">
+			<span>Locale</span>
+			<Select.Root
+				collection={locales}
+				label="Locale"
+				value={locale}
+				onValueChange={(value) => {
+					if (value) locale = value;
+				}}
+			/>
+		</div>
 		<SystemScope {settings}>
 			<LocaleProvider {locale}>
 				<FormatSample />
@@ -118,20 +131,6 @@
 </main>
 
 <style>
-	main {
-		padding: var(--oito2-space-page);
-		display: grid;
-		gap: var(--oito2-space-xl);
-	}
-
-	h2 {
-		margin: 0 0 var(--oito2-space-sm);
-	}
-
-	h2 {
-		font: var(--oito2-type-title-large);
-	}
-
 	dl {
 		display: grid;
 		grid-template-columns: max-content 1fr;

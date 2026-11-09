@@ -13,17 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, frames } from '@oito2/ui-test-utils';
 import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import LayoutF16cHarness from '../../tests/LayoutF16cHarness.svelte';
-
-/** Returns the element of a locator. */
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-
-/** Waits for two animation frames, so that size observers have run. */
-const frames = () =>
-	new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
 /** Focuses the button before the component and presses Tab. */
 async function tabIn() {

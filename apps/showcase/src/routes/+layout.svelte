@@ -54,7 +54,6 @@
 	import SettingsDialog from '#lib/shell/SettingsDialog.svelte';
 	import SourceDialog from '#lib/shell/SourceDialog.svelte';
 	import ThemeActions from '#lib/shell/ThemeActions.svelte';
-	import { spikeRequest } from '#lib/spikes/bridge.js';
 
 	let { children }: LayoutProps = $props();
 
@@ -96,14 +95,7 @@
 		};
 	});
 
-	// A Tauri debug build started with OITO2_SPIKE opens that spike page and reports back.
-	onMount(async () => {
-		const spike = await spikeRequest();
-		if (spike) await goto(resolve(`/spikes/${spike}?report`));
-	});
-
-	// The page the address selects, and whether the address is a spike page outside the shell.
-	let spike = $derived(page.route.id?.startsWith('/spikes') ?? false);
+	// The page the address selects.
 	let slug = $derived(page.params.slug ?? null);
 	let current = $derived(findPage(slug));
 
@@ -123,7 +115,9 @@
 	/** Shows the page `next`, or the start page for `null`. */
 	function select(next: string | null): void {
 		if (next === slug) return;
-		void goto(next === null ? resolve('/') : resolve('/[slug]', { slug: next }));
+		const target = next === null ? resolve('/') : resolve('/[slug]', { slug: next });
+		// The automatic selection of the first page replaces the `/` entry instead of stacking on it.
+		void goto(target, { replaceState: slug === null });
 	}
 </script>
 
@@ -163,7 +157,7 @@
 		>
 			<WindowScope {controller}>
 				<div class="frame">
-					<HeaderBar title="oito2_uikit">
+					<HeaderBar title="oito2_uikit" headingLevel={2}>
 						{#snippet end()}
 							<ThemeActions {settings} />
 							{#if settings.compact}
@@ -175,9 +169,7 @@
 							{/if}
 						{/snippet}
 					</HeaderBar>
-					{#if spike}
-						<div class="content">{@render children()}</div>
-					{:else if settings.compact}
+					{#if settings.compact}
 						<div class="compact">
 							<NavigationRail.Root
 								value={slug ?? undefined}

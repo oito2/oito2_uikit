@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el } from '@oito2/ui-test-utils';
 import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
@@ -20,9 +21,6 @@ import ControlsHarness from '../../tests/ControlsHarness.svelte';
 import type { CheckedState } from './toggles/toggle-state.js';
 import { nextCheckedState } from './toggles/toggle-state.js';
 import { sliderStep, snapSliderValue } from './slider/slider-math.js';
-
-/** Returns the element of a locator. */
-const el = (locator: ReturnType<typeof page.getByRole>) => locator.element() as HTMLElement;
 
 describe('toggle state', () => {
 	it('cycles through the mixed state only when tristate', () => {

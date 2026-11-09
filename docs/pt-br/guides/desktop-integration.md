@@ -151,20 +151,24 @@ O showcase concede à janela principal exatamente estas permissões ([`capabilit
 		"dialog:allow-save",
 		"fs:allow-stat",
 		"fs:allow-read-file",
-		"fs:allow-write-file"
+		"fs:allow-write-file",
+		{ "identifier": "opener:allow-open-url", "allow": [{ "url": "https://github.com/oito2/*" }] }
 	]
 }
 ```
 
-| Permissão                                                  | Necessária para                                                                 |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `core:default`                                             | Ler o estado da janela e escutar eventos (inclusive `oito2-settings://changed`) |
-| `core:window:allow-minimize`, `-toggle-maximize`, `-close` | Os botões de controle da janela                                                 |
-| `core:window:allow-start-dragging`                         | Mover a janela pela barra de título                                             |
-| `core:window:allow-start-resize-dragging`                  | `WindowResizeHandles`                                                           |
-| `oito2-window:default`                                     | `set_decoration_mode`, `decoration_mode` e `show_window_menu`                   |
-| `oito2-settings:default`                                   | `read_settings`                                                                 |
-| `dialog:*`, `fs:*`                                         | Só os componentes de arquivo — veja [Arquivos](./files.md)                      |
+| Permissão                                                         | Necessária para                                                                       |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `core:default`                                                    | Ler o estado da janela e escutar eventos (inclusive `oito2-settings://changed`)       |
+| `core:window:allow-minimize`, `-toggle-maximize`, `-close`        | Os botões de controle da janela                                                       |
+| `core:window:allow-start-dragging`                                | Mover a janela pela barra de título                                                   |
+| `core:window:allow-start-resize-dragging`                         | `WindowResizeHandles`                                                                 |
+| `oito2-window:default`                                            | `set_decoration_mode`, `decoration_mode` e `show_window_menu`                         |
+| `oito2-settings:default`                                          | `read_settings`                                                                       |
+| `dialog:*`, `fs:*`                                                | Só os componentes de arquivo — veja [Arquivos](./files.md)                            |
+| `opener:allow-open-url` (restrita a `https://github.com/oito2/*`) | Os links "Open on GitHub", abertos no navegador do sistema pelo `tauri-plugin-opener` |
+
+Links externos são abertos pelo `tauri-plugin-opener` (registrado no `lib.rs`), porque um link `target="_blank"` não abre nada dentro do webview; a permissão é restrita às URLs do repositório, então nenhum outro endereço pode ser aberto a partir da página.
 
 As opções de `initWindow()` que alteram a janela precisam de mais: `title` → `core:window:allow-set-title`, `size` → `core:window:allow-set-size`, `minimumSize` → `core:window:allow-set-min-size`, `center` → `core:window:allow-center`, e `show` (ligada por padrão) → `core:window:allow-show` e `core:window:allow-set-focus`. O showcase chama `initWindow({ show: false })` sem nenhuma outra opção, então não precisa de nenhuma delas. Todos os identificadores de permissão estão em [Plugins Tauri](../reference/tauri-plugins.md).
 

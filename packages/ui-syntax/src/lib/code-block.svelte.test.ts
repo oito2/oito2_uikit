@@ -13,18 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, stubClipboard, wait, type ClipboardStub } from '@oito2/ui-test-utils';
 import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import CodeBlockHarness from '../tests/CodeBlockHarness.svelte';
+import CodeBlock from './CodeBlock.svelte';
 
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const clipboard = Object.getOwnPropertyDescriptor(Navigator.prototype, 'clipboard');
+let clipboard: ClipboardStub | undefined;
 
 afterEach(() => {
-	if (clipboard) Object.defineProperty(Navigator.prototype, 'clipboard', clipboard);
+	clipboard?.restore();
+	clipboard = undefined;
 });
 
 describe('CodeBlock', () => {
@@ -58,14 +59,10 @@ describe('CodeBlock', () => {
 	});
 
 	it('copies the code with the copy button', async () => {
-		const copied: string[] = [];
-		Object.defineProperty(Navigator.prototype, 'clipboard', {
-			configurable: true,
-			get: () => ({ writeText: async (text: string) => void copied.push(text) })
-		});
+		clipboard = stubClipboard();
 		render(CodeBlockHarness, { code: 'print("hi")', language: 'python' });
 		await page.getByRole('button', { name: 'Copy' }).click();
-		expect(copied).toEqual(['print("hi")']);
+		expect(clipboard.copied).toEqual(['print("hi")']);
 		await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
 	});
 
@@ -76,6 +73,28 @@ describe('CodeBlock', () => {
 		await expect.element(region).toHaveFocus();
 		await userEvent.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
 		await expect.poll(() => el(region).scrollLeft).toBeGreaterThan(0);
+	});
+
+	it('reports the language it detects, and only while detecting', async () => {
+		const detected: (string | null)[] = [];
+		const props = $state({
+			code: 'fn main() { println!("hi"); }',
+			autoDetect: true,
+			label: 'Detected',
+			language: undefined as string | undefined,
+			onLanguageDetected: (language: string | null) => detected.push(language)
+		});
+		render(CodeBlock, props);
+		await expect.poll(() => detected.at(-1)).toEqual(expect.any(String));
+		props.code = '';
+		await expect.poll(() => detected.at(-1)).toBeNull();
+		const reports = detected.length;
+		props.language = 'ts';
+		props.code = 'const a = 1;';
+		await expect
+			.poll(() => document.querySelector('.oito2-code-block')?.getAttribute('data-language'))
+			.toBe('typescript');
+		expect(detected.length).toBe(reports);
 	});
 });
 

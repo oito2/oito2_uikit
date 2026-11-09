@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, settleAnimations, wait } from '@oito2/ui-test-utils';
 import axe from 'axe-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
@@ -22,17 +23,6 @@ import PickersGallery from '../../tests/PickersGallery.svelte';
 import { ToasterStore } from './toast/toaster.svelte.js';
 import { TourController } from './tour/tour-controller.svelte.js';
 import { KeyChord, Shortcut } from '../shortcuts/shortcut.js';
-
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-/** Waits for the finite animations on the page, such as the toasts sliding in, to end. */
-async function settleAnimations(): Promise<void> {
-	const finite = document
-		.getAnimations()
-		.filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity);
-	await Promise.all(finite.map((animation) => animation.finished.catch(() => {})));
-}
 
 describe('Popover', () => {
 	it('moves focus in, keeps an inner popover inside it and returns focus on Escape', async () => {

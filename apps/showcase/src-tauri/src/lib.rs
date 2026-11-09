@@ -16,9 +16,6 @@
 use tauri::Manager;
 use tauri_plugin_oito2_window::{DecorationMode, apply_decoration_mode};
 
-#[cfg(debug_assertions)]
-mod commands;
-
 /// Reads the decoration mode from `OITO2_DECORATIONS` (`native`,
 /// `undecorated` or `gtk-headerless`), falling back to the platform default
 /// when it is unset or, with a message on stderr, when it is not a mode.
@@ -35,12 +32,14 @@ pub(crate) fn requested_decoration_mode() -> DecorationMode {
     }
 }
 
-/// Starts the showcase app.
+/// Starts the showcase app. It exposes no commands of its own: the webview
+/// reaches the plugins only.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder = tauri::Builder::default()
+    tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_oito2_window::init())
         .plugin(tauri_plugin_oito2_settings::init())
         .setup(|app| {
@@ -53,17 +52,7 @@ pub fn run() {
                 window.show()?;
             }
             Ok(())
-        });
-
-    // Spike commands exist only in debug builds; release builds expose no app commands.
-    #[cfg(debug_assertions)]
-    let builder = builder.invoke_handler(tauri::generate_handler![
-        commands::spike::spike_request,
-        commands::spike::spike_decoration_mode,
-        commands::spike::spike_report
-    ]);
-
-    builder
+        })
         .run(tauri::generate_context!())
         .expect("error while running the oito2_uikit showcase");
 }

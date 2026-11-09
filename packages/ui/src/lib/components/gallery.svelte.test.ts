@@ -13,17 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { settleFonts } from '@oito2/ui-test-utils';
 import axe from 'axe-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { page } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import Gallery from '../../tests/Gallery.svelte';
-
-/** Waits for the fonts and for transitions to settle. */
-async function settled() {
-	await document.fonts.ready;
-	await new Promise((resolve) => setTimeout(resolve, 300));
-}
 
 const schemes = [
 	{ name: 'light', mode: 'light', highContrast: false },
@@ -40,7 +35,7 @@ describe('component gallery', () => {
 	for (const scheme of schemes) {
 		it(`has no axe violations in ${scheme.name}`, async () => {
 			render(Gallery, { mode: scheme.mode, highContrast: scheme.highContrast });
-			await settled();
+			await settleFonts();
 			const result = await axe.run(page.getByTestId('gallery').element());
 			const violations = result.violations.map(
 				(v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`
@@ -50,7 +45,7 @@ describe('component gallery', () => {
 
 		it(`matches the golden in ${scheme.name}`, async () => {
 			render(Gallery, { mode: scheme.mode, highContrast: scheme.highContrast });
-			await settled();
+			await settleFonts();
 			await expect(page.getByTestId('gallery')).toMatchScreenshot(`gallery-${scheme.name}`);
 		});
 	}

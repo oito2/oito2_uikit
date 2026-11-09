@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, pointer, settleAnimations, wait } from '@oito2/ui-test-utils';
 import axe from 'axe-core';
 import jsQR from 'jsqr';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -22,22 +23,11 @@ import ExtrasHarness from '../tests/ExtrasHarness.svelte';
 import { CropController } from './crop/crop-controller.svelte.js';
 import { SignatureController } from './signature/signature-controller.svelte.js';
 
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-
 // Moves the pointer off the page area the components render in, so a pointer left over
 // from an earlier test doesn't hover them.
 beforeEach(async () => {
 	await userEvent.unhover(document.body);
 });
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-/** Waits for the finite animations on the page to end. */
-async function settleAnimations(): Promise<void> {
-	const finite = document
-		.getAnimations()
-		.filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity);
-	await Promise.all(finite.map((animation) => animation.finished.catch(() => {})));
-}
 
 /** Returns a PNG data URL of a `width` × `height` image, red on the left half and blue on the right. */
 function twoColorImage(width: number, height: number): string {
@@ -61,29 +51,6 @@ function colorAt(canvas: HTMLCanvasElement, x: number, y: number): string {
 		1
 	).data;
 	return `${r},${g},${b}`;
-}
-
-/** Sends a pointer event of `type` at client position `x`, `y` to `target`. */
-function pointer(
-	target: Element,
-	type: string,
-	x: number,
-	y: number,
-	options: PointerEventInit = {}
-) {
-	target.dispatchEvent(
-		new PointerEvent(type, {
-			bubbles: true,
-			cancelable: true,
-			pointerId: 1,
-			pointerType: 'mouse',
-			button: 0,
-			buttons: 1,
-			clientX: x,
-			clientY: y,
-			...options
-		})
-	);
 }
 
 describe('QrCode', () => {

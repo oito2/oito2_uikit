@@ -13,6 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//! Commands of the showcase app.
+/** Options of `createTheme`. */
+export interface ThemeOptions {
+	accent: string;
+}
 
-pub mod spike;
+/** A theme built from an accent color. */
+export class Theme {
+	constructor(readonly accent: string) {}
+}
+
+/** Returns a theme for `options`. */
+export function createTheme(options: ThemeOptions): Theme {
+	return new Theme(options.accent);
+}

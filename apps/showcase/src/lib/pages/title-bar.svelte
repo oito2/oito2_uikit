@@ -39,7 +39,6 @@
 		type SystemSettings
 	} from '@oito2/ui';
 	import { CodeBlock } from '@oito2/ui-syntax';
-	import { untrack } from 'svelte';
 	import { SimulatedWindowController, simulatedSettings } from '#lib/simulated-window.svelte.js';
 
 	const icon = (component: unknown) => component as IconComponent;
@@ -57,10 +56,6 @@
 	const presented = new SimulatedWindowController();
 	let barStyle = $state<'normal' | 'undecorated' | 'hidden'>('normal');
 	let active = $state(true);
-	$effect(() => {
-		const isActive = active;
-		untrack(() => (presented.state = { ...presented.state, isActive }));
-	});
 
 	const desktops = [
 		'gnome',
@@ -165,7 +160,14 @@ ${scriptEnd}
 				<SegmentGroup.Item value="undecorated">Undecorated</SegmentGroup.Item>
 				<SegmentGroup.Item value="hidden">Hidden</SegmentGroup.Item>
 			</SegmentGroup.Root>
-			<label class="row">Window active <Switch bind:checked={active} /></label>
+			<label class="row">
+				Window active
+				<Switch
+					bind:checked={active}
+					onCheckedChange={(isActive) =>
+						(presented.state = { ...presented.state, isActive })}
+				/>
+			</label>
 		</div>
 		<div class="title-bar-frame title-bar-presented">
 			<TitleBar

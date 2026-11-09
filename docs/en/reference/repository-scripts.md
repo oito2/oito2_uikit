@@ -19,22 +19,24 @@ Every script of the workspace, the Cargo commands, the tools under `tools/`, and
 
 From the root [`package.json`](../../../package.json) (pnpm 12.16.1 is pinned in `packageManager`; Node.js 24 or later is required):
 
-| Script            | Command                                                                                          | What it does                                                                                                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `build`           | `pnpm -r build`                                                                                  | Builds every package (`svelte-package` + `publint`) and the showcase's static build                                                                                |
-| `check`           | `pnpm -r --parallel check`                                                                       | `svelte-check` in every package and the showcase                                                                                                                   |
-| `test`            | `pnpm -r test`                                                                                   | Vitest (node and browser projects) in every package, then the showcase's Playwright tests                                                                          |
-| `lint`            | `prettier --check . && eslint .`                                                                 | Formatting and lint checks                                                                                                                                         |
-| `format`          | `prettier --write .`                                                                             | Formats every file (run it from the root)                                                                                                                          |
-| `generate`        | `node tools/generate-css/generate.ts`                                                            | Writes `tokens.css`, `schemes.css` and `presets.css` from the TypeScript sources                                                                                   |
-| `generate:check`  | `node tools/generate-css/generate.ts --check`                                                    | Fails when a generated CSS file is out of date                                                                                                                     |
-| `docs:generate`   | `node tools/generate-docs/generate.ts`                                                           | Writes the showcase API reference, `apps/showcase/src/lib/api/api.json`                                                                                            |
-| `docs:check`      | `node tools/generate-docs/generate.ts --check`                                                   | Fails when `api.json` is out of date                                                                                                                               |
-| `showcase`        | `pnpm --filter @oito2/showcase`                                                                  | Runs a showcase script: `pnpm showcase dev`, `pnpm showcase build`, ...                                                                                            |
-| `tauri`           | `pnpm --filter @oito2/showcase tauri`                                                            | Runs the Tauri CLI in the showcase: `pnpm tauri dev`, `pnpm tauri build`, ...                                                                                      |
-| `changeset`       | `changeset`                                                                                      | Records a user-facing change for the next release                                                                                                                  |
-| `release:version` | `changeset version && node tools/release/sync-versions.ts && prettier --write "**/CHANGELOG.md"` | Applies the changesets, copies the new version to the Cargo workspace, `Cargo.lock`, the showcase `package.json` and `tauri.conf.json`, and formats the changelogs |
-| `release:check`   | `node tools/release/sync-versions.ts --check`                                                    | Checks that every version equals a tag given as argument: `pnpm release:check vX.Y.Z` (without one it exits with an error)                                         |
+| Script            | Command                                                                                          | What it does                                                                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build`           | `pnpm -r build`                                                                                  | Builds every package (`svelte-package` + `publint`) and the showcase's static build                                                                                              |
+| `check`           | `pnpm -r --parallel check`                                                                       | `svelte-check` in every package and the showcase                                                                                                                                 |
+| `test`            | `pnpm -r test`                                                                                   | Vitest (node and browser projects) in every package, then the showcase's Playwright tests                                                                                        |
+| `lint`            | `prettier --check . && eslint . && node tools/lint-headers/check.ts`                             | Formatting, lint and license-header checks                                                                                                                                       |
+| `lint:headers`    | `node tools/lint-headers/check.ts`                                                               | Fails listing the hand-written source files that do not start with the license notice                                                                                            |
+| `format`          | `prettier --write .`                                                                             | Formats every file (run it from the root)                                                                                                                                        |
+| `generate`        | `node tools/generate-css/generate.ts`                                                            | Writes `tokens.css`, `schemes.css` and `presets.css` from the TypeScript sources                                                                                                 |
+| `generate:check`  | `node tools/generate-css/generate.ts --check`                                                    | Fails when a generated CSS file is out of date                                                                                                                                   |
+| `docs:generate`   | `node tools/generate-docs/generate.ts`                                                           | Writes the showcase API reference, `apps/showcase/src/lib/api/api.json`                                                                                                          |
+| `docs:check`      | `node tools/generate-docs/generate.ts --check`                                                   | Fails when `api.json` is out of date, or when an export cannot be traced to its declaration                                                                                      |
+| `test:tools`      | `node --test "tools/**/*.test.ts"`                                                               | Unit tests of the tools (`tools/generate-docs/api.test.ts` against `tools/generate-docs/fixtures/`)                                                                              |
+| `showcase`        | `pnpm --filter @oito2/showcase`                                                                  | Runs a showcase script: `pnpm showcase dev`, `pnpm showcase build`, ...                                                                                                          |
+| `tauri`           | `pnpm --filter @oito2/showcase tauri`                                                            | Runs the Tauri CLI in the showcase: `pnpm tauri dev`, `pnpm tauri build`, ...                                                                                                    |
+| `changeset`       | `changeset`                                                                                      | Records a user-facing change for the next release                                                                                                                                |
+| `release:version` | `changeset version && node tools/release/sync-versions.ts && prettier --write "**/CHANGELOG.md"` | Applies the changesets, copies the new version to the Cargo workspace, `Cargo.lock`, the showcase `package.json` and `tauri.conf.json`, and formats the changelogs               |
+| `release:check`   | `node tools/release/sync-versions.ts --check`                                                    | Checks that every version, the three workspace crates in `Cargo.lock` included, equals a tag given as argument: `pnpm release:check vX.Y.Z` (without one it exits with an error) |
 
 `pnpm docs` is a built-in pnpm command, which is why the API reference scripts are named `docs:generate` and `docs:check`.
 
@@ -42,11 +44,11 @@ From the root [`package.json`](../../../package.json) (pnpm 12.16.1 is pinned in
 
 Every package under `packages/` has the same three scripts:
 
-| Script  | Command                                                      | Notes                                                                                                                      |
-| ------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `build` | `svelte-package && publint`                                  | `@oito2/ui-test-utils` runs `svelte-package` only                                                                          |
-| `check` | `svelte-check --tsconfig ./tsconfig.json --fail-on-warnings` | `@oito2/ui-themes` and `@oito2/ui-test-utils` run it without `--fail-on-warnings`                                          |
-| `test`  | `vitest run`                                                 | The `node` project (`*.test.ts`) and the browser projects in Chromium and WebKit (`*.svelte.test.ts`, `*.browser.test.ts`) |
+| Script  | Command                                                      | Notes                                                                                                                         |
+| ------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `build` | `svelte-package && publint`                                  | `@oito2/ui-test-utils` runs `svelte-package` only                                                                             |
+| `check` | `svelte-check --tsconfig ./tsconfig.json --fail-on-warnings` | `@oito2/ui-themes` runs it without `--fail-on-warnings`; `@oito2/ui-test-utils` (TypeScript only) runs `tsc --noEmit` instead |
+| `test`  | `vitest run`                                                 | The `node` project (`*.test.ts`) and the browser projects in Chromium and WebKit (`*.svelte.test.ts`, `*.browser.test.ts`)    |
 
 Run one browser test file at a time while developing, as CONTRIBUTING describes:
 
@@ -103,13 +105,14 @@ CI adds `--locked` to `clippy` and `test`. The showcase crate embeds the static 
 
 ## Tools
 
-| Path                              | Run with                                                                                                                | Purpose                                                                                                                                          |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `tools/generate-css/generate.ts`  | `pnpm generate` / `pnpm generate:check`                                                                                 | Generates `packages/ui/src/lib/styles/tokens.css`, `.../schemes.css` and `packages/ui-themes/src/lib/presets.css`                                |
-| `tools/generate-docs/generate.ts` | `pnpm docs:generate` / `pnpm docs:check`                                                                                | Generates the showcase API reference from the exports and TSDoc of every package                                                                 |
-| `tools/release/sync-versions.ts`  | `pnpm release:version` / `pnpm release:check vX.Y.Z` (the release workflow runs the `--check` form with the pushed tag) | Copies the npm version to the Cargo workspace, `Cargo.lock`, the showcase `package.json` and `tauri.conf.json`, or checks them all against a tag |
-| `tools/parity/`                   | `flutter test` in that folder                                                                                           | Exports the parity fixtures from an oito2_ui checkout at `.references/oito2_ui`                                                                  |
-| `tools/templates/`                | —                                                                                                                       | The GPL-3.0 header of each source file type                                                                                                      |
+| Path                              | Run with                                                                                                                | Purpose                                                                                                                                                                         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tools/generate-css/generate.ts`  | `pnpm generate` / `pnpm generate:check`                                                                                 | Generates `packages/ui/src/lib/styles/tokens.css`, `.../schemes.css` and `packages/ui-themes/src/lib/presets.css`                                                               |
+| `tools/generate-docs/generate.ts` | `pnpm docs:generate` / `pnpm docs:check`                                                                                | The CLI of the API reference generator; the reading lives in `tools/generate-docs/api.ts`, tested by `api.test.ts` against `fixtures/` (`pnpm test:tools`)                      |
+| `tools/release/sync-versions.ts`  | `pnpm release:version` / `pnpm release:check vX.Y.Z` (the release workflow runs the `--check` form with the pushed tag) | Copies the npm version to the Cargo workspace, `Cargo.lock`, the showcase `package.json` and `tauri.conf.json`, or checks them all (the `Cargo.lock` entries too) against a tag |
+| `tools/parity/`                   | `flutter test` in that folder                                                                                           | Exports the parity fixtures from an oito2_ui checkout at `.references/oito2_ui`                                                                                                 |
+| `tools/templates/`                | —                                                                                                                       | The GPL-3.0 header of each comment syntax: `header.txt` (`//`), `header.css.txt`, `header.html.txt`, `header.sharp.txt` (`#`)                                                   |
+| `tools/lint-headers/check.ts`     | `pnpm lint:headers` (part of `pnpm lint`)                                                                               | Checks that every hand-written source file starts with the matching header; `app.html` and generated files are skipped                                                          |
 
 ## CI workflows
 
@@ -117,10 +120,11 @@ CI adds `--locked` to `clippy` and `test`. The showcase crate embeds the static 
 
 Triggers: push to `main`, every pull request, manual run. Concurrent runs of the same pull request cancel each other.
 
-| Job        | Runner                                            | Steps                                                                                                                                                                                                                |
-| ---------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frontend` | `ubuntu-latest`                                   | `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm generate:check`, `pnpm docs:check`, `pnpm build`, `pnpm check`, Playwright Chromium and WebKit install, `pnpm test`; uploads the screenshot diffs when it fails |
-| `rust`     | `ubuntu-latest`, `windows-latest`, `macos-latest` | Linux build dependencies, `pnpm install`, `pnpm build`, `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --locked -- -D warnings`, `cargo test --workspace --locked`                            |
+| Job        | Runner                                            | Steps                                                                                                                                                                                                                                   |
+| ---------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `frontend` | `ubuntu-latest`                                   | `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm generate:check`, `pnpm docs:check`, `pnpm test:tools`, `pnpm build`, `pnpm check`, Playwright Chromium and WebKit install, `pnpm test`; uploads the screenshot diffs when it fails |
+| `rust`     | `ubuntu-latest`, `windows-latest`, `macos-latest` | Linux build dependencies, `pnpm install`, `pnpm build`, `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --locked -- -D warnings`, `cargo test --workspace --locked`                                               |
+| `msrv`     | `ubuntu-latest`                                   | `cargo +1.90 check --locked` of the two plugin crates with the minimum supported Rust version (`rust-version` of `Cargo.toml`)                                                                                                          |
 
 ### `pages.yml` — Pages
 
@@ -131,16 +135,20 @@ Triggers: push to `main`, manual run. Builds everything with `BASE_PATH=/oito2_u
 | `build`  | `pnpm install`, `pnpm build` with the base path, upload of the Pages artifact |
 | `deploy` | Deploys to the `github-pages` environment                                     |
 
+### `parity.yml` — Parity
+
+Triggers: every Monday at 06:00 UTC, manual run. Checks out `oito2/oito2_ui` into `.references/oito2_ui`, installs Flutter, runs `flutter test` in `tools/parity` and fails when any file under `packages/*/src/fixtures/parity/` would change: oito2_ui moved ahead and the change has to be ported.
+
 ### `release.yml` — Release
 
 Trigger: push of a tag matching `v*.*.*`.
 
-| Job        | Needs             | Runner                                           | Steps                                                                                                                                                 |
-| ---------- | ----------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verify`   | —                 | `ubuntu-latest`                                  | `node tools/release/sync-versions.ts --check "$GITHUB_REF_NAME"`                                                                                      |
-| `npm`      | `verify`          | `ubuntu-latest`, `release` environment           | Builds, then packs and publishes every non-private package whose version is not on npm yet, with provenance (OIDC, or `NPM_TOKEN` when set)           |
-| `binaries` | `verify`          | `ubuntu-22.04`, `windows-latest`, `macos-latest` | `pnpm build`, `pnpm tauri build` with the bundles of each system, then renames the installers                                                         |
-| `release`  | `npm`, `binaries` | `ubuntu-latest`                                  | Writes `SHA256SUMS`, builds the notes from the version's section of `packages/ui/CHANGELOG.md`, and creates a **draft** GitHub Release with the files |
+| Job        | Needs             | Runner                                           | Steps                                                                                                                                                                      |
+| ---------- | ----------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify`   | —                 | `ubuntu-latest`                                  | `node tools/release/sync-versions.ts --check "$GITHUB_REF_NAME"`                                                                                                           |
+| `npm`      | `verify`          | `ubuntu-latest`, `release` environment           | Builds, then packs and publishes every non-private package whose version is not on npm yet, with provenance (OIDC, or `NPM_TOKEN` when set)                                |
+| `binaries` | `verify`          | `ubuntu-22.04`, `windows-latest`, `macos-latest` | Builds the packages, then `pnpm tauri build -- --locked` with the bundles of each system (the Tauri `beforeBuildCommand` builds the showcase), then renames the installers |
+| `release`  | `npm`, `binaries` | `ubuntu-latest`                                  | Writes `SHA256SUMS`, builds the notes from the version's section of every public package's `CHANGELOG.md`, and creates a **draft** GitHub Release with the files           |
 
 The release files are `oito2-uikit-showcase-X.Y.Z-linux-amd64.deb`, `-linux-x86_64.rpm`, `-linux-amd64.AppImage`, `-windows-x64.msi`, `-windows-x64-setup.exe`, `-macos-universal.dmg` and `SHA256SUMS`. They are not code-signed. The Linux packages are built on Ubuntu 22.04, the oldest supported system.
 

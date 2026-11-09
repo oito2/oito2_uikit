@@ -151,20 +151,24 @@ The showcase grants its main window exactly these permissions ([`capabilities/de
 		"dialog:allow-save",
 		"fs:allow-stat",
 		"fs:allow-read-file",
-		"fs:allow-write-file"
+		"fs:allow-write-file",
+		{ "identifier": "opener:allow-open-url", "allow": [{ "url": "https://github.com/oito2/*" }] }
 	]
 }
 ```
 
-| Permission                                                 | Needed for                                                                              |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `core:default`                                             | Reading the window state and listening to events (including `oito2-settings://changed`) |
-| `core:window:allow-minimize`, `-toggle-maximize`, `-close` | The window control buttons                                                              |
-| `core:window:allow-start-dragging`                         | Moving the window from the title bar                                                    |
-| `core:window:allow-start-resize-dragging`                  | `WindowResizeHandles`                                                                   |
-| `oito2-window:default`                                     | `set_decoration_mode`, `decoration_mode` and `show_window_menu`                         |
-| `oito2-settings:default`                                   | `read_settings`                                                                         |
-| `dialog:*`, `fs:*`                                         | The file components only — see [Files](./files.md)                                      |
+| Permission                                                       | Needed for                                                                              |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `core:default`                                                   | Reading the window state and listening to events (including `oito2-settings://changed`) |
+| `core:window:allow-minimize`, `-toggle-maximize`, `-close`       | The window control buttons                                                              |
+| `core:window:allow-start-dragging`                               | Moving the window from the title bar                                                    |
+| `core:window:allow-start-resize-dragging`                        | `WindowResizeHandles`                                                                   |
+| `oito2-window:default`                                           | `set_decoration_mode`, `decoration_mode` and `show_window_menu`                         |
+| `oito2-settings:default`                                         | `read_settings`                                                                         |
+| `dialog:*`, `fs:*`                                               | The file components only — see [Files](./files.md)                                      |
+| `opener:allow-open-url` (scoped to `https://github.com/oito2/*`) | The "Open on GitHub" links, opened in the system browser through `tauri-plugin-opener`  |
+
+External links are opened through `tauri-plugin-opener` (registered in `lib.rs`), because a `target="_blank"` link opens nothing inside the webview; the permission is scoped to the repository's URLs, so no other address can be opened from the page.
 
 `initWindow()` options that change the window need more: `title` → `core:window:allow-set-title`, `size` → `core:window:allow-set-size`, `minimumSize` → `core:window:allow-set-min-size`, `center` → `core:window:allow-center`, and `show` (on by default) → `core:window:allow-show` and `core:window:allow-set-focus`. The showcase calls `initWindow({ show: false })` and passes no other option, so it needs none of them. Every permission identifier is listed in [Tauri plugins](../reference/tauri-plugins.md).
 

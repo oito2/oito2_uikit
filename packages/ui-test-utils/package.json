@@ -25,7 +25,7 @@
 	},
 	"scripts": {
 		"build": "svelte-package",
-		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"check": "tsc --noEmit -p tsconfig.json",
 		"test": "vitest run"
 	},
 	"peerDependencies": {

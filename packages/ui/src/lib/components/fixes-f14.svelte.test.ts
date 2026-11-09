@@ -13,14 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el } from '@oito2/ui-test-utils';
 import axe from 'axe-core';
 import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import FixesHarness from '../../tests/FixesHarness.svelte';
 import type { CarouselController } from './carousel/carousel-controller.svelte.js';
-
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
 
 /** Returns the axe violations inside `element`, as `rule: target` lines. */
 async function violations(element: Element): Promise<string[]> {

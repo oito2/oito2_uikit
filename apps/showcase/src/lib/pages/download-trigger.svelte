@@ -126,7 +126,8 @@
 				fileName="broken.txt"
 				data={failing}
 				onSaved={(saved) => (failResult = outcome(saved))}
-				onError={(error) => (failResult = `Failed: ${(error as Error).message}`)}
+				onError={(error) =>
+					(failResult = `Failed: ${error instanceof Error ? error.message : String(error)}`)}
 				>Broken report</DownloadTrigger
 			>
 		</div>

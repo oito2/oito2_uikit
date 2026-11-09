@@ -291,6 +291,211 @@
 				"source": "packages/ui/src/lib/format/format.ts",
 				"doc": "A live view of the formatter for the current locale: `current` always reads the latest."
 			},
+			"colorToHex": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/color.ts",
+				"doc": "Formats a `ColorValue` as uppercase `#RRGGBB`, or `#RRGGBBAA` when it isn't opaque."
+			},
+			"lerpColor": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/color.ts",
+				"doc": "Returns the color `t` of the way from `a` to `b` (0 gives `a`, 1 gives `b`), per channel."
+			},
+			"toColorValue": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/color.ts",
+				"doc": "Converts a hex string or a `ColorValue` to a `ColorValue`."
+			},
+			"ColorInput": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/foundation/color.ts",
+				"doc": "A color as a hex string or as a `ColorValue`."
+			},
+			"ColorValue": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/foundation/color.ts",
+				"doc": "A color with red, green, blue and alpha channels from 0 to 1. Unlike `Rgba`, a channel\ncan sit between two 8-bit steps, as colors mixed with `lerpColor` do; `colorToHex`\nrounds it to the nearest step."
+			},
+			"Contrast": {
+				"kind": "constant",
+				"source": "packages/ui/src/lib/foundation/contrast.ts",
+				"doc": "Color contrast helpers based on WCAG 2.2 relative luminance. Colors are hex strings."
+			},
+			"contrastRatio": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/contrast.ts",
+				"doc": "Returns the WCAG contrast ratio between two colors, from 1 to 21; alpha is ignored."
+			},
+			"ensureContrastColor": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/contrast.ts",
+				"doc": "Returns the color closest to `color` that reaches `target` contrast against every\nbackground, as a `ColorValue`; see `Contrast.ensure`. A color that already reaches it is\nreturned unchanged, between 8-bit steps included; adjusted colors land on 8-bit steps."
+			},
+			"foregroundColorFor": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/contrast.ts",
+				"doc": "Returns black or white, whichever contrasts more with `background`, as a `ColorValue`."
+			},
+			"luminanceOf": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/contrast.ts",
+				"doc": "Returns the relative luminance of `color`, from 0 (black) to 1 (white); alpha is ignored."
+			},
+			"minContrastRatio": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/foundation/contrast.ts",
+				"doc": "Returns the lowest contrast ratio between `color` and any of `backgrounds`, or 21."
+			},
+			"Brightness": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/theme/color-roles.ts",
+				"doc": "Whether a scheme is light or dark."
+			},
+			"ColorRoles": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/theme/color-roles.ts",
+				"doc": "The handful of role colors a color theme family defines, from which\n`colorThemeFromRoles` derives a complete oito2 scheme. The roles follow the vocabulary\nmost theme families publish; values are taken as given, and contrast adjustments\nhappen in `colorThemeFromRoles`."
+			},
+			"chromeMinimumStep": {
+				"kind": "constant",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "The minimum contrast ratio between adjacent chrome surfaces: page, sidebar and mainbar."
+			},
+			"colorSchemeRoles": {
+				"kind": "constant",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "The Material 3 color roles, in the order of Material's `ColorScheme`."
+			},
+			"colorThemeFromRoles": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "A scheme derived from the role colors of a theme family. The primary fill keeps\n`roles.primary` with black or white text, whichever contrasts more. The surfaces run\nfrom the lower of background and card up to the secondary surface:\n\n- `surfaceContainerLowest` is whichever of background and card sits lower;\n- `surfaceContainerLow` is halfway from it to the card;\n- `surfaceContainer` and `surfaceContainerHigh` are one and two thirds of the way from\n  the card to the secondary surface, and `surfaceContainerHighest` is the secondary;\n- the title bar is `surfaceContainer`;\n- `outline` is the border mixed 35% toward the foreground, `outlineVariant` the border.\n\nText, outline, semantic and syntax colors are then raised to WCAG AA (AAA with\n`highContrast`) against every surface. Results are cached by their inputs."
+			},
+			"createColorTheme": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "The oito2 base scheme: GTK-style neutrals with `accent` as the primary hue. The primary\nfill keeps white text: its lightness is lowered only as far as needed for white to reach\n4.5:1 (7:1 with high contrast). Results are cached by their inputs."
+			},
+			"surfacesOfTheme": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "Every surface of a theme: the background, the Material surface roles and the chrome."
+			},
+			"BaseColorThemeOptions": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "Options of the oito2 base scheme."
+			},
+			"ChromeColors": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "Colors of the structural window chrome."
+			},
+			"ColorScheme": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "The Material 3 colors of a scheme, as hex strings."
+			},
+			"ColorSchemeRole": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "A Material 3 color role."
+			},
+			"ColorTheme": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "The complete, resolved colors of one oito2 scheme: the Material `colorScheme` plus the\noito2 `semantic`, `chrome` and `syntax` colors, as hex strings.\n\n`onSurface`, `onSurfaceVariant` and every semantic and syntax color reach 4.5:1 against\nevery surface of the scheme and against `background`, and `outline` reaches 3:1. With\nhigh contrast the targets rise to 7:1 and 4.5:1."
+			},
+			"SemanticColors": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/theme/color-theme.ts",
+				"doc": "Text-safe accent and status colors. Each reaches 4.5:1 (7:1 with high contrast) against\nevery surface of its scheme, so it can color text, links, icons and focus indicators;\nthe `primary` and `error` fills of the color scheme keep the scheme's own colors."
+			},
+			"colorThemeRule": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "Returns a CSS rule that applies `theme` to the elements matching `selector`."
+			},
+			"colorThemeStyle": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "Returns the custom properties of `theme` as an inline `style` value."
+			},
+			"colorThemeVariables": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "Returns the CSS custom properties of `theme`, keyed by property name:\n`--oito2-color-<role>` for the Material roles, the background and the semantic colors\n(`--oito2-color-primary-text`, `--oito2-color-success`…), the component colors\n(`--oito2-color-selected-fill`…), the message colors (`--oito2-color-info-box-warning`,\n`--oito2-color-info-badge-text-success`…), `--oito2-chrome-<surface>`\nand `--oito2-syntax-<role>`, with lowercase hex values."
+			},
+			"componentColors": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "Returns the colors components derive from `theme`."
+			},
+			"infoColors": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "Returns the colors of every kind of message in `theme`."
+			},
+			"infoTypes": {
+				"kind": "constant",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "The kinds of message of `InfoBox` and `InfoBadge`."
+			},
+			"ComponentColors": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "The colors components derive from a theme, beyond its roles."
+			},
+			"InfoColors": {
+				"kind": "interface",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "The colors of one kind of message, over the theme surface."
+			},
+			"InfoType": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/theme/css.ts",
+				"doc": "The kind of message shown by `InfoBox` and `InfoBadge`."
+			},
+			"ensureSyntaxContrast": {
+				"kind": "function",
+				"source": "packages/ui/src/lib/theme/syntax-palette.ts",
+				"doc": "Returns a copy of `palette` where every role reaches `target` contrast against every\ncolor in `backgrounds`, adjusting only the lightness of the roles that don't."
+			},
+			"syntaxRoles": {
+				"kind": "constant",
+				"source": "packages/ui/src/lib/theme/syntax-palette.ts",
+				"doc": "The token roles of a syntax-highlighted code block, in declaration order."
+			},
+			"SyntaxPalette": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/theme/syntax-palette.ts",
+				"doc": "Colors for the token roles of a syntax-highlighted code block, as hex strings."
+			},
+			"SyntaxPaletteInput": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/theme/syntax-palette.ts",
+				"doc": "A syntax palette whose colors can also be `ColorValue`s, as theme families define them."
+			},
+			"SyntaxRole": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/theme/syntax-palette.ts",
+				"doc": "A token role of a code block: plain text, comments, keywords and control flow, string\nand numeric literals, function and type names, markup tags and attributes (also object\nproperties), constants (booleans, enum values) and invalid code."
+			},
+			"accentColors": {
+				"kind": "constant",
+				"source": "packages/ui/src/lib/tokens/values.ts",
+				"doc": "The named accent colors of the oito2 base scheme, from the GNOME accent palette."
+			},
+			"defaultAccent": {
+				"kind": "constant",
+				"source": "packages/ui/src/lib/tokens/values.ts",
+				"doc": "The default accent color."
+			},
+			"AccentColor": {
+				"kind": "type",
+				"source": "packages/ui/src/lib/tokens/values.ts",
+				"doc": "The name of an accent color."
+			},
 			"setTheme": {
 				"kind": "function",
 				"source": "packages/ui/src/lib/theme/theme-context.ts",
@@ -638,6 +843,14 @@
 						"type": "HTMLAnchorAttributes['target']",
 						"optional": true,
 						"doc": "Where a link opens."
+					},
+					{
+						"name": "rel",
+						"kind": "prop",
+						"type": "HTMLAnchorAttributes['rel']",
+						"optional": true,
+						"doc": "The relationship of a link. With `target=\"_blank\"` it defaults to `noopener`.",
+						"default": "target === '_blank' ? 'noopener' : undefined"
 					},
 					{
 						"name": "ref",
@@ -4240,16 +4453,6 @@
 				"kind": "function",
 				"source": "packages/ui/src/lib/components/info/info-type.ts",
 				"doc": "Returns the localized name of `type` from `strings`, such as \"Warning\"."
-			},
-			"infoTypes": {
-				"kind": "constant",
-				"source": "packages/ui/src/lib/components/info/info-type.ts",
-				"doc": ""
-			},
-			"InfoType": {
-				"kind": "constant",
-				"source": "packages/ui/src/lib/components/info/info-type.ts",
-				"doc": ""
 			},
 			"InfoBox": {
 				"kind": "component",
@@ -11485,6 +11688,13 @@
 						"optional": true,
 						"doc": "Whether a missing `language` is guessed among the registered ones.",
 						"default": "false"
+					},
+					{
+						"name": "onLanguageDetected",
+						"kind": "event",
+						"type": "(language: string | null) => void",
+						"optional": true,
+						"doc": "Called with the language `autoDetect` picked for the code, or `null` when none\nmatched, each time the code is highlighted."
 					},
 					{
 						"name": "highlighter",

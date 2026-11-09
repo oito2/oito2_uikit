@@ -29,9 +29,16 @@ import { join } from 'node:path';
 
 const root = join(import.meta.dirname, '..', '..');
 const cargoToml = join(root, 'Cargo.toml');
+const cargoLock = join(root, 'Cargo.lock');
 const tauriConf = join(root, 'apps', 'showcase', 'src-tauri', 'tauri.conf.json');
 const showcasePackage = join(root, 'apps', 'showcase', 'package.json');
 const workspaceVersion = /(\[workspace\.package\]\s*\nversion = ")([^"]+)(")/;
+/** The crates of the Cargo workspace, whose Cargo.lock entries carry the version. */
+const workspaceCrates = [
+	'tauri-plugin-oito2-window',
+	'tauri-plugin-oito2-settings',
+	'oito2-uikit-showcase'
+];
 
 /** Reads a JSON file. */
 function readJson(path: string): Record<string, unknown> {
@@ -60,11 +67,21 @@ function cargoVersion(): string {
 	return match[2];
 }
 
+/** Returns the version of the crate `name` in Cargo.lock, or "missing" when it has no entry. */
+function lockedVersion(name: string): string {
+	const entry = new RegExp(`\\nname = "${name}"\\nversion = "([^"]+)"`);
+	return entry.exec(readFileSync(cargoLock, 'utf8'))?.[1] ?? 'missing';
+}
+
 /** Lists every place that holds a version, with the version it holds. */
 function allVersions(): { source: string; version: string }[] {
 	return [
 		...publicPackages().map((pkg) => ({ source: pkg.name, version: pkg.version })),
 		{ source: 'Cargo.toml [workspace.package]', version: cargoVersion() },
+		...workspaceCrates.map((name) => ({
+			source: `Cargo.lock ${name}`,
+			version: lockedVersion(name)
+		})),
 		{
 			source: 'apps/showcase/package.json',
 			version: String(readJson(showcasePackage).version)

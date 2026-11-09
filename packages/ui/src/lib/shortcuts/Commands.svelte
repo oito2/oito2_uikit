@@ -1,12 +1,3 @@
-<script module lang="ts">
-	/**
-	 * The ids of the enabled commands of the scopes a key event has passed through, which
-	 * replace the commands of the same id in the scopes it reaches next. A disabled command
-	 * overrides nothing, as in the command palette.
-	 */
-	const overriddenIds = new WeakMap<Event, Set<string>>();
-</script>
-
 <!--
   Copyright (C) 2026  OITO2
 
@@ -23,6 +14,15 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
+
+<script module lang="ts">
+	/**
+	 * The ids of the enabled commands of the scopes a key event has passed through, which
+	 * replace the commands of the same id in the scopes it reaches next. A disabled command
+	 * overrides nothing, as in the command palette.
+	 */
+	const overriddenIds = new WeakMap<Event, Set<string>>();
+</script>
 
 <!--
   @component

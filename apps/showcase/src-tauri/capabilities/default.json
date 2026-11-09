@@ -1,7 +1,7 @@
 {
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "main-capability",
-	"description": "Main window: core defaults, the window actions of the custom title bar, and the file chooser, Save as dialog and file reads and writes of the file components.",
+	"description": "Main window: core defaults, the window actions of the custom title bar, the file chooser, Save as dialog and file reads and writes of the file components, and opening the project's GitHub pages in the system browser.",
 	"windows": ["main"],
 	"permissions": [
 		"core:default",
@@ -16,6 +16,10 @@
 		"dialog:allow-save",
 		"fs:allow-stat",
 		"fs:allow-read-file",
-		"fs:allow-write-file"
+		"fs:allow-write-file",
+		{
+			"identifier": "opener:allow-open-url",
+			"allow": [{ "url": "https://github.com/oito2/*" }]
+		}
 	]
 }

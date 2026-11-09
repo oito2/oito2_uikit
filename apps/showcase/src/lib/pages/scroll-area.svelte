@@ -84,6 +84,7 @@
 		<ScrollArea
 			class="scroll-area-box scroll-area-tall"
 			thumbVisibility={alwaysVisible}
+			aria-label="Settings"
 			bind:viewport
 		>
 			<ul class="scroll-area-settings">
@@ -96,7 +97,11 @@
 
 	<section aria-labelledby="scroll-area-horizontal">
 		<h2 id="scroll-area-horizontal">Horizontal and both</h2>
-		<ScrollArea direction="horizontal" class="scroll-area-box scroll-area-wide">
+		<ScrollArea
+			direction="horizontal"
+			class="scroll-area-box scroll-area-wide"
+			aria-label="Tags"
+		>
 			<div class="scroll-area-chips">
 				{#each tags as tag (tag)}
 					<Button variant="outlined" onclick={() => (picked = tag)}>{tag}</Button>
@@ -104,7 +109,11 @@
 			</div>
 		</ScrollArea>
 		<p class="note">Picked: {picked}</p>
-		<ScrollArea direction="both" class="scroll-area-box scroll-area-tall scroll-area-wide">
+		<ScrollArea
+			direction="both"
+			class="scroll-area-box scroll-area-tall scroll-area-wide"
+			aria-label="Cells"
+		>
 			<div class="scroll-area-grid">
 				{#each { length: 64 }, index (index)}
 					<Button variant="text" onclick={() => (picked = `cell ${index + 1}`)}

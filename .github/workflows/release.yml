@@ -71,9 +71,14 @@ jobs:
             version=$(node -p "require('./${dir}package.json').version")
             private=$(node -p "require('./${dir}package.json').private === true")
             if [ "$private" = "true" ]; then continue; fi
-            if npm view "$name@$version" version > /dev/null 2>&1; then
+            # Only a 404 (unknown package or version) means "not published yet";
+            # any other npm error (network, auth, registry) fails the job.
+            if out=$(npm view "$name@$version" version 2>&1); then
               echo "$name@$version is already on npm"
               continue
+            elif ! echo "$out" | grep -q E404; then
+              echo "$out" >&2
+              exit 1
             fi
             cp LICENSE "$dir"
             (cd "$dir" && pnpm pack --pack-destination "$out")
@@ -86,6 +91,9 @@ jobs:
     needs: verify
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    env:
+      TARGET: ${{ matrix.name }}
+      TAURI_ARGS: ${{ matrix.args }}
     strategy:
       fail-fast: false
       matrix:
@@ -109,7 +117,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libxdo-dev libssl-dev xdg-utils
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf libxdo-dev libssl-dev xdg-utils
       # rustup installs the toolchain pinned in rust-toolchain.toml on first use.
       - name: Add the macOS targets of the universal binary
         if: runner.os == 'macOS'
@@ -120,8 +128,15 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm tauri build ${{ matrix.args }}
+      # Only the packages: tauri.conf.json's beforeBuildCommand (`pnpm build` in
+      # apps/showcase) builds the showcase itself, so nothing is built twice.
+      - run: pnpm -r --filter './packages/*' build
+      # TAURI_ARGS holds several flags, so it is split on purpose; --locked goes
+      # to cargo and refuses a build that would change Cargo.lock.
+      - shell: bash
+        run: |
+          # shellcheck disable=SC2086
+          pnpm tauri build $TAURI_ARGS -- --locked
       - name: Collect the installers
         shell: bash
         run: |
@@ -136,7 +151,7 @@ jobs:
             fi
             cp "$1" "dist/$2"
           }
-          case "${{ matrix.name }}" in
+          case "$TARGET" in
             linux)
               pick "target/release/bundle/deb/*.deb" "$base-linux-amd64.deb"
               pick "target/release/bundle/rpm/*.rpm" "$base-linux-x86_64.rpm"
@@ -176,8 +191,9 @@ jobs:
       - name: Write the checksums
         working-directory: dist
         run: sha256sum -- * > SHA256SUMS
-      # The notes are the version's section of the @oito2/ui changelog; every
-      # package shares the version, and @oito2/ui receives every changeset's entry.
+      # Every package shares the version, but a changeset is written only to the
+      # changelogs of the packages it names: the notes concatenate the version's
+      # section of every public package that has one.
       - name: Write the release notes
         run: |
           version="${GITHUB_REF_NAME#v}"
@@ -188,11 +204,20 @@ jobs:
             echo
             echo "The showcase installers are not code-signed. Verify a download with \`sha256sum -c SHA256SUMS --ignore-missing\`."
             echo
-            awk -v v="$version" '
-              $0 == "## " v { found = 1; next }
-              found && /^## / { exit }
-              found { print }
-            ' packages/ui/CHANGELOG.md
+            for dir in packages/*/; do
+              if [ "$(node -p "require('./${dir}package.json').private === true")" = "true" ]; then continue; fi
+              if [ ! -f "${dir}CHANGELOG.md" ]; then continue; fi
+              section=$(awk -v v="$version" '
+                $0 == "## " v { found = 1; next }
+                found && /^## / { exit }
+                found { print }
+              ' "${dir}CHANGELOG.md")
+              if [ -z "$section" ]; then continue; fi
+              echo "### $(node -p "require('./${dir}package.json').name")"
+              echo
+              echo "$section"
+              echo
+            done
           } > "$RUNNER_TEMP/notes.md"
           cat "$RUNNER_TEMP/notes.md"
       - name: Create the draft release

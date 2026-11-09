@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, wait } from '@oito2/ui-test-utils';
 import { tick } from 'svelte';
 import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
@@ -20,12 +21,6 @@ import { render } from 'vitest-browser-svelte';
 import OverlaysF16cHarness from '../../tests/OverlaysF16cHarness.svelte';
 import { ToasterStore } from './toast/toaster.svelte.js';
 import { TourController } from './tour/tour-controller.svelte.js';
-
-/** Returns the element of a locator. */
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-
-/** Waits `ms` milliseconds. */
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Whether `element` is inside an inert subtree. */
 const inert = (element: Element) => element.closest('[inert]') !== null;

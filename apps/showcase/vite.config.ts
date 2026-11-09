@@ -33,6 +33,8 @@ export default defineConfig({
 			paths: { base }
 		})
 	],
+	// The commit the "View source" links point at: the one of the GitHub Actions build, or main.
+	define: { __OITO2_SOURCE_REF__: JSON.stringify(process.env.GITHUB_SHA ?? 'main') },
 	// Tauri expects a fixed port and must see Rust errors in the terminal.
 	clearScreen: false,
 	server: {

@@ -38,6 +38,11 @@
 		language?: string | null;
 		/** Whether a missing `language` is guessed among the registered ones. */
 		autoDetect?: boolean;
+		/**
+		 * Called with the language `autoDetect` picked for the code, or `null` when none
+		 * matched, each time the code is highlighted.
+		 */
+		onLanguageDetected?: (language: string | null) => void;
 		/** The highlighter; defaults to `Highlighter.instance`. */
 		highlighter?: Highlighter;
 		/** Whether line numbers show. */
@@ -57,6 +62,7 @@
 		code,
 		language = null,
 		autoDetect = false,
+		onLanguageDetected,
 		highlighter = Highlighter.instance,
 		showLineNumbers = false,
 		showCopyButton = true,
@@ -68,6 +74,10 @@
 
 	const locale = useLocale();
 	let highlighted = $derived(highlighter.highlight(code, { language, autoDetect }));
+	// Reports the language the detection picked after each highlight of code without a language.
+	$effect(() => {
+		if (autoDetect && language == null) onLanguageDetected?.(highlighted.language);
+	});
 	/** The number of lines, not counting the empty one after a final line break. */
 	let lineCount = $derived(code.replace(/\r?\n$/, '').split('\n').length);
 </script>

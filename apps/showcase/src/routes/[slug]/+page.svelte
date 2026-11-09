@@ -17,6 +17,7 @@
 
 <!-- A page of the showcase catalogue, loaded on demand from src/lib/pages. -->
 <script lang="ts">
+	import { Button } from '@oito2/ui';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { findPage, loadPage } from '#lib/catalog.js';
@@ -29,6 +30,12 @@
 	{#await loadPage(entry.slug) then Page}
 		<Page />
 		{#if entry.api.length > 0}<ApiReference names={entry.api} />{/if}
+	{:catch}
+		<!-- The page's chunk is missing, as after a deploy that renamed the hashed files. -->
+		<main class="missing">
+			<p>This page could not be loaded. Reload the showcase to get the latest version.</p>
+			<Button variant="text" onclick={() => location.reload()}>Reload</Button>
+		</main>
 	{/await}
 {:else}
 	<main class="missing">

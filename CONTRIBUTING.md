@@ -21,18 +21,18 @@ Thank you for helping! This guide covers the development environment, the checks
 
 ## Development environment
 
-| Tool                                    | Version                                                     |
-| --------------------------------------- | ----------------------------------------------------------- |
-| Node.js                                 | 24 LTS or later                                             |
-| pnpm                                    | the one pinned in `package.json` (`corepack enable`)        |
-| Rust                                    | pinned in `rust-toolchain.toml`; rustup installs it         |
-| Tauri v2 system dependencies            | see below                                                   |
-| Flutter (only to regenerate the parity) | stable, with an oito2_ui checkout in `.references/oito2_ui` |
+| Tool                                    | Version                                                                                                                |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Node.js                                 | 24 LTS or later                                                                                                        |
+| pnpm                                    | the one pinned in `package.json` (`corepack enable`, or `npm install -g pnpm@<version>` with the `packageManager` one) |
+| Rust                                    | pinned in `rust-toolchain.toml`; rustup installs it                                                                    |
+| Tauri v2 system dependencies            | see below                                                                                                              |
+| Flutter (only to regenerate the parity) | stable, with an oito2_ui checkout in `.references/oito2_ui`                                                            |
 
 Linux system packages (Debian/Ubuntu):
 
 ```bash
-sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev
 # Playwright's WebKit, used by the browser tests
 sudo apt install libavif16
 ```
@@ -44,7 +44,7 @@ Set up the repository:
 ```bash
 git clone https://github.com/oito2/oito2_uikit.git
 cd oito2_uikit
-corepack enable
+corepack enable   # Node 25 and later ship without Corepack: npm install -g pnpm@<version in packageManager>
 pnpm install
 pnpm --filter @oito2/ui exec playwright install chromium webkit
 pnpm build
@@ -76,7 +76,7 @@ Run from the repository root:
 
 | Command                                                 | What it does                                                           |
 | ------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `pnpm lint`                                             | Prettier `--check` and ESLint                                          |
+| `pnpm lint`                                             | Prettier `--check`, ESLint and the license-header check                |
 | `pnpm format`                                           | Prettier `--write` (always from the root)                              |
 | `pnpm check`                                            | `svelte-check` in every package and the showcase                       |
 | `pnpm build`                                            | `svelte-package` + `publint` for the packages, showcase static build   |
@@ -126,13 +126,15 @@ cd tools/parity
 flutter test
 ```
 
+The [Parity workflow](.github/workflows/parity.yml) runs the same export every Monday (and on demand, from the Actions tab) against the current oito2_ui and fails when any fixture would change. A failed run means oito2_ui moved ahead: regenerate the fixtures locally, port the change and commit the new JSON.
+
 ## Conventions
 
 - **Svelte 5 runes** everywhere; reusable behaviors are attachments, state lives in `.svelte.ts` classes, no stores.
 - **Accessibility**: behavior follows the WAI-ARIA Authoring Practices pattern of each widget; galleries run axe in the browser tests.
 - **Styling**: plain CSS inside `@layer oito2`, values through `var(--oito2-…)` tokens, states through `data-*` attributes.
 - **Rust**: `cargo fmt`, clippy with `-D warnings`, no `unwrap`/`expect`/`panic!` in command paths, `unsafe` only in `tauri-plugin-oito2-window/src/menu.rs`.
-- **License header**: every hand-written source file starts with the GPL-3.0 notice from `tools/templates/` in its comment syntax (JSON and Markdown files carry none).
+- **License header**: every hand-written source file starts with the GPL-3.0 notice from `tools/templates/` in its comment syntax (`header.txt` for `//`, `header.css.txt`, `header.html.txt`, `header.sharp.txt` for `#`); `pnpm lint:headers` (part of `pnpm lint`) enforces it. JSON, Markdown, `app.html`, the manifests and the workflows carry none.
 - **Language**: code, comments, commit messages and documentation in English; `docs/pt-br/` mirrors `docs/en/` in Brazilian Portuguese.
 - **TSDoc** in English on every public export and prop: it feeds the API reference.
 

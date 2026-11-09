@@ -3,6 +3,8 @@
 	"compilerOptions": {
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
 		"types": ["$app/types", "node"]
 	},
 	"include": ["src", "tests", "smoke", "vite.config.ts", "playwright.config.ts"]

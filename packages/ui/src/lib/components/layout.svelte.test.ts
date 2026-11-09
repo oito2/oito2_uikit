@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, frames } from '@oito2/ui-test-utils';
 import axe from 'axe-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
@@ -20,13 +21,6 @@ import { render } from 'vitest-browser-svelte';
 import LayoutGallery from '../../tests/LayoutGallery.svelte';
 import LayoutHarness from '../../tests/LayoutHarness.svelte';
 import NavigationHarness from '../../tests/NavigationHarness.svelte';
-
-/** Returns the element of a locator. */
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-
-/** Waits for two frames, so attachments and observers have run. */
-const frames = () =>
-	new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
 describe('Tabs', () => {
 	it('has one Tab stop and selects with the arrows, skipping disabled tabs', async () => {

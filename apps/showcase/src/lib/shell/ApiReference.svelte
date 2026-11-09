@@ -17,6 +17,8 @@
 
 <!-- The API reference of the exports a showcase page documents, read from the generated api.json. -->
 <script lang="ts">
+	import { Button } from '@oito2/ui';
+
 	interface Prop {
 		name: string;
 		kind: 'prop' | 'event' | 'snippet';
@@ -161,6 +163,12 @@
 				</div>
 			{/if}
 		{/each}
+	{:catch}
+		<!-- The reference's chunk is missing, as after a deploy that renamed the hashed files. -->
+		<div class="missing">
+			<p>This page could not be loaded. Reload the showcase to get the latest version.</p>
+			<Button variant="text" onclick={() => location.reload()}>Reload</Button>
+		</div>
 	{/await}
 </section>
 
@@ -251,5 +259,11 @@
 	.extends {
 		color: var(--oito2-color-on-surface-variant);
 		font: var(--oito2-type-body-small);
+	}
+
+	.missing {
+		display: grid;
+		gap: var(--oito2-space-sm);
+		justify-items: start;
 	}
 </style>

@@ -89,7 +89,7 @@
 	);
 </script>
 
-<main>
+<main class="showcase-page">
 	<p>
 		The Material 3 primitives restyled like the oito2_ui theme, with the active scheme. The
 		<a href={resolve('/[slug]', { slug: 'colors' })}>colors</a> and the
@@ -282,7 +282,7 @@
 			<Field.Root>
 				<Field.Label>Search</Field.Label>
 				<TextField placeholder="Search files">
-					{#snippet leading()}<Search size={20} />{/snippet}
+					{#snippet leading()}<Search size={20} aria-hidden="true" />{/snippet}
 				</TextField>
 			</Field.Root>
 			<Field.Root disabled>
@@ -378,7 +378,7 @@
 		</ScrollArea>
 		<div class="list">
 			<ListTile title="List tile" subtitle="With a subtitle" onclick={() => {}}>
-				{#snippet leading()}<Folder size={20} />{/snippet}
+				{#snippet leading()}<Folder size={20} aria-hidden="true" />{/snippet}
 			</ListTile>
 			<Separator />
 			<ListTile title="Selected list tile" selected onclick={() => {}} />
@@ -389,29 +389,6 @@
 </main>
 
 <style>
-	main {
-		display: grid;
-		gap: var(--oito2-space-xl);
-		padding: var(--oito2-space-xl);
-	}
-
-	h2,
-	p {
-		margin: 0 0 var(--oito2-space-sm);
-	}
-
-	section {
-		display: grid;
-		gap: var(--oito2-space-md);
-	}
-
-	.row {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--oito2-space-sm);
-	}
-
 	.columns {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -419,8 +396,6 @@
 	}
 
 	.column {
-		display: grid;
-		align-content: start;
 		justify-items: start;
 	}
 
@@ -434,6 +409,10 @@
 		max-width: 360px;
 		border: 1px solid var(--oito2-color-outline-variant);
 		border-radius: var(--oito2-radius-medium);
+	}
+
+	:global(.scroll) p {
+		margin: 0 0 var(--oito2-space-sm);
 	}
 
 	.bars {

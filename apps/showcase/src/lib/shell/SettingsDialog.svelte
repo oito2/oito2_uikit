@@ -17,7 +17,7 @@
 
 <!-- The showcase settings: compact layout, reading direction, language, control size and, in the browser build, the simulated desktop. -->
 <script lang="ts">
-	import { Dialog, ListCollection, Select, SwitchListTile } from '@oito2/ui';
+	import { Dialog, Field, ListCollection, Select, SwitchListTile } from '@oito2/ui';
 	import type {
 		ShowcaseDensity,
 		ShowcaseLanguage,
@@ -79,40 +79,38 @@
 			subtitle="Lays the components out for right-to-left text"
 			bind:checked={settings.rtl}
 		/>
-		<div class="field">
-			<span id="settings-language">Language</span>
+		<!-- Each select is the control of a field, so its label names it. -->
+		<Field.Root class="showcase-settings-field">
+			<Field.Label>Language</Field.Label>
 			<Select.Root
 				collection={languages}
-				label="Language"
 				value={settings.language}
 				onValueChange={(value) => {
 					if (value) settings.language = value as ShowcaseLanguage;
 				}}
 			/>
-		</div>
-		<div class="field">
-			<span>Control size</span>
+		</Field.Root>
+		<Field.Root class="showcase-settings-field">
+			<Field.Label>Control size</Field.Label>
 			<Select.Root
 				collection={densities}
-				label="Control size"
 				value={settings.density}
 				onValueChange={(value) => {
 					if (value) settings.density = value as ShowcaseDensity;
 				}}
 			/>
-		</div>
+		</Field.Root>
 		{#if !tauri}
-			<div class="field">
-				<span>Desktop</span>
+			<Field.Root class="showcase-settings-field">
+				<Field.Label>Desktop</Field.Label>
 				<Select.Root
 					collection={desktops}
-					label="Desktop"
 					value={settings.desktop}
 					onValueChange={(value) => {
 						if (value) settings.desktop = value as SimulatedDesktop;
 					}}
 				/>
-			</div>
+			</Field.Root>
 		{/if}
 	</Dialog.Content>
 </Dialog.Root>
@@ -122,8 +120,9 @@
 		width: min(440px, 100%);
 	}
 
-	.field {
-		display: flex;
+	/* The label and the select share a row, unlike a field's default column. */
+	:global(.showcase-settings-field) {
+		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--oito2-space-md);

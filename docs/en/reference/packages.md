@@ -131,11 +131,11 @@ Their commands, permissions and events are in [Tauri plugins](./tauri-plugins.md
 
 ## Private packages
 
-| Package                | Path                      | Notes                                                                                         |
-| ---------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
-| `@oito2/ui-test-utils` | `packages/ui-test-utils`  | `"private": true`, ignored by Changesets; its entry point currently exports nothing           |
-| `@oito2/showcase`      | `apps/showcase`           | `"private": true`, ignored by Changesets; the release ships its installers, not the package   |
-| `oito2-uikit-showcase` | `apps/showcase/src-tauri` | `publish = false`; binary `oito2-uikit-showcase`, identifier `io.github.oito2.uikit-showcase` |
+| Package                | Path                      | Notes                                                                                                                                                                                 |
+| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@oito2/ui-test-utils` | `packages/ui-test-utils`  | `"private": true`, ignored by Changesets; exports the browser-test helpers the packages share (`el`, `wait`, `settleAnimations`, `settleFonts`, `frames`, `pointer`, `stubClipboard`) |
+| `@oito2/showcase`      | `apps/showcase`           | `"private": true`, ignored by Changesets; the release ships its installers, not the package                                                                                           |
+| `oito2-uikit-showcase` | `apps/showcase/src-tauri` | `publish = false`; binary `oito2-uikit-showcase`, identifier `io.github.oito2.uikit-showcase`                                                                                         |
 
 ## See also
 

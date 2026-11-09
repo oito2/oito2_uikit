@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { el, wait } from '@oito2/ui-test-utils';
 import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
@@ -23,8 +24,6 @@ import { TreeCollection, type TreeNode } from '../collections/tree-collection.js
 import { TimerController } from './timer/timer-controller.svelte.js';
 import { TreeController } from './tree/tree-controller.svelte.js';
 
-const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const files = () =>
 	TreeCollection.fromPaths([
 		'src/lib/index.ts',

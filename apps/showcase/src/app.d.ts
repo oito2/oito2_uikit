@@ -16,6 +16,9 @@
 // Ambient types of the SvelteKit app; the App namespace stays empty until a phase needs it.
 declare global {
 	namespace App {}
+
+	/** The Git reference the showcase was built from, defined by the Vite config. */
+	const __OITO2_SOURCE_REF__: string;
 }
 
 export {};

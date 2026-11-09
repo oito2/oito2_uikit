@@ -23,6 +23,9 @@
 	import Settings from '@lucide/svelte/icons/settings';
 	import Star from '@lucide/svelte/icons/star';
 	import { BackButton, Button, CloseButton, IconButton } from '@oito2/ui';
+	import { onExternalClick } from '../api/open-external.js';
+
+	const repository = 'https://github.com/oito2/oito2_uikit';
 
 	const variants = ['filled', 'tonal', 'outlined', 'text', 'elevated'] as const;
 
@@ -57,7 +60,12 @@
 				Options
 				{#snippet trailing()}<ChevronDown aria-hidden="true" />{/snippet}
 			</Button>
-			<Button variant="text" href="https://github.com/oito2/oito2_uikit" target="_blank">
+			<Button
+				variant="text"
+				href={repository}
+				target="_blank"
+				onclick={(event) => onExternalClick(event, repository)}
+			>
 				A link that looks like a button
 			</Button>
 		</div>

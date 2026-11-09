@@ -24,44 +24,54 @@
 	const ratio = (color: string) => Contrast.ratio(color, theme.current.background).toFixed(1);
 </script>
 
-<main>
+{#snippet swatches(id: string, title: string, colors: [string, string][])}
+	<section aria-labelledby={id}>
+		<h2 {id}>{title}</h2>
+		<ul>
+			{#each colors as [name, color] (name)}
+				<li>
+					<span class="chip" style:background={color}></span>
+					<span class="name">{name}</span>
+					<code>{color}</code>
+					<span class="ratio">{ratio(color)}:1</span>
+				</li>
+			{/each}
+		</ul>
+	</section>
+{/snippet}
+
+<main class="showcase-page">
 	<p>
 		{theme.current.brightness}{theme.current.highContrast ? ', high contrast' : ''}. Ratios are
 		against the page background.
 	</p>
 
-	{#snippet swatches(title: string, colors: [string, string][])}
-		<section>
-			<h2>{title}</h2>
-			<ul>
-				{#each colors as [name, color] (name)}
-					<li>
-						<span class="chip" style:background={color}></span>
-						<span class="name">{name}</span>
-						<code>{color}</code>
-						<span class="ratio">{ratio(color)}:1</span>
-					</li>
-				{/each}
-			</ul>
-		</section>
-	{/snippet}
-
-	{@render swatches('Semantic', Object.entries(theme.current.semantic) as [string, string][])}
-	{@render swatches('Chrome', Object.entries(theme.current.chrome) as [string, string][])}
 	{@render swatches(
+		'colors-semantic',
+		'Semantic',
+		Object.entries(theme.current.semantic) as [string, string][]
+	)}
+	{@render swatches(
+		'colors-chrome',
+		'Chrome',
+		Object.entries(theme.current.chrome) as [string, string][]
+	)}
+	{@render swatches(
+		'colors-material',
 		'Material roles',
 		colorSchemeRoles.map((role) => [role, theme.current.colorScheme[role]] as [string, string])
 	)}
 	{@render swatches(
+		'colors-syntax',
 		'Syntax',
 		syntaxRoles.map((role) => [role, theme.current.syntax[role]] as [string, string])
 	)}
 
-	<section>
-		<h2>Text samples</h2>
-		<p class="sample" style:color="var(--oito2-color-primary-text)">Primary text and links</p>
-		<p class="sample" style:color="var(--oito2-color-error-text)">An error message</p>
-		<p class="sample" style:color="var(--oito2-color-on-surface-variant)">Secondary text</p>
+	<section aria-labelledby="colors-samples">
+		<h2 id="colors-samples">Text samples</h2>
+		<p style:color="var(--oito2-color-primary-text)">Primary text and links</p>
+		<p style:color="var(--oito2-color-error-text)">An error message</p>
+		<p style:color="var(--oito2-color-on-surface-variant)">Secondary text</p>
 		<pre class="code"><span style:color="var(--oito2-syntax-keyword)">const</span> <span
 				style:color="var(--oito2-syntax-function)">greet</span
 			> = (<span style:color="var(--oito2-syntax-attribute)">name</span>) =&gt; <span
@@ -71,15 +81,6 @@
 </main>
 
 <style>
-	main {
-		padding: var(--oito2-space-page);
-	}
-
-	h2 {
-		font: var(--oito2-type-title-medium);
-		margin: var(--oito2-space-xl) 0 var(--oito2-space-sm);
-	}
-
 	ul {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -108,11 +109,8 @@
 		font: var(--oito2-type-label-medium);
 	}
 
-	.sample {
-		margin: var(--oito2-space-xs) 0;
-	}
-
 	.code {
+		margin: 0;
 		padding: var(--oito2-space-md);
 		border-radius: var(--oito2-radius-medium);
 		background: var(--oito2-color-surface-container);

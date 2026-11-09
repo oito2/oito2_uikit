@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Smoke test of the desktop showcase through tauri-driver: starts the debug build, waits for the
-// catalogue, opens the Button page and checks that the Tauri bridge is present. Speaks plain W3C
-// WebDriver over HTTP, so it needs no client library.
+// Smoke test of the desktop showcase through tauri-driver: starts the debug build, opens the
+// Button page by its address, waits for the catalogue and checks that the Tauri bridge is
+// present. Speaks plain W3C WebDriver over HTTP, so it needs no client library.
 //
 // Usage: node smoke/webdriver.ts <application> [tauri-driver arguments...]
 // The TAURI_DRIVER environment variable overrides the tauri-driver executable.
@@ -64,7 +64,14 @@ async function poll<T>(
 }
 
 const driver = spawn(process.env.TAURI_DRIVER ?? 'tauri-driver', driverArgs, { stdio: 'inherit' });
+driver.on('error', (error) => {
+	console.error('could not start tauri-driver:', error);
+	process.exit(2);
+});
 let session: string | undefined;
+
+// The page title: the <h1> of the compact layout, or the level-one heading of the detail header.
+const headingSelector = 'h1, [role="heading"][aria-level="1"]';
 
 try {
 	await poll('tauri-driver', async () => ((await command('GET', '/status')) ? true : undefined));
@@ -84,11 +91,16 @@ try {
 	const run = (script: string) =>
 		command('POST', `/session/${session}/execute/sync`, { script, args: [] });
 
-	// Clicks the Button link from the page script once the catalogue has rendered:
-	// WebKitWebDriver does not find the link by selector.
+	// Opens the Button page by its address once the app has loaded, instead of clicking a
+	// link of the start page.
+	const origin = await poll('the app', async () => {
+		const value = await run('return location.origin;');
+		return typeof value === 'string' && value !== 'null' ? value : undefined;
+	});
+	await command('POST', `/session/${session}/url`, { url: `${origin}/button` });
 	await poll('the catalogue', async () =>
 		(await run(
-			'const link = document.querySelector(\'a[href$="/button"]\'); link?.click(); return link ? true : null;'
+			`return document.querySelector('.oito2-master-detail-list, ${headingSelector}') !== null;`
 		)) === true
 			? true
 			: undefined
@@ -96,10 +108,9 @@ try {
 	if (!(await run("return '__TAURI_INTERNALS__' in window;"))) {
 		throw new Error('the Tauri bridge is missing');
 	}
-	// The title bar is the first level-one heading; the page title is another one.
 	const heading = await poll('the Button page', async () =>
 		(await run(
-			"return [...document.querySelectorAll('h1')].some((h) => h.textContent.trim() === 'Button');"
+			`return [...document.querySelectorAll('${headingSelector}')].some((h) => h.textContent.trim() === 'Button');`
 		)) === true
 			? 'Button'
 			: undefined
@@ -109,7 +120,7 @@ try {
 	console.error(error);
 	if (session) {
 		const state = await command('POST', `/session/${session}/execute/sync`, {
-			script: 'return { url: location.href, width: innerWidth, height: innerHeight, headings: [...document.querySelectorAll("h1")].map((h) => h.textContent.trim()) };',
+			script: `return { url: location.href, width: innerWidth, height: innerHeight, headings: [...document.querySelectorAll('${headingSelector}')].map((h) => h.textContent.trim()) };`,
 			args: []
 		}).catch((reason: unknown) => reason);
 		console.error('page state:', state);

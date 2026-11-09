@@ -41,6 +41,8 @@
 		href?: string;
 		/** Where a link opens. */
 		target?: HTMLAnchorAttributes['target'];
+		/** The relationship of a link. With `target="_blank"` it defaults to `noopener`. */
+		rel?: HTMLAnchorAttributes['rel'];
 		/** The button or link element. */
 		ref?: HTMLElement | null;
 		/** The label. */
@@ -53,6 +55,7 @@
 		trailing,
 		href,
 		target,
+		rel = target === '_blank' ? 'noopener' : undefined,
 		ref = $bindable(null),
 		disabled = false,
 		type = 'button',
@@ -73,6 +76,7 @@
 		bind:this={ref}
 		{href}
 		{target}
+		{rel}
 		class={['oito2-button', className]}
 		data-variant={variant}
 		{...rest as HTMLAnchorAttributes}
