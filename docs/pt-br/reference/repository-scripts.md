@@ -125,6 +125,7 @@ Gatilhos: push na `main`, todo pull request, execução manual. Execuções simu
 | `frontend` | `ubuntu-latest`                                   | `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm generate:check`, `pnpm docs:check`, `pnpm test:tools`, `pnpm build`, `pnpm check`, instalação do Chromium e do WebKit do Playwright, `pnpm test`; envia os diffs de screenshot quando falha |
 | `rust`     | `ubuntu-latest`, `windows-latest`, `macos-latest` | Dependências de build do Linux, `pnpm install`, `pnpm build`, `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --locked -- -D warnings`, `cargo test --workspace --locked`                                                  |
 | `msrv`     | `ubuntu-latest`                                   | `cargo +1.90 check --locked` dos dois crates de plugin com a versão mínima suportada do Rust (`rust-version` do `Cargo.toml`)                                                                                                                    |
+| `smoke`    | `ubuntu-latest`                                   | Smoke test desktop: gera o showcase em debug pela CLI do Tauri, instala o `tauri-driver` 2.1.0 e o WebKitWebDriver e roda `apps/showcase/smoke/webdriver.ts` sob `xvfb-run` (abre a página Button e confere a ponte do Tauri)                    |
 
 ### `pages.yml` — Pages
 
