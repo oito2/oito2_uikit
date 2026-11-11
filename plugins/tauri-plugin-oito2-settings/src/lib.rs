@@ -32,7 +32,7 @@ use tauri::{
 #[cfg(any(target_os = "linux", target_os = "macos", test))]
 mod color;
 mod commands;
-#[cfg(any(target_os = "linux", test))]
+#[cfg(target_os = "linux")]
 mod config;
 mod error;
 #[cfg(any(target_os = "linux", test))]

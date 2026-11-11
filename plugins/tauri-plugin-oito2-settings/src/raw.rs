@@ -77,7 +77,7 @@ pub const GSETTINGS_KEYS: &[(&str, &str)] = &[
 ];
 
 /// The configuration files the plugin reads, relative to `XDG_CONFIG_HOME`.
-#[cfg(any(target_os = "linux", test))]
+#[cfg(target_os = "linux")]
 pub mod files {
     pub const KWINRC: &str = "kwinrc";
     pub const KDEGLOBALS: &str = "kdeglobals";
