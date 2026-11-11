@@ -201,12 +201,11 @@ describe('Toaster', () => {
 	it('shows toasts, pauses while hovered and closes on its button', async () => {
 		const store = new ToasterStore();
 		render(OverlaysF9Harness, { show: 'toast', store });
-		store.show({ title: 'Saved', type: 'success', duration: 800 });
+		store.show({ title: 'Saved', type: 'success', duration: 2000 });
 		const toast = page.getByRole('status').filter({ hasText: 'Saved' });
 		await expect.element(toast).toBeVisible();
-		await wait(250);
 		await toast.hover();
-		await wait(1200);
+		await wait(2400);
 		await expect.element(toast).toBeVisible();
 		await page.getByRole('button', { name: 'Dismiss' }).click();
 		await expect.element(toast).not.toBeInTheDocument();
