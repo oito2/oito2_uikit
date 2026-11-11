@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-oito2-settings"
-description = "System integration for @oito2/ui: desktop environment detection, window button layout, accent color and high contrast."
+description = "System integration for @oito2/ui: desktop environment detection, window button layout, accent color, high contrast and color scheme."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -12,24 +12,7 @@ links = "tauri-plugin-oito2-settings"
 
 [dependencies]
 tauri = { workspace = true }
-serde = { workspace = true }
-thiserror = { workspace = true }
-
-[target.'cfg(target_os = "linux")'.dependencies]
-gtk = { workspace = true }
-
-[target.'cfg(windows)'.dependencies]
-windows = { version = "0.62", features = ["Foundation", "UI", "UI_ViewManagement"] }
-
-[target.'cfg(target_os = "macos")'.dependencies]
-objc2-app-kit = { version = "0.3", default-features = false, features = [
-    "std",
-    "NSColor",
-    "NSColorSpace",
-    "NSWorkspace",
-    "NSAccessibility",
-    "objc2-core-foundation",
-] }
+oito2_settings = { workspace = true }
 
 [dev-dependencies]
 serde_json = { workspace = true }

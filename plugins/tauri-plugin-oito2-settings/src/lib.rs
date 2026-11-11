@@ -14,99 +14,127 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //! System settings for `@oito2/ui`: the desktop session, the window button layout, the
-//! accent color and the high-contrast preference, read from the platform and reported to
-//! the webview, which turns them into a `SystemSettings`. On Linux the plugin also watches
-//! GSettings, the desktop portal and the configuration files and emits
-//! `oito2-settings://changed` with the new values.
+//! accent color, the high-contrast preference and the color scheme, read from the platform
+//! by `oito2_settings` and reported to the webview, which turns them into a
+//! `SystemSettings`. The plugin also watches the settings and emits
+//! `oito2-settings://changed` with the new values whenever they change.
 
-#[cfg(target_os = "linux")]
-use std::sync::Mutex;
-
-#[cfg(target_os = "linux")]
-use tauri::{AppHandle, Emitter, Manager};
+use oito2_settings::SettingsWatcher;
 use tauri::{
-    Runtime,
+    AppHandle, Emitter, Manager, Runtime,
     plugin::{Builder, TauriPlugin},
 };
 
-#[cfg(any(target_os = "linux", target_os = "macos", test))]
-mod color;
 mod commands;
-#[cfg(target_os = "linux")]
-mod config;
-mod error;
-#[cfg(any(target_os = "linux", test))]
-mod parsers;
-#[cfg(target_os = "linux")]
-mod platform_linux;
-#[cfg(target_os = "macos")]
-mod platform_macos;
-#[cfg(windows)]
-mod platform_windows;
-mod raw;
 
-pub use error::{Error, Result};
-pub use raw::{ConfigValues, RawSettings, SettingValue};
+pub use oito2_settings::{
+    ColorScheme, ConfigValues, Error, RawSettings, Result, SettingValue, read_raw_settings,
+};
 
 /// The event emitted with the new `RawSettings` when a watched setting changes.
 pub const CHANGED_EVENT: &str = "oito2-settings://changed";
 
-/// Reads the settings of the running platform.
-pub fn read_raw_settings() -> RawSettings {
-    #[cfg(target_os = "linux")]
-    return platform_linux::read();
-    #[cfg(windows)]
-    return platform_windows::read();
-    #[cfg(target_os = "macos")]
-    return platform_macos::read();
-    #[cfg(not(any(target_os = "linux", windows, target_os = "macos")))]
-    return RawSettings::default();
+/// Keeps the settings watcher alive while the app runs; dropping it stops the watcher.
+struct Watch {
+    _watcher: SettingsWatcher,
 }
 
-/// The settings last reported to the webview, to emit only real changes.
-#[cfg(target_os = "linux")]
-#[derive(Default)]
-struct LastSettings(Mutex<Option<RawSettings>>);
-
-/// Reads the settings on a worker thread and emits them when they differ from the last
-/// ones.
-#[cfg(target_os = "linux")]
-fn report_change<R: Runtime>(app: AppHandle<R>) {
-    std::thread::spawn(move || {
-        let raw = read_raw_settings();
-        let Some(last) = app.try_state::<LastSettings>() else {
-            return;
-        };
-        let Ok(mut last) = last.0.lock() else {
-            return;
-        };
-        if last.as_ref() == Some(&raw) {
-            return;
-        }
-        *last = Some(raw.clone());
-        if let Err(error) = app.emit(CHANGED_EVENT, raw) {
-            eprintln!("oito2-settings: could not report a settings change: {error}");
-        }
-    });
+/// Starts watching the settings on a thread of its own, since `oito2_settings::watch`
+/// reads them once before returning, and keeps the watcher in the app state. Every change
+/// is emitted to the webviews as `CHANGED_EVENT`. Failures are written to stderr and leave
+/// the app without change events.
+fn start_watching<R: Runtime>(app: AppHandle<R>) {
+    let spawned = std::thread::Builder::new()
+        .name("oito2-settings-start".into())
+        .spawn(move || {
+            let emitter = app.clone();
+            let watched = oito2_settings::watch(move |raw| {
+                if let Err(error) = emitter.emit(CHANGED_EVENT, raw) {
+                    eprintln!("oito2-settings: could not report a settings change: {error}");
+                }
+            });
+            match watched {
+                Ok(watcher) => {
+                    app.manage(Watch { _watcher: watcher });
+                }
+                Err(error) => eprintln!("oito2-settings: not watching the settings: {error}"),
+            }
+        });
+    if let Err(error) = spawned {
+        eprintln!("oito2-settings: not watching the settings: {error}");
+    }
 }
 
-/// Creates the plugin. It exposes the `read_settings` command and, on Linux, starts
-/// watching the settings.
+/// Creates the plugin: the `read_settings` command, and the settings watcher started
+/// when the app starts.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("oito2-settings")
         .invoke_handler(tauri::generate_handler![commands::read_settings])
-        .setup(|_app, _api| {
-            #[cfg(target_os = "linux")]
-            {
-                let app = _app;
-                app.manage(LastSettings::default());
-                let handle = app.clone();
-                app.run_on_main_thread(move || {
-                    let watcher = handle.clone();
-                    platform_linux::watch(move || report_change(watcher.clone()));
-                })?;
-            }
+        .setup(|app, _api| {
+            start_watching(app.clone());
             Ok(())
         })
         .build()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn serializes_for_the_webview() {
+        let mut raw = RawSettings {
+            xdg_current_desktop: Some("GNOME".into()),
+            color_scheme: Some(ColorScheme::Dark),
+            ..Default::default()
+        };
+        raw.gsettings.insert(
+            "org.gnome.desktop.a11y.interface/high-contrast".into(),
+            SettingValue::Flag(true),
+        );
+        raw.config.cosmic_show_minimize = Some(false);
+        let json = serde_json::to_value(&raw).unwrap();
+        assert_eq!(json["xdgCurrentDesktop"], "GNOME");
+        assert_eq!(json["desktopSession"], serde_json::Value::Null);
+        assert_eq!(
+            json["gsettings"]["org.gnome.desktop.a11y.interface/high-contrast"],
+            true
+        );
+        for key in [
+            "kwinButtonsOnLeft",
+            "kwinButtonsOnRight",
+            "kdeAccentColor",
+            "kdeColorScheme",
+            "xfwmButtonLayout",
+            "cosmicShowMaximize",
+        ] {
+            assert_eq!(json["config"][key], serde_json::Value::Null, "{key}");
+        }
+        assert_eq!(json["config"]["cosmicShowMinimize"], false);
+        assert_eq!(json["systemAccent"], serde_json::Value::Null);
+        assert_eq!(json["systemHighContrast"], false);
+        assert_eq!(json["colorScheme"], "dark");
+    }
+
+    #[test]
+    fn errors_reject_with_kind_and_message() {
+        let json = serde_json::to_value(Error::Internal("settings reader stopped".into())).unwrap();
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "kind": "internal",
+                "message": "internal error: settings reader stopped"
+            })
+        );
+        let json = serde_json::to_value(Error::Unsupported("watching".into())).unwrap();
+        assert_eq!(json["kind"], "unsupported");
+    }
+
+    /// Prints what the plugin reads on this machine, for checking a desktop by hand:
+    /// `cargo test -p tauri-plugin-oito2-settings -- --ignored --nocapture`.
+    #[test]
+    #[ignore = "reads the real desktop session"]
+    fn prints_the_settings_of_this_machine() {
+        println!("{:#?}", read_raw_settings());
+    }
 }

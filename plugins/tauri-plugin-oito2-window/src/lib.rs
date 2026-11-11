@@ -28,9 +28,10 @@ mod error;
 #[allow(unsafe_code)]
 mod menu;
 
-pub use csd::{DecorationMode, DecorationState, apply_decoration_mode};
+pub use csd::{DecorationState, apply_decoration_mode};
 pub use error::{Error, Result};
 pub use menu::{show_window_menu, window_menu_supported};
+pub use oito2_foundation::{DecorationMode, ParseDecorationModeError};
 
 /// Creates the plugin. It exposes the `set_decoration_mode`, `decoration_mode` and
 /// `show_window_menu` commands to the webview, and forgets the recorded mode of each

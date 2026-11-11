@@ -21,7 +21,7 @@ use tauri::{Runtime, WebviewWindow};
 
 /// Whether this platform has a native window menu the plugin can show: Linux and Windows.
 pub fn window_menu_supported() -> bool {
-    cfg!(any(target_os = "linux", windows))
+    oito2_foundation::window_menu::supported()
 }
 
 /// Shows the native window menu of `window` at `x`, `y`, in CSS pixels from the top left

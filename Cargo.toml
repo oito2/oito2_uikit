@@ -29,6 +29,9 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 thiserror = "2.0.21"
 gtk = "0.18"
+# Platform settings and window behavior shared with the other OITO2 Rust UIs.
+oito2_foundation = "0.1.0"
+oito2_settings = { version = "0.1.0", features = ["watch"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

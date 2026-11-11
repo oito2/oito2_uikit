@@ -18,8 +18,6 @@ use tauri::{Manager, Runtime, WebviewWindow};
 use crate::{DecorationMode, DecorationState, Error, Result};
 
 /// The largest coordinate accepted for the window menu position, in CSS pixels.
-const MAX_COORDINATE: f64 = 100_000.0;
-
 /// Applies `mode` to the calling window on the main thread and resolves once it is
 /// applied, or rejects with the error. On Linux the window must still be hidden.
 #[tauri::command]
@@ -76,12 +74,8 @@ async fn on_main_thread<R: Runtime>(
 
 /// Checks that a menu position is a finite point inside a plausible window.
 fn validate_position(x: f64, y: f64) -> Result<(f64, f64)> {
-    let valid = |value: f64| value.is_finite() && (0.0..=MAX_COORDINATE).contains(&value);
-    if valid(x) && valid(y) {
-        Ok((x, y))
-    } else {
-        Err(Error::InvalidInput(format!("menu position ({x}, {y})")))
-    }
+    oito2_foundation::window_menu::validate_position(x, y)
+        .map_err(|error| Error::InvalidInput(error.to_string()))
 }
 
 #[cfg(test)]
@@ -100,5 +94,14 @@ mod tests {
         assert!(validate_position(10.0, 1e9).is_err());
         assert!(validate_position(f64::NAN, 10.0).is_err());
         assert!(validate_position(10.0, f64::INFINITY).is_err());
+    }
+
+    #[test]
+    fn rejects_as_invalid_input() {
+        let json = serde_json::to_value(validate_position(-1.0, 10.0).unwrap_err()).unwrap();
+        assert_eq!(
+            json,
+            serde_json::json!({ "kind": "invalidInput", "message": "invalid input: menu position (-1, 10)" })
+        );
     }
 }

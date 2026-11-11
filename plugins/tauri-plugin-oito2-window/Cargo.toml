@@ -12,6 +12,7 @@ links = "tauri-plugin-oito2-window"
 
 [dependencies]
 tauri = { workspace = true }
+oito2_foundation = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 

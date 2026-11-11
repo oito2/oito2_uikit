@@ -2341,6 +2341,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "oito2_foundation"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bee2fb39dd67bd94d15234a7b9d3973f86d9eea4c26685719cec7f994145e96e"
+dependencies = [
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "oito2_settings"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e2815ca920a6fe417e08c4e9c50f6b50c23c6e28fcd42a3507bc0a3e2eb0e72"
+dependencies = [
+ "block2",
+ "gio",
+ "glib",
+ "objc2",
+ "objc2-app-kit",
+ "objc2-foundation",
+ "oito2_foundation",
+ "serde",
+ "thiserror 2.0.21",
+ "windows",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3558,14 +3586,10 @@ dependencies = [
 name = "tauri-plugin-oito2-settings"
 version = "0.1.0"
 dependencies = [
- "gtk",
- "objc2-app-kit",
- "serde",
+ "oito2_settings",
  "serde_json",
  "tauri",
  "tauri-plugin",
- "thiserror 2.0.21",
- "windows",
 ]
 
 [[package]]
@@ -3573,6 +3597,7 @@ name = "tauri-plugin-oito2-window"
 version = "0.1.0"
 dependencies = [
  "gtk",
+ "oito2_foundation",
  "serde",
  "serde_json",
  "tauri",

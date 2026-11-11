@@ -59,7 +59,7 @@ Wrap the app content in `SystemSettingsScope`, outside the `ThemeProvider`, so t
 </SystemSettingsScope>
 ```
 
-The scope reads the settings once mounted, follows the changes the plugin reports (Linux) and reads them again whenever the window regains focus. Its props are all optional: `initialSettings`, `source`, `platform` and an `onSettingsChange` callback. When a read or the subscription fails (for example without the plugin or its permission), the scope keeps the current settings and logs one `console.warn` with the cause per instance.
+The scope reads the settings once mounted, follows the changes the plugin reports and reads them again whenever the window regains focus. Its props are all optional: `initialSettings`, `source`, `platform` and an `onSettingsChange` callback. When a read or the subscription fails (for example without the plugin or its permission), the scope keeps the current settings and logs one `console.warn` with the cause per instance.
 
 Components read the result with `useSystemSettings()` from `@oito2/ui`:
 

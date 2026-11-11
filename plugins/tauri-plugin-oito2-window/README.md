@@ -90,13 +90,13 @@ Both `set_decoration_mode` and `show_window_menu` do their work on the main thre
 
 ### Rust API
 
-| Item                                                         | Purpose                                                                                 |
-| ------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `init()`                                                     | Creates the plugin                                                                      |
-| `DecorationMode`                                             | `Native`, `Undecorated`, `GtkHeaderless`; `platform_default()`, `as_str()`, `FromStr`   |
-| `apply_decoration_mode(&window, mode)`                       | Applies a mode to a `WebviewWindow` and records it; main thread, hidden window on Linux |
-| `show_window_menu(&window, x, y)`, `window_menu_supported()` | The native window menu; `show_window_menu` must run on the main thread                  |
-| `DecorationState`, `Error`, `Result`                         | Managed state (`record`, `get`, `forget`) and the serializable error type               |
+| Item                                                         | Purpose                                                                                                                                                        |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `init()`                                                     | Creates the plugin                                                                                                                                             |
+| `DecorationMode`, `ParseDecorationModeError`                 | Re-exported from [`oito2_foundation`](https://docs.rs/oito2_foundation): `Native`, `Undecorated`, `GtkHeaderless`; `platform_default()`, `as_str()`, `FromStr` |
+| `apply_decoration_mode(&window, mode)`                       | Applies a mode to a `WebviewWindow` and records it; main thread, hidden window on Linux                                                                        |
+| `show_window_menu(&window, x, y)`, `window_menu_supported()` | The native window menu; `show_window_menu` must run on the main thread                                                                                         |
+| `DecorationState`, `Error`, `Result`                         | Managed state (`record`, `get`, `forget`) and the serializable error type                                                                                      |
 
 ## Platform notes
 

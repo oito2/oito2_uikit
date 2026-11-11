@@ -14,68 +14,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::sync::Mutex;
 
-use serde::{Deserialize, Serialize};
 use tauri::{Manager, Runtime, WebviewWindow};
 
-/// How the window frame is drawn.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum DecorationMode {
-    /// The system title bar and frame.
-    Native,
-    /// No system frame at all: the app draws the title bar and its own resize
-    /// handles.
-    Undecorated,
-    /// GTK client-side decorations with an empty title bar: GTK keeps the
-    /// window shadow and resize edges, the app draws the title bar. Falls back
-    /// to [`DecorationMode::Undecorated`] outside Linux.
-    GtkHeaderless,
-}
-
-impl DecorationMode {
-    /// The mode used when none is requested: GTK client-side decorations on
-    /// Linux, the native frame on macOS, no system frame elsewhere.
-    pub fn platform_default() -> Self {
-        if cfg!(target_os = "linux") {
-            Self::GtkHeaderless
-        } else if cfg!(target_os = "macos") {
-            Self::Native
-        } else {
-            Self::Undecorated
-        }
-    }
-}
-
-impl DecorationMode {
-    /// The name accepted by [`FromStr`]: `native`, `undecorated` or
-    /// `gtk-headerless`.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Native => "native",
-            Self::Undecorated => "undecorated",
-            Self::GtkHeaderless => "gtk-headerless",
-        }
-    }
-}
-
-impl FromStr for DecorationMode {
-    type Err = crate::Error;
-
-    /// Parses `native`, `undecorated` or `gtk-headerless` (case-insensitive).
-    fn from_str(value: &str) -> crate::Result<Self> {
-        match value.trim().to_ascii_lowercase().as_str() {
-            "native" => Ok(Self::Native),
-            "undecorated" => Ok(Self::Undecorated),
-            "gtk-headerless" | "gtkheaderless" => Ok(Self::GtkHeaderless),
-            other => Err(crate::Error::Unsupported(format!(
-                "decoration mode `{other}`"
-            ))),
-        }
-    }
-}
+use crate::DecorationMode;
 
 /// Applies `mode` to `window` and records it. Must run on the main thread. On
 /// Linux the window must still be hidden, so GTK can switch its frame before
@@ -174,38 +117,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_every_mode() {
-        assert_eq!(
-            "native".parse::<DecorationMode>().unwrap(),
-            DecorationMode::Native
-        );
-        assert_eq!(
-            " Undecorated ".parse::<DecorationMode>().unwrap(),
-            DecorationMode::Undecorated
-        );
-        assert_eq!(
-            "gtk-headerless".parse::<DecorationMode>().unwrap(),
-            DecorationMode::GtkHeaderless
-        );
-    }
-
-    #[test]
-    fn names_round_trip() {
-        for mode in [
-            DecorationMode::Native,
-            DecorationMode::Undecorated,
-            DecorationMode::GtkHeaderless,
-        ] {
-            assert_eq!(mode.as_str().parse::<DecorationMode>().unwrap(), mode);
-        }
-    }
-
-    #[test]
-    fn rejects_unknown_modes() {
-        assert!("frameless".parse::<DecorationMode>().is_err());
-    }
-
-    #[test]
     fn serializes_as_the_parsed_names() {
         for mode in [
             DecorationMode::Native,
@@ -214,7 +125,17 @@ mod tests {
         ] {
             let json = serde_json::to_string(&mode).unwrap();
             assert_eq!(json, format!("\"{}\"", mode.as_str()));
+            assert_eq!(serde_json::from_str::<DecorationMode>(&json).unwrap(), mode);
         }
+    }
+
+    #[test]
+    fn unknown_mode_names_are_unsupported() {
+        let error = crate::Error::from("frameless".parse::<DecorationMode>().unwrap_err());
+        assert_eq!(
+            error.to_string(),
+            "unsupported: decoration mode `frameless`"
+        );
     }
 
     #[test]
@@ -235,17 +156,5 @@ mod tests {
         assert_eq!(state.get("settings"), Some(DecorationMode::Undecorated));
         state.forget("missing");
         assert_eq!(state.get("settings"), Some(DecorationMode::Undecorated));
-    }
-
-    #[test]
-    fn defaults_per_platform() {
-        let expected = if cfg!(target_os = "linux") {
-            DecorationMode::GtkHeaderless
-        } else if cfg!(target_os = "macos") {
-            DecorationMode::Native
-        } else {
-            DecorationMode::Undecorated
-        };
-        assert_eq!(DecorationMode::platform_default(), expected);
     }
 }

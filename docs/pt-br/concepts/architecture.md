@@ -76,7 +76,7 @@ A CI roda `pnpm generate:check` para que o CSS gerado nunca se afaste das fontes
 | `packages/ui-settings`                | `@oito2/ui-settings`: `SystemSettingsScope`, `composeSystemSettings`, `loadSystemSettings`                                                                                                                                   |
 | `packages/ui-test-utils`              | Utilitários de teste compartilhados pelos pacotes (privado)                                                                                                                                                                  |
 | `plugins/tauri-plugin-oito2-window`   | Rust: modos de decoração e o menu nativo da janela                                                                                                                                                                           |
-| `plugins/tauri-plugin-oito2-settings` | Rust: sessão de desktop, fontes do layout de botões, acento, alto contraste, observadores no Linux                                                                                                                           |
+| `plugins/tauri-plugin-oito2-settings` | Rust: o comando `read_settings` e o evento de mudança sobre o `oito2_settings` (sessão de desktop, fontes do layout de botões, acento, alto contraste, esquema de cores, observadores)                                       |
 | `apps/showcase`                       | O catálogo SvelteKit de todos os componentes, compilado para o GitHub Pages e como app Tauri (`src-tauri/`)                                                                                                                  |
 | `tools/generate-css`                  | Gera `tokens.css`, `schemes.css` e `presets.css`                                                                                                                                                                             |
 | `tools/generate-docs`                 | Gera a referência de API do showcase (`apps/showcase/src/lib/api/api.json`)                                                                                                                                                  |
@@ -119,16 +119,17 @@ Dentro de `packages/ui/src/lib`:
 
 ### Rust
 
-| Crate                                    | Usado por                                 | Por quê                                                                                                |
-| ---------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `tauri` (2.12)                           | os dois plugins, showcase                 | O runtime do app e a API de plugins                                                                    |
-| `tauri-plugin` (build)                   | os dois plugins                           | Gera os arquivos de permissão a partir dos comandos                                                    |
-| `serde`                                  | os dois plugins                           | Serializa `RawSettings`, `DecorationMode` e os erros para o webview                                    |
-| `thiserror`                              | os dois plugins                           | O enum de erro serializável de cada crate                                                              |
-| `gtk` 0.18 (Linux)                       | os dois plugins                           | Decorações client-side do GTK, o menu de janela do GDK, GSettings, monitores de arquivo do GIO e D-Bus |
-| `windows` 0.62 (Windows)                 | plugin de janela, plugin de configurações | O menu do sistema (`Win32_UI_WindowsAndMessaging`); o acento e o alto contraste (`UI::ViewManagement`) |
-| `objc2-app-kit` 0.3 (macOS)              | plugin de configurações                   | `NSColor.controlAccentColor` e a preferência "Aumentar contraste"                                      |
-| `tauri-plugin-dialog`, `tauri-plugin-fs` | showcase                                  | O lado Rust dos componentes de arquivo                                                                 |
+| Crate                                    | Usado por                 | Por quê                                                                                                                                                             |
+| ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tauri` (2.12)                           | os dois plugins, showcase | O runtime do app e a API de plugins                                                                                                                                 |
+| `tauri-plugin` (build)                   | os dois plugins           | Gera os arquivos de permissão a partir dos comandos                                                                                                                 |
+| `serde`                                  | os dois plugins           | Serializa `RawSettings`, `DecorationMode` e os erros para o webview (pelos crates oito2 e pelo erro próprio do plugin de janela)                                    |
+| `thiserror`                              | plugin de janela          | O enum de erro serializável dele                                                                                                                                    |
+| `oito2_foundation` 0.1                   | os dois plugins           | `DecorationMode`, o suporte e a validação de posição do menu da janela, os tipos do `RawSettings`                                                                   |
+| `oito2_settings` 0.1 (`watch`)           | plugin de configurações   | Os leitores e observadores de cada plataforma: GSettings, o portal XDG e os arquivos de configuração no Linux (pelo `gio`/`glib` 0.18), o Windows Runtime, o AppKit |
+| `gtk` 0.18 (Linux)                       | plugin de janela          | Decorações client-side do GTK e o menu de janela do GDK                                                                                                             |
+| `windows` 0.62 (Windows)                 | plugin de janela          | O menu do sistema (`Win32_UI_WindowsAndMessaging`)                                                                                                                  |
+| `tauri-plugin-dialog`, `tauri-plugin-fs` | showcase                  | O lado Rust dos componentes de arquivo                                                                                                                              |
 
 Cada versão é declarada uma vez: as do npm no `catalog:` do `pnpm-workspace.yaml`, as dos crates em `[workspace.dependencies]` do `Cargo.toml` da raiz.
 

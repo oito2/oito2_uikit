@@ -141,7 +141,7 @@ Two Tauri v2 plugins do what the webview cannot:
 | Plugin                        | Commands and events                                          | Webview side         |
 | ----------------------------- | ------------------------------------------------------------ | -------------------- |
 | `tauri-plugin-oito2-window`   | `set_decoration_mode`, `decoration_mode`, `show_window_menu` | `@oito2/ui-window`   |
-| `tauri-plugin-oito2-settings` | `read_settings`, event `oito2-settings://changed` (Linux)    | `@oito2/ui-settings` |
+| `tauri-plugin-oito2-settings` | `read_settings`, event `oito2-settings://changed`            | `@oito2/ui-settings` |
 
 The plugins return raw values; the TypeScript packages turn them into what the components need. Each plugin's permissions are listed in its README and in [Tauri plugins](../reference/tauri-plugins.md).
 

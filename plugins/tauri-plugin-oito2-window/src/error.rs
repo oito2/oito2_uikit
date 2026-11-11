@@ -54,4 +54,11 @@ impl Serialize for Error {
 }
 
 /// Result type of the plugin.
+/// A decoration mode name that is not a mode becomes an `Unsupported` error.
+impl From<oito2_foundation::ParseDecorationModeError> for Error {
+    fn from(error: oito2_foundation::ParseDecorationModeError) -> Self {
+        Self::Unsupported(error.to_string())
+    }
+}
+
 pub type Result<T> = std::result::Result<T, Error>;

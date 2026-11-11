@@ -76,7 +76,7 @@ CI runs `pnpm generate:check` so the generated CSS never drifts from its sources
 | `packages/ui-settings`                | `@oito2/ui-settings`: `SystemSettingsScope`, `composeSystemSettings`, `loadSystemSettings`                                                                                                                              |
 | `packages/ui-test-utils`              | Test helpers shared by the packages (private)                                                                                                                                                                           |
 | `plugins/tauri-plugin-oito2-window`   | Rust: decoration modes and the native window menu                                                                                                                                                                       |
-| `plugins/tauri-plugin-oito2-settings` | Rust: desktop session, button layout sources, accent, high contrast, Linux watchers                                                                                                                                     |
+| `plugins/tauri-plugin-oito2-settings` | Rust: the `read_settings` command and the change event over `oito2_settings` (desktop session, button layout sources, accent, high contrast, color scheme, watchers)                                                    |
 | `apps/showcase`                       | The SvelteKit catalogue of every component, built for GitHub Pages and as a Tauri app (`src-tauri/`)                                                                                                                    |
 | `tools/generate-css`                  | Generates `tokens.css`, `schemes.css` and `presets.css`                                                                                                                                                                 |
 | `tools/generate-docs`                 | Generates the showcase API reference (`apps/showcase/src/lib/api/api.json`)                                                                                                                                             |
@@ -119,16 +119,17 @@ Inside `packages/ui/src/lib`:
 
 ### Rust
 
-| Crate                                    | Used by                        | Why                                                                                                   |
-| ---------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `tauri` (2.12)                           | both plugins, showcase         | The app runtime and plugin API                                                                        |
-| `tauri-plugin` (build)                   | both plugins                   | Generates the permission files from the commands                                                      |
-| `serde`                                  | both plugins                   | Serializes `RawSettings`, `DecorationMode` and errors for the webview                                 |
-| `thiserror`                              | both plugins                   | The serializable error enum of each crate                                                             |
-| `gtk` 0.18 (Linux)                       | both plugins                   | GTK client-side decorations, the GDK window menu, GSettings, GIO file monitors and D-Bus              |
-| `windows` 0.62 (Windows)                 | window plugin, settings plugin | The system menu (`Win32_UI_WindowsAndMessaging`); the accent and high contrast (`UI::ViewManagement`) |
-| `objc2-app-kit` 0.3 (macOS)              | settings plugin                | `NSColor.controlAccentColor` and the "Increase contrast" preference                                   |
-| `tauri-plugin-dialog`, `tauri-plugin-fs` | showcase                       | The Rust side of the file components                                                                  |
+| Crate                                    | Used by                | Why                                                                                                                                                                |
+| ---------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tauri` (2.12)                           | both plugins, showcase | The app runtime and plugin API                                                                                                                                     |
+| `tauri-plugin` (build)                   | both plugins           | Generates the permission files from the commands                                                                                                                   |
+| `serde`                                  | both plugins           | Serializes `RawSettings`, `DecorationMode` and errors for the webview (through the oito2 crates and the window plugin's own error)                                 |
+| `thiserror`                              | window plugin          | Its serializable error enum                                                                                                                                        |
+| `oito2_foundation` 0.1                   | both plugins           | `DecorationMode`, window menu support and position checks, the `RawSettings` types                                                                                 |
+| `oito2_settings` 0.1 (`watch`)           | settings plugin        | The platform readers and watchers: GSettings, the XDG desktop portal and the configuration files on Linux (through `gio`/`glib` 0.18), the Windows Runtime, AppKit |
+| `gtk` 0.18 (Linux)                       | window plugin          | GTK client-side decorations and the GDK window menu                                                                                                                |
+| `windows` 0.62 (Windows)                 | window plugin          | The system menu (`Win32_UI_WindowsAndMessaging`)                                                                                                                   |
+| `tauri-plugin-dialog`, `tauri-plugin-fs` | showcase               | The Rust side of the file components                                                                                                                               |
 
 Every version is declared once: npm versions in the `catalog:` of `pnpm-workspace.yaml`, crate versions in `[workspace.dependencies]` of the root `Cargo.toml`.
 
