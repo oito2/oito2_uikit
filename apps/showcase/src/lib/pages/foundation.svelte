@@ -28,12 +28,15 @@
 		radius,
 		sizes,
 		spacing,
-		typography
+		typography,
+		useSystemSettings
 	} from '@oito2/ui';
 	import FormatSample from './parts/FormatSample.svelte';
 
 	const platform = Platform.current();
 	const settings = fallbackSystemSettings(platform);
+	// The settings of the system the showcase runs on (the platform defaults in a browser).
+	const system = useSystemSettings();
 	const locales = new ListCollection(
 		[
 			{ value: 'en', label: 'English' },
@@ -54,13 +57,21 @@
 			<dd>{platform.isWeb ? 'a browser' : 'a Tauri webview'}</dd>
 			<dt>Density</dt>
 			<dd>{platform.density}</dd>
+			<dt>Desktop environment</dt>
+			<dd>{system.current.desktopEnvironment ?? '—'}</dd>
 			<dt>Window controls</dt>
 			<dd>
-				{settings.windowControlStyle}
-				({settings.windowButtonLayout.leading.join(', ') || '—'} | {settings.windowButtonLayout.trailing.join(
+				{system.current.windowControlStyle}
+				({system.current.windowButtonLayout.leading.join(', ') || '—'} | {system.current.windowButtonLayout.trailing.join(
 					', '
 				) || '—'})
 			</dd>
+			<dt>Accent color</dt>
+			<dd>{system.current.accentColor ?? '—'}</dd>
+			<dt>Color scheme</dt>
+			<dd>{system.current.colorScheme ?? 'no preference'}</dd>
+			<dt>High contrast</dt>
+			<dd>{system.current.highContrast ? 'on' : 'off'}</dd>
 		</dl>
 	</section>
 

@@ -26,9 +26,17 @@ describe('isRawSettings', () => {
 				gsettings: { 'org.gnome.desktop.interface/accent-color': 'blue' },
 				config: { ...emptyRawSettings.config, kdeAccentColor: '#3DAEE9' },
 				systemAccent: '#3DAEE9',
-				systemHighContrast: true
+				systemHighContrast: true,
+				colorScheme: 'dark'
 			})
 		).toBe(true);
+	});
+
+	it('accepts a payload of an older plugin without the color scheme', () => {
+		const older = { ...emptyRawSettings };
+		delete older.colorScheme;
+		expect(isRawSettings(older)).toBe(true);
+		expect(isRawSettings({ ...emptyRawSettings, colorScheme: 'light' })).toBe(true);
 	});
 
 	it('rejects values without the shape', () => {
@@ -40,5 +48,7 @@ describe('isRawSettings', () => {
 		expect(isRawSettings({ ...emptyRawSettings, xdgCurrentDesktop: 1 })).toBe(false);
 		expect(isRawSettings({ ...emptyRawSettings, desktopSession: undefined })).toBe(false);
 		expect(isRawSettings({ ...emptyRawSettings, systemAccent: false })).toBe(false);
+		expect(isRawSettings({ ...emptyRawSettings, colorScheme: 'sepia' })).toBe(false);
+		expect(isRawSettings({ ...emptyRawSettings, colorScheme: 1 })).toBe(false);
 	});
 });

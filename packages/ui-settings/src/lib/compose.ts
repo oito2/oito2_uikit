@@ -19,6 +19,7 @@ import {
 	detectDesktopEnvironment,
 	fallbackSystemSettings,
 	type AccentColor,
+	type Brightness,
 	type DesktopEnvironment,
 	type Platform,
 	type SystemSettings,
@@ -90,11 +91,48 @@ function linuxHighContrast(raw: RawSettings, environment: DesktopEnvironment): b
 	return typeof theme === 'string' && theme.toLowerCase().includes('highcontrast');
 }
 
+/** Returns the scheme of a GNOME `color-scheme` value, or `null` for `default` or unknown. */
+function gnomePreference(value: unknown): Brightness | null {
+	if (value === 'prefer-dark') return 'dark';
+	if (value === 'prefer-light') return 'light';
+	return null;
+}
+
+/**
+ * Returns the scheme the Linux desktop's own store asks for: a `kdeglobals` color scheme or
+ * global theme containing "dark" on KDE, the `is_dark` flag on COSMIC, nothing on Xfce and
+ * LXQt, and the GNOME interface `color-scheme` elsewhere.
+ */
+function linuxColorScheme(raw: RawSettings, environment: DesktopEnvironment): Brightness | null {
+	switch (environment) {
+		case 'kde': {
+			const name = raw.config.kdeColorScheme ?? raw.config.kdeLookAndFeelPackage ?? '';
+			return name.toLowerCase().includes('dark') ? 'dark' : null;
+		}
+		case 'cosmic': {
+			const dark = raw.config.cosmicIsDark;
+			return typeof dark === 'boolean' ? (dark ? 'dark' : 'light') : null;
+		}
+		case 'xfce':
+		case 'lxqt':
+			return null;
+		default:
+			return gnomePreference(raw.gsettings[`${gnomeInterface}/color-scheme`]);
+	}
+}
+
+/** Returns `value` when it is a scheme, else `null`. */
+function schemeOf(value: unknown): Brightness | null {
+	return value === 'light' || value === 'dark' ? value : null;
+}
+
 /**
  * Turns the values read from the platform into the `SystemSettings` of `platform`, with
  * the rules of `oito2_ui_settings`: the desktop environment from the session variables,
- * the button layout of each desktop's own settings (or its default), the accent and the
- * high-contrast preference. Outside native Linux only the accent and contrast count.
+ * the button layout of each desktop's own settings (or its default), the accent, the
+ * high-contrast preference and the color scheme (the platform's, else on Linux the
+ * desktop's own store). Outside native Linux only the accent, contrast and color scheme
+ * count.
  */
 export function composeSystemSettings(raw: RawSettings, platform: Platform): SystemSettings {
 	const linux = platform.isLinux && platform.isDesktopNative;
@@ -112,7 +150,9 @@ export function composeSystemSettings(raw: RawSettings, platform: Platform): Sys
 		windowControlStyle: fallback.windowControlStyle,
 		windowButtonLayout: layout ?? fallback.windowButtonLayout,
 		accentColor: environment ? linuxAccent(raw, environment) : raw.systemAccent,
-		colorScheme: fallback.colorScheme,
+		colorScheme:
+			schemeOf(raw.colorScheme) ??
+			(environment ? linuxColorScheme(raw, environment) : fallback.colorScheme),
 		highContrast:
 			raw.systemHighContrast || (environment !== null && linuxHighContrast(raw, environment))
 	};

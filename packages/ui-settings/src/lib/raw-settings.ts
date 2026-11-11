@@ -26,12 +26,16 @@ export interface ConfigValues {
 	readonly kdeAccentColor: string | null;
 	/** KDE's color scheme name. */
 	readonly kdeColorScheme: string | null;
+	/** KDE's global theme (look-and-feel package) name; absent from older plugins. */
+	readonly kdeLookAndFeelPackage?: string | null;
 	/** The Xfwm4 button layout, such as `O|SHMC`. */
 	readonly xfwmButtonLayout: string | null;
 	/** COSMIC's `show_minimize` flag. */
 	readonly cosmicShowMinimize: boolean | null;
 	/** COSMIC's `show_maximize` flag. */
 	readonly cosmicShowMaximize: boolean | null;
+	/** COSMIC's `is_dark` flag; absent from older plugins. */
+	readonly cosmicIsDark?: boolean | null;
 }
 
 /**
@@ -48,17 +52,24 @@ export interface RawSettings {
 	readonly systemAccent: string | null;
 	/** Whether the system asks for high contrast. */
 	readonly systemHighContrast: boolean;
+	/**
+	 * The light or dark scheme of the platform (the settings portal on Linux), `null` without
+	 * a preference; absent from older plugins.
+	 */
+	readonly colorScheme?: 'light' | 'dark' | null;
 }
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
 	typeof value === 'object' && value !== null;
 const isStringOrNull = (value: unknown): value is string | null =>
 	typeof value === 'string' || value === null;
+const isColorScheme = (value: unknown): boolean =>
+	value === undefined || value === null || value === 'light' || value === 'dark';
 
 /**
  * Whether `value` has the shape of a `RawSettings`: `gsettings` and `config` are objects,
- * `systemHighContrast` a boolean and the session variables and `systemAccent` strings or
- * null.
+ * `systemHighContrast` a boolean, the session variables and `systemAccent` strings or
+ * null, and `colorScheme`, when present, `light`, `dark` or null.
  */
 export function isRawSettings(value: unknown): value is RawSettings {
 	return (
@@ -68,7 +79,8 @@ export function isRawSettings(value: unknown): value is RawSettings {
 		typeof value.systemHighContrast === 'boolean' &&
 		isStringOrNull(value.xdgCurrentDesktop) &&
 		isStringOrNull(value.desktopSession) &&
-		isStringOrNull(value.systemAccent)
+		isStringOrNull(value.systemAccent) &&
+		isColorScheme(value.colorScheme)
 	);
 }
 
@@ -82,10 +94,13 @@ export const emptyRawSettings: RawSettings = Object.freeze({
 		kwinButtonsOnRight: null,
 		kdeAccentColor: null,
 		kdeColorScheme: null,
+		kdeLookAndFeelPackage: null,
 		xfwmButtonLayout: null,
 		cosmicShowMinimize: null,
-		cosmicShowMaximize: null
+		cosmicShowMaximize: null,
+		cosmicIsDark: null
 	}),
 	systemAccent: null,
-	systemHighContrast: false
+	systemHighContrast: false,
+	colorScheme: null
 });

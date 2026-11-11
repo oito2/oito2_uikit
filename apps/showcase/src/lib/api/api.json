@@ -12697,7 +12697,7 @@
 			"isRawSettings": {
 				"kind": "function",
 				"source": "packages/ui-settings/src/lib/raw-settings.ts",
-				"doc": "Whether `value` has the shape of a `RawSettings`: `gsettings` and `config` are objects,\n`systemHighContrast` a boolean and the session variables and `systemAccent` strings or\nnull."
+				"doc": "Whether `value` has the shape of a `RawSettings`: `gsettings` and `config` are objects,\n`systemHighContrast` a boolean, the session variables and `systemAccent` strings or\nnull, and `colorScheme`, when present, `light`, `dark` or null."
 			},
 			"ConfigValues": {
 				"kind": "interface",
@@ -12717,7 +12717,7 @@
 			"composeSystemSettings": {
 				"kind": "function",
 				"source": "packages/ui-settings/src/lib/compose.ts",
-				"doc": "Turns the values read from the platform into the `SystemSettings` of `platform`, with\nthe rules of `oito2_ui_settings`: the desktop environment from the session variables,\nthe button layout of each desktop's own settings (or its default), the accent and the\nhigh-contrast preference. Outside native Linux only the accent and contrast count."
+				"doc": "Turns the values read from the platform into the `SystemSettings` of `platform`, with\nthe rules of `oito2_ui_settings`: the desktop environment from the session variables,\nthe button layout of each desktop's own settings (or its default), the accent, the\nhigh-contrast preference and the color scheme (the platform's, else on Linux the\ndesktop's own store). Outside native Linux only the accent, contrast and color scheme\ncount."
 			},
 			"sameSystemSettings": {
 				"kind": "function",

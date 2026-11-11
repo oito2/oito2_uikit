@@ -119,7 +119,7 @@ The GSettings keys read on Linux are `button-layout` of `org.gnome.desktop.wm.pr
 
 `ConfigValues` fields (each `null` when absent): `kwinButtonsOnLeft`, `kwinButtonsOnRight`, `kdeAccentColor`, `kdeColorScheme`, `kdeLookAndFeelPackage`, `xfwmButtonLayout`, `cosmicShowMinimize`, `cosmicShowMaximize`, `cosmicIsDark`.
 
-`@oito2/ui-settings` does not read `colorScheme`, `kdeLookAndFeelPackage` and `cosmicIsDark` yet; its `isRawSettings` guard accepts the extra fields.
+`@oito2/ui-settings` composes `colorScheme`, `kdeLookAndFeelPackage` and `cosmicIsDark` into `SystemSettings.colorScheme`, and reads them as `null` when an older plugin leaves them out.
 
 ### Event
 

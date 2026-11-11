@@ -33,6 +33,7 @@ function raw(
 		config?: Partial<ConfigValues>;
 		systemAccent?: string;
 		systemHighContrast?: boolean;
+		colorScheme?: RawSettings['colorScheme'];
 	} = {}
 ): RawSettings {
 	return {
@@ -41,7 +42,8 @@ function raw(
 		gsettings: options.gsettings ?? {},
 		config: { ...emptyRawSettings.config, ...options.config },
 		systemAccent: options.systemAccent ?? null,
-		systemHighContrast: options.systemHighContrast ?? false
+		systemHighContrast: options.systemHighContrast ?? false,
+		colorScheme: options.colorScheme ?? null
 	};
 }
 
@@ -202,6 +204,67 @@ describe('Xfce and COSMIC', () => {
 	});
 });
 
+describe('color scheme', () => {
+	const scheme = (settings: RawSettings, platform = linux) =>
+		composeSystemSettings(settings, platform).colorScheme;
+	const gnomeScheme = (value: string) => ({ [`${gnomeInterface}/color-scheme`]: value });
+
+	it('uses the portal value first', () => {
+		expect(
+			scheme(raw('GNOME', { colorScheme: 'light', gsettings: gnomeScheme('prefer-dark') }))
+		).toBe('light');
+		expect(scheme(raw('KDE', { colorScheme: 'dark' }))).toBe('dark');
+	});
+
+	it('reads the GNOME color-scheme key on the GNOME family, Cinnamon and MATE', () => {
+		for (const desktop of ['GNOME', 'X-Cinnamon', 'MATE', 'Budgie:GNOME', 'Unity']) {
+			expect(scheme(raw(desktop, { gsettings: gnomeScheme('prefer-dark') })), desktop).toBe(
+				'dark'
+			);
+		}
+		expect(scheme(raw('GNOME', { gsettings: gnomeScheme('prefer-light') }))).toBe('light');
+		expect(scheme(raw('GNOME', { gsettings: gnomeScheme('default') }))).toBeNull();
+		expect(scheme(raw('GNOME'))).toBeNull();
+	});
+
+	it('finds a dark scheme or global theme on KDE', () => {
+		expect(scheme(raw('KDE', { config: { kdeColorScheme: 'BreezeDark' } }))).toBe('dark');
+		expect(
+			scheme(raw('KDE', { config: { kdeLookAndFeelPackage: 'org.kde.breezedark.desktop' } }))
+		).toBe('dark');
+		expect(scheme(raw('KDE', { config: { kdeColorScheme: 'BreezeLight' } }))).toBeNull();
+		expect(scheme(raw('KDE', { gsettings: gnomeScheme('prefer-dark') }))).toBeNull();
+	});
+
+	it('reads the COSMIC is_dark flag', () => {
+		expect(scheme(raw('COSMIC', { config: { cosmicIsDark: true } }))).toBe('dark');
+		expect(scheme(raw('COSMIC', { config: { cosmicIsDark: false } }))).toBe('light');
+		expect(scheme(raw('COSMIC'))).toBeNull();
+	});
+
+	it('has no store beyond the portal on Xfce and LXQt', () => {
+		expect(scheme(raw('XFCE', { gsettings: gnomeScheme('prefer-dark') }))).toBeNull();
+		expect(scheme(raw('LXQt', { gsettings: gnomeScheme('prefer-dark') }))).toBeNull();
+		expect(scheme(raw('XFCE', { colorScheme: 'dark' }))).toBe('dark');
+	});
+
+	it('takes the system value elsewhere', () => {
+		expect(scheme(raw('', { colorScheme: 'dark' }), windows)).toBe('dark');
+		expect(scheme(raw('GNOME', { gsettings: gnomeScheme('prefer-dark') }), windows)).toBeNull();
+	});
+
+	it('is null with a plugin that does not send it', () => {
+		const older = {
+			...raw('GNOME', { gsettings: { [`${gnomeInterface}/color-scheme`]: 'default' } })
+		};
+		delete older.colorScheme;
+		expect(scheme(older)).toBeNull();
+		const config = { ...emptyRawSettings.config };
+		delete config.cosmicIsDark;
+		expect(scheme({ ...raw('COSMIC'), config })).toBeNull();
+	});
+});
+
 describe('other platforms', () => {
 	it('use the platform defaults and the system accent', () => {
 		const settings = composeSystemSettings(
@@ -243,6 +306,12 @@ describe('helpers', () => {
 			sameSystemSettings(
 				a,
 				composeSystemSettings(raw('GNOME', { systemAccent: '#111111' }), linux)
+			)
+		).toBe(false);
+		expect(
+			sameSystemSettings(
+				a,
+				composeSystemSettings(raw('GNOME', { colorScheme: 'dark' }), linux)
 			)
 		).toBe(false);
 	});

@@ -4,7 +4,7 @@
 
 # System settings
 
-How an oito2 app learns the desktop environment, the window button layout, the accent color and the high-contrast preference of the system it runs on. The work is split on purpose: the Rust plugin only **reads** raw values, and the TypeScript package **composes** them, so every rule is a pure function tested without the platform.
+How an oito2 app learns the desktop environment, the window button layout, the accent color, the light or dark preference and the high-contrast preference of the system it runs on. The work is split on purpose: the Rust plugin only **reads** raw values, and the TypeScript package **composes** them, so every rule is a pure function tested without the platform.
 
 ```text
 tauri-plugin-oito2-settings        @oito2/ui-settings                       @oito2/ui
@@ -20,17 +20,17 @@ For setting it up in an app, see the [Desktop integration guide](../guides/deskt
 
 Defined in `packages/ui/src/lib/foundation/system-settings.ts`:
 
-| Field                | Type                         | Meaning                                                                                                                   |
-| -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `platform`           | `Platform`                   | Operating system and whether it runs on the web                                                                           |
-| `desktopEnvironment` | `DesktopEnvironment \| null` | The Linux desktop; `null` outside native Linux                                                                            |
-| `windowControlStyle` | `WindowControlStyle`         | The look of the window buttons                                                                                            |
-| `windowButtonLayout` | `WindowButtonLayout`         | The buttons on each side, in order                                                                                        |
-| `accentColor`        | `string \| null`             | The system accent as hex                                                                                                  |
-| `colorScheme`        | `Brightness \| null`         | The light or dark scheme the system asks for; `null` without a preference (always `null` for now: no reader fills it yet) |
-| `highContrast`       | `boolean`                    | Whether the system asks for high contrast                                                                                 |
+| Field                | Type                         | Meaning                                                                   |
+| -------------------- | ---------------------------- | ------------------------------------------------------------------------- |
+| `platform`           | `Platform`                   | Operating system and whether it runs on the web                           |
+| `desktopEnvironment` | `DesktopEnvironment \| null` | The Linux desktop; `null` outside native Linux                            |
+| `windowControlStyle` | `WindowControlStyle`         | The look of the window buttons                                            |
+| `windowButtonLayout` | `WindowButtonLayout`         | The buttons on each side, in order                                        |
+| `accentColor`        | `string \| null`             | The system accent as hex                                                  |
+| `colorScheme`        | `Brightness \| null`         | The light or dark scheme the system asks for; `null` without a preference |
+| `highContrast`       | `boolean`                    | Whether the system asks for high contrast                                 |
 
-`SystemScope` provides it; `useSystemSettings()` reads it, falling back to `fallbackSystemSettings(Platform.current())` without a scope. The fallback derives everything from the platform: on native Linux the desktop is `unknown` (style `gnome`), on Windows the style is `windows`, on macOS `macos`, on the web and touch platforms `none`; the layout is `WindowButtonLayout.defaultFor(style)` (close, minimize, maximize on the leading side for macOS; minimize, maximize, close on the trailing side otherwise); no accent; no high contrast.
+`SystemScope` provides it; `useSystemSettings()` reads it, falling back to `fallbackSystemSettings(Platform.current())` without a scope. The fallback derives everything from the platform: on native Linux the desktop is `unknown` (style `gnome`), on Windows the style is `windows`, on macOS `macos`, on the web and touch platforms `none`; the layout is `WindowButtonLayout.defaultFor(style)` (close, minimize, maximize on the leading side for macOS; minimize, maximize, close on the trailing side otherwise); no accent; no color scheme preference; no high contrast.
 
 ## `tauri-plugin-oito2-settings` (Rust)
 
@@ -49,7 +49,7 @@ Errors serialize as `{ kind, message }` with `kind` `unsupported` or `internal`.
 
 ### `RawSettings`
 
-Serialized in camelCase: `xdgCurrentDesktop`, `desktopSession`, `gsettings` (values by `schema/key`, a string or a boolean), `config` (`kwinButtonsOnLeft`, `kwinButtonsOnRight`, `kdeAccentColor`, `kdeColorScheme`, `kdeLookAndFeelPackage`, `xfwmButtonLayout`, `cosmicShowMinimize`, `cosmicShowMaximize`, `cosmicIsDark`), `systemAccent` (`#RRGGBB` or `null`), `systemHighContrast` and `colorScheme` (`light`, `dark` or `null`). `@oito2/ui-settings` does not read `colorScheme`, `kdeLookAndFeelPackage` and `cosmicIsDark` yet.
+Serialized in camelCase: `xdgCurrentDesktop`, `desktopSession`, `gsettings` (values by `schema/key`, a string or a boolean), `config` (`kwinButtonsOnLeft`, `kwinButtonsOnRight`, `kdeAccentColor`, `kdeColorScheme`, `kdeLookAndFeelPackage`, `xfwmButtonLayout`, `cosmicShowMinimize`, `cosmicShowMaximize`, `cosmicIsDark`), `systemAccent` (`#RRGGBB` or `null`), `systemHighContrast` and `colorScheme` (`light`, `dark` or `null`). A plugin older than these fields leaves out `colorScheme`, `kdeLookAndFeelPackage` and `cosmicIsDark`; `@oito2/ui-settings` reads them as `null`.
 
 ### Sources
 
@@ -72,7 +72,16 @@ On **native Linux**, the desktop environment comes from `detectDesktopEnvironmen
 
 "GNOME named accent" means `org.gnome.desktop.interface/accent-color` when it names one of the nine `accentColors` (`blue`, `teal`…, `slate`); it is mapped to that accent's hex.
 
-On **Windows and macOS** (and any non-Linux platform), there is no desktop environment, the style and layout are the platform defaults, `accentColor` is `systemAccent` and `highContrast` is `systemHighContrast`.
+The **color scheme** is `colorScheme` of `RawSettings` (the settings portal on Linux) when it is `light` or `dark`. When the portal states no preference, each Linux desktop's own store decides, as `oito2_foundation` does:
+
+| Desktop environment                                                   | Color scheme without a portal preference                                                                            |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `kde`                                                                 | `dark` when `kdeColorScheme` (else `kdeLookAndFeelPackage`) contains `dark`, else `null`                            |
+| `cosmic`                                                              | `cosmicIsDark`: `dark` when `true`, `light` when `false`, `null` when missing                                       |
+| `xfce`, `lxqt`                                                        | `null`: no store beyond the portal                                                                                  |
+| `gnome`, `budgie`, `cinnamon`, `mate`, `pantheon`, `unity`, `unknown` | GSettings `org.gnome.desktop.interface/color-scheme`: `prefer-dark` → `dark`, `prefer-light` → `light`, else `null` |
+
+On **Windows and macOS** (and any non-Linux platform), there is no desktop environment, the style and layout are the platform defaults, `accentColor` is `systemAccent`, `colorScheme` is the `colorScheme` of `RawSettings` and `highContrast` is `systemHighContrast`.
 
 The button layout parsers live in `@oito2/ui` (`WindowButtonLayout.parseGnome`, `parseKde`, `parseXfwm`); they skip unknown tokens and repeated buttons.
 
@@ -93,7 +102,7 @@ Each read carries a generation number, so a slow read never overwrites a newer o
 
 | What                         | Where                                                                                                            |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Composition rules            | `packages/ui-settings/src/lib/compose.test.ts` (Node), against hand-written `RawSettings`                        |
+| Composition rules            | `packages/ui-settings/src/lib/compose.test.ts` (Node), against hand-written `RawSettings`, color scheme included |
 | Detection, layouts, fallback | `packages/ui/src/lib/foundation/*.test.ts`, compared with `fixtures/parity/foundation.json` from oito2_ui        |
 | The scope                    | `SystemSettingsScope.svelte.test.ts`, with a fake `source`                                                       |
 | JSON contract of the plugin  | `cargo test -p tauri-plugin-oito2-settings` (camelCase fields of `RawSettings`, error kinds)                     |

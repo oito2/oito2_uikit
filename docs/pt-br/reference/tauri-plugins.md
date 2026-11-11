@@ -119,7 +119,7 @@ As chaves do GSettings lidas no Linux são `button-layout` de `org.gnome.desktop
 
 Campos de `ConfigValues` (cada um `null` quando ausente): `kwinButtonsOnLeft`, `kwinButtonsOnRight`, `kdeAccentColor`, `kdeColorScheme`, `kdeLookAndFeelPackage`, `xfwmButtonLayout`, `cosmicShowMinimize`, `cosmicShowMaximize`, `cosmicIsDark`.
 
-O `@oito2/ui-settings` ainda não lê `colorScheme`, `kdeLookAndFeelPackage` e `cosmicIsDark`; a guarda `isRawSettings` dele aceita os campos extras.
+O `@oito2/ui-settings` compõe `colorScheme`, `kdeLookAndFeelPackage` e `cosmicIsDark` em `SystemSettings.colorScheme` e os lê como `null` quando um plugin mais antigo os omite.
 
 ### Evento
 
