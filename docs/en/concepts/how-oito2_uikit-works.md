@@ -85,6 +85,7 @@ Components that adapt to the operating system read a `SystemSettings` object fro
 | `windowControlStyle` | `gnome`, `breeze`, `xfwm`, `cosmic`, `windows`, `macos` or `none` |
 | `windowButtonLayout` | Which window buttons go on which side, in order                   |
 | `accentColor`        | The system accent as hex, or `null`                               |
+| `colorScheme`        | `light` or `dark` as the system asks, or `null`                   |
 | `highContrast`       | Whether the system asks for high contrast                         |
 
 Without a scope, components use `fallbackSystemSettings`, derived from the platform alone. In a Tauri app, `SystemSettingsScope` from `@oito2/ui-settings` fills the scope with the real values read by `tauri-plugin-oito2-settings`, and keeps them up to date. Placed outside the `ThemeProvider`, it makes the theme follow the system accent and contrast too:

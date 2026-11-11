@@ -26,7 +26,7 @@ O que ele oferece:
 
 - **Cerca de 100 componentes** — botões, campos, seletores, menus, diálogos, abas, tabelas, árvores, toasts, uma paleta de comandos e mais — com comportamento de teclado e leitor de tela seguindo o WAI-ARIA Authoring Practices, testados com o axe no Chromium e no WebKit.
 - **Chrome da janela** — barras de título e controles da janela em seis estilos (GNOME, Breeze, Xfwm, COSMIC, Windows, macOS), decorações no lado do cliente no Linux e no Windows, semáforos nativos no macOS.
-- **Integração com o sistema** — detecção do ambiente desktop, layout dos botões da janela, cor de destaque e alto contraste lidos do sistema e acompanhados ao vivo.
+- **Integração com o sistema** — detecção do ambiente desktop, layout dos botões da janela, cor de destaque, preferência por claro ou escuro e alto contraste lidos do sistema e acompanhados ao vivo.
 - **Temas** — esquemas claro, escuro e de alto contraste a partir de qualquer cor de destaque, e 13 presets (Everforest, Rosé Pine, Nord, Dracula/Alucard, Catppuccin).
 - **Pacotes opcionais** — realce de sintaxe, QR codes, um painel de assinatura, um recortador de imagens e envio/download de arquivos para Tauri e navegador.
 - **Funciona sem Tauri** — os componentes rodam em qualquer app Svelte 5; o [showcase](https://oito2.github.io/oito2_uikit/) é o mesmo app compilado para a web.
@@ -49,7 +49,9 @@ O oito2_uikit é licenciado sob a GPL-3.0: um app que o usa precisa ser distribu
 | [`@oito2/ui-window`](../../packages/ui-window)                             | Integração com a janela nativa (lado guest do `tauri-plugin-oito2-window`)               |
 | [`@oito2/ui-settings`](../../packages/ui-settings)                         | Integração com as configurações do sistema (lado guest do `tauri-plugin-oito2-settings`) |
 | [`tauri-plugin-oito2-window`](../../plugins/tauri-plugin-oito2-window)     | Rust: decorações, menu da janela                                                         |
-| [`tauri-plugin-oito2-settings`](../../plugins/tauri-plugin-oito2-settings) | Rust: ambiente desktop, layout dos botões, cor de destaque, alto contraste               |
+| [`tauri-plugin-oito2-settings`](../../plugins/tauri-plugin-oito2-settings) | Rust: ambiente desktop, layout dos botões, cor de destaque, contraste, esquema de cores  |
+
+Os dois plugins são camadas finas do Tauri sobre os crates [`oito2_foundation`](https://crates.io/crates/oito2_foundation) e [`oito2_settings`](https://crates.io/crates/oito2_settings) do [oito2_rs](https://github.com/oito2/oito2_rs), que as outras interfaces Rust do OITO2 compartilham, então todo app Rust lê o sistema do mesmo jeito.
 
 ## Pré-requisitos e instalação rápida
 

@@ -18,7 +18,7 @@ Operating system
         ▼
 tauri-plugin-oito2-settings (Rust)
   read_settings command  ──►  RawSettings (camelCase JSON)
-  oito2-settings://changed event (Linux, debounced 150 ms)
+  oito2-settings://changed event (Linux, Windows, macOS)
         │  invoke / listen
         ▼
 @oito2/ui-settings (TypeScript)
@@ -32,7 +32,7 @@ tauri-plugin-oito2-settings (Rust)
         └──► WindowTitleBar / HeaderBar / DialogTitleBar: control style and button layout
 ```
 
-The plugin returns only raw values. Every rule — which desktop environment it is, which button layout source applies, which accent wins — lives in `composeSystemSettings`, a pure function tested without Tauri. Outside Tauri there is no source, and the scope keeps `fallbackSystemSettings(platform)`. Details in [System settings](../architecture/system-settings.md).
+The plugin returns only raw values. Every rule — which desktop environment it is, which button layout source applies, which accent wins, which color scheme store counts — lives in `composeSystemSettings`, a pure function tested without Tauri. Outside Tauri there is no source, and the scope keeps `fallbackSystemSettings(platform)`. Details in [System settings](../architecture/system-settings.md).
 
 ### Window actions, from the title bar to the window
 

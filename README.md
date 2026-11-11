@@ -26,7 +26,7 @@ What it offers:
 
 - **About 100 components** — buttons, entries, pickers, menus, dialogs, tabs, tables, trees, toasts, a command palette and more — with keyboard and screen reader behavior following the WAI-ARIA Authoring Practices, tested with axe in Chromium and WebKit.
 - **Window chrome** — title bars and window controls in six styles (GNOME, Breeze, Xfwm, COSMIC, Windows, macOS), client-side decorations on Linux and Windows, native traffic lights on macOS.
-- **System integration** — desktop environment detection, window button layout, accent color and high contrast read from the system and followed live.
+- **System integration** — desktop environment detection, window button layout, accent color, light or dark preference and high contrast read from the system and followed live.
 - **Themes** — light, dark and high contrast schemes from any accent, and 13 presets (Everforest, Rosé Pine, Nord, Dracula/Alucard, Catppuccin).
 - **Optional packages** — syntax highlighting, QR codes, a signature pad, an image cropper, and file upload/download for Tauri and the browser.
 - **Works without Tauri** — the components run in any Svelte 5 app; the [showcase](https://oito2.github.io/oito2_uikit/) is the same app built for the web.
@@ -49,7 +49,9 @@ oito2_uikit is licensed under the GPL-3.0: an app that uses it must be distribut
 | [`@oito2/ui-window`](packages/ui-window)                             | Native window integration (guest side of `tauri-plugin-oito2-window`)     |
 | [`@oito2/ui-settings`](packages/ui-settings)                         | System settings integration (guest side of `tauri-plugin-oito2-settings`) |
 | [`tauri-plugin-oito2-window`](plugins/tauri-plugin-oito2-window)     | Rust: decorations, window menu                                            |
-| [`tauri-plugin-oito2-settings`](plugins/tauri-plugin-oito2-settings) | Rust: desktop environment, button layout, accent, high contrast           |
+| [`tauri-plugin-oito2-settings`](plugins/tauri-plugin-oito2-settings) | Rust: desktop environment, button layout, accent, contrast, color scheme  |
+
+The two plugins are thin Tauri layers over the [`oito2_foundation`](https://crates.io/crates/oito2_foundation) and [`oito2_settings`](https://crates.io/crates/oito2_settings) crates of [oito2_rs](https://github.com/oito2/oito2_rs), which the other OITO2 Rust user interfaces share, so every Rust app reads the system the same way.
 
 ## Prerequisites & Quick Installation
 

@@ -4,7 +4,7 @@
 
 # Integração com o desktop
 
-Como dar a um app Tauri v2 as configurações reais do desktop (destaque, alto contraste, disposição dos botões da janela), a barra de título oito2 com controles de janela que funcionam, e uma moldura de janela adequada a cada sistema operacional. Tudo aqui segue o app showcase ([`apps/showcase`](../../../apps/showcase)), que é ele mesmo um app Tauri feito com estes pacotes.
+Como dar a um app Tauri v2 as configurações reais do desktop (destaque, alto contraste, esquema de cores, disposição dos botões da janela), a barra de título oito2 com controles de janela que funcionam, e uma moldura de janela adequada a cada sistema operacional. Tudo aqui segue o app showcase ([`apps/showcase`](../../../apps/showcase)), que é ele mesmo um app Tauri feito com estes pacotes.
 
 ![O showcase com a sua header bar no Linux](../../img/desktop-integration-header-bar.png)
 
@@ -24,12 +24,12 @@ Como dar a um app Tauri v2 as configurações reais do desktop (destaque, alto c
 
 ## As peças
 
-| Peça                                         | Pacote / crate                                       | Papel                                                                                                     |
-| -------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `SystemSettingsScope`                        | `@oito2/ui-settings` + `tauri-plugin-oito2-settings` | Lê o ambiente de desktop, a disposição dos botões, o destaque e o alto contraste, e acompanha as mudanças |
-| `initWindow()`, `NativeWindowController`     | `@oito2/ui-window` + `tauri-plugin-oito2-window`     | Define a moldura da janela e liga a barra de título à janela real                                         |
-| `WindowScope`, `HeaderBar`, `WindowTitleBar` | `@oito2/ui`                                          | Fornecem o controlador às barras de título e as desenham no estilo do desktop                             |
-| `WindowResizeHandles`                        | `@oito2/ui-window`                                   | Bordas de redimensionamento para uma janela `undecorated` no Linux                                        |
+| Peça                                         | Pacote / crate                                       | Papel                                                                                                                         |
+| -------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `SystemSettingsScope`                        | `@oito2/ui-settings` + `tauri-plugin-oito2-settings` | Lê o ambiente de desktop, a disposição dos botões, o destaque, o alto contraste e o esquema de cores, e acompanha as mudanças |
+| `initWindow()`, `NativeWindowController`     | `@oito2/ui-window` + `tauri-plugin-oito2-window`     | Define a moldura da janela e liga a barra de título à janela real                                                             |
+| `WindowScope`, `HeaderBar`, `WindowTitleBar` | `@oito2/ui`                                          | Fornecem o controlador às barras de título e as desenham no estilo do desktop                                                 |
+| `WindowResizeHandles`                        | `@oito2/ui-window`                                   | Bordas de redimensionamento para uma janela `undecorated` no Linux                                                            |
 
 ## Lado Rust
 
@@ -302,7 +302,7 @@ Os componentes leem as configurações com `useSystemSettings()` de `@oito2/ui`:
 </p>
 ```
 
-`SystemSettingsScope` lê as configurações ao ser montado, acompanha o evento de mudança que o plugin emite no Linux e lê de novo sempre que a janela recupera o foco (o único caminho de atualização no Windows e no macOS). As suas props opcionais são `initialSettings`, `source`, `platform` e `onSettingsChange`. Para ler as configurações uma vez, sem componente, chame `loadSystemSettings()`. Quando uma leitura ou a assinatura falha (sem plugin, sem permissão), o escopo mantém as configurações atuais e imprime um `console.warn` com a causa. Dentro de um sandbox Flatpak ou Snap, `XDG_CONFIG_HOME` aponta para o diretório do próprio sandbox (`~/.var/app/<id>/config` no Flatpak), por isso o plugin não encontra ali `kwinrc`, `kdeglobals`, `xfwm4.xml` nem os arquivos do COSMIC; as fontes do portal XDG e do GSettings continuam funcionando. O que cada plataforma informa está no [README de `@oito2/ui-settings`](../../../packages/ui-settings/README.md#platform-coverage) e em [Configurações do sistema](../architecture/system-settings.md).
+`SystemSettingsScope` lê as configurações ao ser montado, acompanha o evento de mudança que o plugin emite no Linux, no Windows e no macOS e lê de novo sempre que a janela recupera o foco (o que cobre também um observador que não conseguiu iniciar). As suas props opcionais são `initialSettings`, `source`, `platform` e `onSettingsChange`. Para ler as configurações uma vez, sem componente, chame `loadSystemSettings()`. Quando uma leitura ou a assinatura falha (sem plugin, sem permissão), o escopo mantém as configurações atuais e imprime um `console.warn` com a causa. Dentro de um sandbox Flatpak ou Snap, `XDG_CONFIG_HOME` aponta para o diretório do próprio sandbox (`~/.var/app/<id>/config` no Flatpak), por isso o plugin não encontra ali `kwinrc`, `kdeglobals`, `xfwm4.xml` nem os arquivos do COSMIC; as fontes do portal XDG e do GSettings continuam funcionando. O que cada plataforma informa está no [README de `@oito2/ui-settings`](../../../packages/ui-settings/README.md#platform-coverage) e em [Configurações do sistema](../architecture/system-settings.md).
 
 ## Rodando o mesmo código num navegador
 

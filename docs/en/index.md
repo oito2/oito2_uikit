@@ -31,7 +31,7 @@ oito2_uikit is a Svelte 5 design system for Tauri v2 desktop apps on Linux, Wind
 - [Tokens and themes](./architecture/tokens-and-themes.md) — token values, generated CSS, color schemes, high contrast and presets.
 - [Interaction primitives](./architecture/interaction-primitives.md) — focus, roving focus, typeahead, dismissal, portals, positioning, collections and shortcuts.
 - [Window chrome](./architecture/window-chrome.md) — title bars, window controls, the window controller and the window plugin.
-- [System settings](./architecture/system-settings.md) — desktop detection, button layout, accent and high contrast, from Rust to the components.
+- [System settings](./architecture/system-settings.md) — desktop detection, button layout, accent, high contrast and color scheme, from Rust to the components.
 - [Parity and generators](./architecture/parity-and-generators.md) — the oito2_ui parity fixtures, the CSS and API generators, release scripts and CI.
 
 ---

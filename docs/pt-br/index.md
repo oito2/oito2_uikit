@@ -31,7 +31,7 @@ O oito2_uikit é um design system em Svelte 5 para apps desktop Tauri v2 no Linu
 - [Tokens e temas](./architecture/tokens-and-themes.md) — valores dos tokens, CSS gerado, esquemas de cor, alto contraste e presets.
 - [Primitivos de interação](./architecture/interaction-primitives.md) — foco, foco itinerante, typeahead, fechamento, portais, posicionamento, coleções e atalhos.
 - [Chrome da janela](./architecture/window-chrome.md) — barras de título, controles da janela, o controlador de janela e o plugin de janela.
-- [Configurações do sistema](./architecture/system-settings.md) — detecção do desktop, layout dos botões, cor de destaque e alto contraste, do Rust aos componentes.
+- [Configurações do sistema](./architecture/system-settings.md) — detecção do desktop, layout dos botões, cor de destaque, alto contraste e esquema de cores, do Rust aos componentes.
 - [Paridade e geradores](./architecture/parity-and-generators.md) — as fixtures de paridade com o oito2_ui, os geradores de CSS e de API, scripts de release e CI.
 
 ---

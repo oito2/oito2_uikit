@@ -82,7 +82,7 @@ As ações de janela usam permissões do núcleo do Tauri (`core:window:allow-mi
 
 ### Modos de decoração
 
-O `DecorationMode` (serializado em kebab-case) é aplicado com `apply_decoration_mode(&window, mode)` pelo Rust ou pelo comando `set_decoration_mode`, de preferência enquanto a janela ainda está oculta (`"visible": false`):
+O `DecorationMode` (serializado em kebab-case, reexportado do crate [`oito2_foundation`](https://docs.rs/oito2_foundation) do oito2_rs) é aplicado com `apply_decoration_mode(&window, mode)` pelo Rust ou pelo comando `set_decoration_mode`, de preferência enquanto a janela ainda está oculta (`"visible": false`):
 
 | Modo             | Implementação                                                                                                                                                                                                              | Padrão em |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
@@ -96,7 +96,7 @@ O showcase aplica o modo no seu `setup` em Rust e lê uma substituição da vari
 
 ### O menu nativo da janela (`src/menu.rs`)
 
-`show_window_menu(x, y)` (pixels CSS a partir do canto superior esquerdo do webview, cada um validado como número finito de 0 a 100 000) abre o menu de janela do sistema — Restaurar, Mover, Redimensionar, Minimizar, Maximizar, Fechar e o que o desktop acrescentar — na thread principal:
+`show_window_menu(x, y)` (pixels CSS a partir do canto superior esquerdo do webview, cada um validado como número finito de 0 a 100 000 pelo `oito2_foundation::window_menu::validate_position`) abre o menu de janela do sistema — Restaurar, Mover, Redimensionar, Minimizar, Maximizar, Fechar e o que o desktop acrescentar — na thread principal:
 
 | Plataforma | Implementação                                                                                                                                                                                       |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -82,7 +82,7 @@ The window actions use Tauri core permissions (`core:window:allow-minimize`, `al
 
 ### Decoration modes
 
-`DecorationMode` (serialized in kebab-case) is applied with `apply_decoration_mode(&window, mode)` from Rust or the `set_decoration_mode` command, ideally while the window is still hidden (`"visible": false`):
+`DecorationMode` (serialized in kebab-case, re-exported from the [`oito2_foundation`](https://docs.rs/oito2_foundation) crate of oito2_rs) is applied with `apply_decoration_mode(&window, mode)` from Rust or the `set_decoration_mode` command, ideally while the window is still hidden (`"visible": false`):
 
 | Mode             | Implementation                                                                                                                                                                       | Default on |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
@@ -96,7 +96,7 @@ The showcase applies the mode in its Rust `setup` and reads an override from the
 
 ### The native window menu (`src/menu.rs`)
 
-`show_window_menu(x, y)` (CSS pixels from the top left of the webview, each validated as a finite number from 0 to 100 000) opens the system's window menu — Restore, Move, Size, Minimize, Maximize, Close and whatever the desktop adds — on the main thread:
+`show_window_menu(x, y)` (CSS pixels from the top left of the webview, each validated as a finite number from 0 to 100 000 by `oito2_foundation::window_menu::validate_position`) opens the system's window menu — Restore, Move, Size, Minimize, Maximize, Close and whatever the desktop adds — on the main thread:
 
 | Platform | Implementation                                                                                                                                                                             |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

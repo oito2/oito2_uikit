@@ -123,9 +123,9 @@ Tauri: the `tauri-plugin-oito2-settings` crate with `oito2-settings:default`; `c
 | Edition / MSRV     | Rust 2024, `rust-version = "1.90"`                                                   |
 | `tauri`            | 2.12                                                                                 |
 | Plugin name        | `oito2-window` / `oito2-settings` (permission prefix and `plugin:<name>\|<command>`) |
-| Linux dependency   | `gtk` 0.18 (both)                                                                    |
-| Windows dependency | `windows` 0.62 (both)                                                                |
-| macOS dependency   | `objc2-app-kit` 0.3 (settings only)                                                  |
+| oito2_rs crates    | `oito2_foundation` 0.1 (window), `oito2_settings` 0.1 with `watch` (settings)        |
+| Linux dependency   | `gtk` 0.18 (window only)                                                             |
+| Windows dependency | `windows` 0.62 (window only)                                                         |
 
 Their commands, permissions and events are in [Tauri plugins](./tauri-plugins.md).
 

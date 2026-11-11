@@ -123,9 +123,9 @@ Tauri: o crate `tauri-plugin-oito2-settings` com `oito2-settings:default`; `core
 | Edição / MSRV          | Rust 2024, `rust-version = "1.90"`                                                      |
 | `tauri`                | 2.12                                                                                    |
 | Nome do plugin         | `oito2-window` / `oito2-settings` (prefixo das permissões e `plugin:<name>\|<command>`) |
-| Dependência no Linux   | `gtk` 0.18 (ambos)                                                                      |
-| Dependência no Windows | `windows` 0.62 (ambos)                                                                  |
-| Dependência no macOS   | `objc2-app-kit` 0.3 (só o de configurações)                                             |
+| Crates do oito2_rs     | `oito2_foundation` 0.1 (janela), `oito2_settings` 0.1 com `watch` (configurações)       |
+| Dependência no Linux   | `gtk` 0.18 (só o de janela)                                                             |
+| Dependência no Windows | `windows` 0.62 (só o de janela)                                                         |
 
 Os seus comandos, permissões e eventos estão em [Plugins Tauri](./tauri-plugins.md).
 

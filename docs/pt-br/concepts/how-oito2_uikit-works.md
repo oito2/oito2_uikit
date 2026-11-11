@@ -85,6 +85,7 @@ Os componentes que se adaptam ao sistema operacional leem um objeto `SystemSetti
 | `windowControlStyle` | `gnome`, `breeze`, `xfwm`, `cosmic`, `windows`, `macos` ou `none` |
 | `windowButtonLayout` | Quais botões da janela ficam em qual lado, em ordem               |
 | `accentColor`        | O acento do sistema em hex, ou `null`                             |
+| `colorScheme`        | `light` ou `dark`, como o sistema pede, ou `null`                 |
 | `highContrast`       | Se o sistema pede alto contraste                                  |
 
 Sem um escopo, os componentes usam `fallbackSystemSettings`, derivado só da plataforma. Em um app Tauri, o `SystemSettingsScope` do `@oito2/ui-settings` preenche o escopo com os valores reais lidos pelo `tauri-plugin-oito2-settings` e os mantém atualizados. Colocado por fora do `ThemeProvider`, ele faz o tema também seguir o acento e o contraste do sistema:

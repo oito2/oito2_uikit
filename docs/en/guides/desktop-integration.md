@@ -4,7 +4,7 @@
 
 # Desktop integration
 
-How to give a Tauri v2 app the real desktop settings (accent, high contrast, window button layout), the oito2 title bar with working window controls, and a window frame that suits each operating system. Everything here follows the showcase app ([`apps/showcase`](../../../apps/showcase)), which is itself a Tauri app built from these packages.
+How to give a Tauri v2 app the real desktop settings (accent, high contrast, color scheme, window button layout), the oito2 title bar with working window controls, and a window frame that suits each operating system. Everything here follows the showcase app ([`apps/showcase`](../../../apps/showcase)), which is itself a Tauri app built from these packages.
 
 ![The showcase with its header bar on Linux](../../img/desktop-integration-header-bar.png)
 
@@ -24,12 +24,12 @@ How to give a Tauri v2 app the real desktop settings (accent, high contrast, win
 
 ## The pieces
 
-| Piece                                        | Package / crate                                      | Role                                                                                              |
-| -------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `SystemSettingsScope`                        | `@oito2/ui-settings` + `tauri-plugin-oito2-settings` | Reads the desktop environment, button layout, accent and high contrast, and follows their changes |
-| `initWindow()`, `NativeWindowController`     | `@oito2/ui-window` + `tauri-plugin-oito2-window`     | Sets the window frame and connects the title bar to the real window                               |
-| `WindowScope`, `HeaderBar`, `WindowTitleBar` | `@oito2/ui`                                          | Provide the controller to the title bars and draw them in the desktop's style                     |
-| `WindowResizeHandles`                        | `@oito2/ui-window`                                   | Resize edges for an `undecorated` window on Linux                                                 |
+| Piece                                        | Package / crate                                      | Role                                                                                                            |
+| -------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `SystemSettingsScope`                        | `@oito2/ui-settings` + `tauri-plugin-oito2-settings` | Reads the desktop environment, button layout, accent, high contrast and color scheme, and follows their changes |
+| `initWindow()`, `NativeWindowController`     | `@oito2/ui-window` + `tauri-plugin-oito2-window`     | Sets the window frame and connects the title bar to the real window                                             |
+| `WindowScope`, `HeaderBar`, `WindowTitleBar` | `@oito2/ui`                                          | Provide the controller to the title bars and draw them in the desktop's style                                   |
+| `WindowResizeHandles`                        | `@oito2/ui-window`                                   | Resize edges for an `undecorated` window on Linux                                                               |
 
 ## Rust side
 
@@ -302,7 +302,7 @@ Components read the settings through `useSystemSettings()` from `@oito2/ui`:
 </p>
 ```
 
-`SystemSettingsScope` reads the settings once mounted, follows the change event the plugin emits on Linux, and reads them again whenever the window regains focus (the only update path on Windows and macOS). Its optional props are `initialSettings`, `source`, `platform` and `onSettingsChange`. To read the settings once without a component, call `loadSystemSettings()`. When a read or the subscription fails (no plugin, no permission), the scope keeps the current settings and prints one `console.warn` with the cause. Inside a Flatpak or Snap sandbox, `XDG_CONFIG_HOME` points at the sandbox's own directory (`~/.var/app/<id>/config` for Flatpak), so the plugin does not find `kwinrc`, `kdeglobals`, `xfwm4.xml` or the COSMIC files there; the XDG desktop portal and GSettings sources still work. What each platform reports is in the [`@oito2/ui-settings` README](../../../packages/ui-settings/README.md#platform-coverage) and in [System settings](../architecture/system-settings.md).
+`SystemSettingsScope` reads the settings once mounted, follows the change event the plugin emits on Linux, Windows and macOS, and reads them again whenever the window regains focus (which also covers a watcher that could not start). Its optional props are `initialSettings`, `source`, `platform` and `onSettingsChange`. To read the settings once without a component, call `loadSystemSettings()`. When a read or the subscription fails (no plugin, no permission), the scope keeps the current settings and prints one `console.warn` with the cause. Inside a Flatpak or Snap sandbox, `XDG_CONFIG_HOME` points at the sandbox's own directory (`~/.var/app/<id>/config` for Flatpak), so the plugin does not find `kwinrc`, `kdeglobals`, `xfwm4.xml` or the COSMIC files there; the XDG desktop portal and GSettings sources still work. What each platform reports is in the [`@oito2/ui-settings` README](../../../packages/ui-settings/README.md#platform-coverage) and in [System settings](../architecture/system-settings.md).
 
 ## Running the same code in a browser
 

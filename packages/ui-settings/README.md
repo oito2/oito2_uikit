@@ -1,11 +1,11 @@
 # @oito2/ui-settings
 
-System integration for `@oito2/ui` on Tauri v2: desktop environment detection, window button layout, accent color and high contrast.
+System integration for `@oito2/ui` on Tauri v2: desktop environment detection, window button layout, accent color, high contrast and color scheme.
 
 [![npm](https://img.shields.io/npm/v/@oito2/ui-settings?label=npm)](https://www.npmjs.com/package/@oito2/ui-settings)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](https://github.com/oito2/oito2_uikit/blob/main/LICENSE)
 
-`@oito2/ui` components read the system preferences (`SystemSettings`) from the closest `SystemScope`: the Linux desktop environment, the window control style and button layout, the accent color and the high-contrast preference. `SystemSettingsScope` fills that scope with the real values, read through the Rust plugin `tauri-plugin-oito2-settings`. Outside Tauri it keeps the platform defaults (`fallbackSystemSettings`).
+`@oito2/ui` components read the system preferences (`SystemSettings`) from the closest `SystemScope`: the Linux desktop environment, the window control style and button layout, the accent color, the light or dark preference (`colorScheme`) and the high-contrast preference. `SystemSettingsScope` fills that scope with the real values, read through the Rust plugin `tauri-plugin-oito2-settings`. Outside Tauri it keeps the platform defaults (`fallbackSystemSettings`).
 
 ## Installation
 
@@ -97,8 +97,8 @@ To read the settings once without a component, call `loadSystemSettings()`; it r
 | Platform | Read                                                                                                                                                            | Live updates              |
 | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
 | Linux    | Desktop session (`XDG_CURRENT_DESKTOP`, `DESKTOP_SESSION`), GSettings (GNOME, Cinnamon, MATE), the XDG desktop portal, KDE, Xfce and COSMIC configuration files | Yes, plus on window focus |
-| Windows  | Accent color and high contrast                                                                                                                                  | On window focus           |
-| macOS    | Accent color and "Increase contrast"                                                                                                                            | On window focus           |
+| Windows  | Accent color, high contrast and light or dark mode                                                                                                              | Yes, plus on window focus |
+| macOS    | Accent color, "Increase contrast" and the dark appearance                                                                                                       | Yes, plus on window focus |
 
 ## Links
 
