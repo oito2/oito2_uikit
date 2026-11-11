@@ -72,7 +72,7 @@ A aparência dos botões da janela: `gnome`, `breeze` (KDE), `xfwm` (Xfce), `cos
 
 ### Fixture de paridade
 
-Um arquivo JSON exportado do oito2_ui pelos testes Flutter de `tools/parity` e versionado em `packages/*/src/fixtures/parity/` (em `ui`, `ui-syntax` e `ui-extras`). As suítes do Vitest verificam que o oito2_uikit produz os mesmos valores.
+Um arquivo JSON exportado pelos testes Flutter do `tools/parity` do próprio oito2_ui, copiado byte a byte pelo `pnpm parity:sync` e versionado em `packages/*/src/fixtures/parity/` (em `ui`, `ui-syntax` e `ui-extras`). As suítes do Vitest verificam que o oito2_uikit produz os mesmos valores.
 
 ### Layout dos botões
 

@@ -37,6 +37,7 @@ describe('fallbackSystemSettings matches oito2_ui', () => {
 						trailing: [...settings.windowButtonLayout.trailing]
 					},
 					accentColor: settings.accentColor,
+					colorScheme: settings.colorScheme,
 					highContrast: settings.highContrast
 				},
 				`${os} web=${isWeb} ${desktopEnvironment}`

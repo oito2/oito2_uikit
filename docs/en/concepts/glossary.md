@@ -78,7 +78,7 @@ A scheme variant whose text and semantic colors reach 7:1 (WCAG AAA) and outline
 
 ### Parity fixture
 
-A JSON file exported from oito2_ui by the Flutter tests in `tools/parity` and committed under `packages/*/src/fixtures/parity/` (in `ui`, `ui-syntax` and `ui-extras`). The Vitest suites assert that oito2_uikit produces the same values.
+A JSON file exported by the Flutter tests in oito2_ui's own `tools/parity`, copied byte for byte by `pnpm parity:sync` and committed under `packages/*/src/fixtures/parity/` (in `ui`, `ui-syntax` and `ui-extras`). The Vitest suites assert that oito2_uikit produces the same values.
 
 ### Permission
 

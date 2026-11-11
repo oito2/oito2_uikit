@@ -112,6 +112,7 @@ export function composeSystemSettings(raw: RawSettings, platform: Platform): Sys
 		windowControlStyle: fallback.windowControlStyle,
 		windowButtonLayout: layout ?? fallback.windowButtonLayout,
 		accentColor: environment ? linuxAccent(raw, environment) : raw.systemAccent,
+		colorScheme: fallback.colorScheme,
 		highContrast:
 			raw.systemHighContrast || (environment !== null && linuxHighContrast(raw, environment))
 	};
@@ -126,6 +127,7 @@ export function sameSystemSettings(a: SystemSettings, b: SystemSettings): boolea
 		a.windowControlStyle === b.windowControlStyle &&
 		a.windowButtonLayout.equals(b.windowButtonLayout) &&
 		a.accentColor === b.accentColor &&
+		a.colorScheme === b.colorScheme &&
 		a.highContrast === b.highContrast
 	);
 }

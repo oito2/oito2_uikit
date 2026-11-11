@@ -20,6 +20,8 @@
 		"generate:check": "node tools/generate-css/generate.ts --check",
 		"docs:generate": "node tools/generate-docs/generate.ts",
 		"docs:check": "node tools/generate-docs/generate.ts --check",
+		"parity:sync": "node tools/parity/sync.ts",
+		"parity:check": "node tools/parity/sync.ts --check",
 		"showcase": "pnpm --filter @oito2/showcase",
 		"tauri": "pnpm --filter @oito2/showcase tauri",
 		"changeset": "changeset",

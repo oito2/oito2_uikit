@@ -1,10 +1,11 @@
 name: Parity
 
 # Checks that the parity fixtures still match oito2_ui, the design source of truth:
-# clones oito2_ui, runs the exporter of tools/parity, which rewrites
-# packages/*/src/fixtures/parity/*.json, and fails when any fixture changed.
-# A failed run is the signal that oito2_ui moved: regenerate the fixtures locally,
-# port the change and commit the new JSON.
+# clones oito2_ui and runs tools/parity/sync.ts --check, which compares every
+# packages/*/src/fixtures/parity/*.json byte for byte with the fixtures oito2_ui
+# exports in tools/parity/fixtures, and fails when any of them differs.
+# A failed run is the signal that oito2_ui moved: run `pnpm parity:sync` locally,
+# port the change and commit the new JSON together with tools/parity/source.json.
 
 on:
   schedule:
@@ -19,33 +20,22 @@ jobs:
   fixtures:
     name: Fixtures match oito2_ui
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # tools/parity reads the oito2_ui packages from .references/oito2_ui, a
-      # git-ignored folder that holds a symbolic link on a developer's machine.
+      # tools/parity/sync.ts reads oito2_ui from .references/oito2_ui, a git-ignored
+      # folder that holds a symbolic link on a developer's machine.
       - name: Check out oito2_ui
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: oito2/oito2_ui
           path: .references/oito2_ui
           persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+      # The script has no dependencies, so only Node is needed.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          channel: stable
-          cache: true
-      - run: flutter pub get
-        working-directory: tools/parity
-      - name: Regenerate the fixtures
-        run: flutter test
-        working-directory: tools/parity
+          node-version: 24
       - name: Fixtures are unchanged
-        run: |
-          git status --porcelain -- 'packages/*/src/fixtures/parity/'
-          git diff --exit-code --stat -- 'packages/*/src/fixtures/parity/'
-          if [ -n "$(git status --porcelain -- 'packages/*/src/fixtures/parity/')" ]; then
-            echo "The parity fixtures changed: oito2_ui moved ahead of this repository." >&2
-            exit 1
-          fi
+        run: node tools/parity/sync.ts --from .references/oito2_ui --check

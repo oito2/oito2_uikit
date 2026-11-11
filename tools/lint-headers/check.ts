@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Checks that every hand-written source file starts with the license notice of
-// tools/templates: header.txt for .ts, .js, .rs and .dart, header.css.txt for .css,
+// tools/templates: header.txt for .ts, .js and .rs, header.css.txt for .css,
 // header.html.txt for .svelte and .html, header.sharp.txt for .yaml, .yml, .toml and .sh.
 // Lines are compared after trimming trailing whitespace. Lists the files without the
 // notice and exits with status 1 when there is any.
@@ -30,7 +30,6 @@ const templateOf: Record<string, string> = {
 	'.ts': 'header.txt',
 	'.js': 'header.txt',
 	'.rs': 'header.txt',
-	'.dart': 'header.txt',
 	'.css': 'header.css.txt',
 	'.svelte': 'header.html.txt',
 	'.html': 'header.html.txt',
@@ -55,9 +54,7 @@ const scopes: { dir: string; extensions?: string[] }[] = [
 	{ dir: 'tools', extensions: ['.ts'] },
 	{ dir: 'plugins/tauri-plugin-oito2-window/src', extensions: ['.rs'] },
 	{ dir: 'plugins/tauri-plugin-oito2-settings/src', extensions: ['.rs'] },
-	{ dir: 'apps/showcase/src-tauri/src', extensions: ['.rs'] },
-	{ dir: 'tools/parity/lib', extensions: ['.dart'] },
-	{ dir: 'tools/parity/test', extensions: ['.dart'] }
+	{ dir: 'apps/showcase/src-tauri/src', extensions: ['.rs'] }
 ];
 
 /** Folder names never walked. */

@@ -21,13 +21,13 @@ Obrigado por ajudar! Este guia cobre o ambiente de desenvolvimento, as verifica�
 
 ## Ambiente de desenvolvimento
 
-| Ferramenta                             | Versão                                                                                                      |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Node.js                                | 24 LTS ou mais recente                                                                                      |
-| pnpm                                   | a fixada no `package.json` (`corepack enable`, ou `npm install -g pnpm@<versão>` com a do `packageManager`) |
-| Rust                                   | fixada no `rust-toolchain.toml`; o rustup instala                                                           |
-| Dependências de sistema do Tauri v2    | veja abaixo                                                                                                 |
-| Flutter (só para regenerar a paridade) | stable, com um checkout do oito2_ui em `.references/oito2_ui`                                               |
+| Ferramenta                                            | Versão                                                                                                      |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Node.js                                               | 24 LTS ou mais recente                                                                                      |
+| pnpm                                                  | a fixada no `package.json` (`corepack enable`, ou `npm install -g pnpm@<versão>` com a do `packageManager`) |
+| Rust                                                  | fixada no `rust-toolchain.toml`; o rustup instala                                                           |
+| Dependências de sistema do Tauri v2                   | veja abaixo                                                                                                 |
+| Checkout do oito2_ui (só para sincronizar a paridade) | um clone de `oito2/oito2_ui`, ou um link simbólico para um, em `.references/oito2_ui`                       |
 
 Pacotes de sistema no Linux (Debian/Ubuntu):
 
@@ -61,14 +61,14 @@ O showcase usa os pacotes **compilados**: rode `pnpm build` de novo depois de mu
 
 ## Estrutura do repositório
 
-| Caminho                  | Conteúdo                                                                            |
-| ------------------------ | ----------------------------------------------------------------------------------- |
-| `packages/ui`            | `@oito2/ui`: tokens, temas, primitivos de interação, chrome da janela, componentes  |
-| `packages/ui-*`          | Os pacotes opcionais (themes, syntax, extras, files, window, settings)              |
-| `packages/ui-test-utils` | Utilitários de teste compartilhados pelos pacotes (privado, nunca publicado)        |
-| `plugins/`               | Os plugins Tauri em Rust `tauri-plugin-oito2-window` e `-settings`                  |
-| `apps/showcase`          | O catálogo SvelteKit, compilado como app Tauri e para o GitHub Pages                |
-| `tools/`                 | Geradores de CSS e da referência de API, exportador de paridade, scripts de release |
+| Caminho                  | Conteúdo                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `packages/ui`            | `@oito2/ui`: tokens, temas, primitivos de interação, chrome da janela, componentes     |
+| `packages/ui-*`          | Os pacotes opcionais (themes, syntax, extras, files, window, settings)                 |
+| `packages/ui-test-utils` | Utilitários de teste compartilhados pelos pacotes (privado, nunca publicado)           |
+| `plugins/`               | Os plugins Tauri em Rust `tauri-plugin-oito2-window` e `-settings`                     |
+| `apps/showcase`          | O catálogo SvelteKit, compilado como app Tauri e para o GitHub Pages                   |
+| `tools/`                 | Geradores de CSS e da referência de API, sincronização da paridade, scripts de release |
 
 ## Comandos do dia a dia
 
@@ -119,14 +119,14 @@ Um teste que passa em só um motor é um bug. Regenere goldens visuais só de pr
 
 ### Paridade com o oito2_ui
 
-Com um checkout do oito2_ui (ou um link simbólico) em `.references/oito2_ui`, regenere as fixtures com:
+O próprio oito2_ui exporta as fixtures de paridade (pelo pacote `tools/parity` dele, rodado com o Flutter lá). Com um checkout do oito2_ui (ou um link simbólico) em `.references/oito2_ui`, copie-as para os pacotes com:
 
 ```bash
-cd tools/parity
-flutter test
+pnpm parity:sync    # copia as fixtures e registra o commit em tools/parity/source.json
+pnpm parity:check   # só compara
 ```
 
-O [workflow Parity](../../.github/workflows/parity.yml) roda a mesma exportação toda segunda-feira (e sob demanda, pela aba Actions) contra o oito2_ui atual e falha quando alguma fixture mudaria. Uma execução com falha significa que o oito2_ui avançou: regenere as fixtures localmente, porte a mudança e faça commit do novo JSON.
+O [workflow Parity](../../.github/workflows/parity.yml) roda `pnpm parity:check` toda segunda-feira (e sob demanda, pela aba Actions) contra o oito2_ui atual e falha quando alguma fixture difere. Uma execução com falha significa que o oito2_ui avançou: sincronize as fixtures localmente, porte a mudança e faça commit do novo JSON junto com o `tools/parity/source.json`.
 
 ## Convenções
 

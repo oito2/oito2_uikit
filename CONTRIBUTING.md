@@ -21,13 +21,13 @@ Thank you for helping! This guide covers the development environment, the checks
 
 ## Development environment
 
-| Tool                                    | Version                                                                                                                |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Node.js                                 | 24 LTS or later                                                                                                        |
-| pnpm                                    | the one pinned in `package.json` (`corepack enable`, or `npm install -g pnpm@<version>` with the `packageManager` one) |
-| Rust                                    | pinned in `rust-toolchain.toml`; rustup installs it                                                                    |
-| Tauri v2 system dependencies            | see below                                                                                                              |
-| Flutter (only to regenerate the parity) | stable, with an oito2_ui checkout in `.references/oito2_ui`                                                            |
+| Tool                                        | Version                                                                                                                |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Node.js                                     | 24 LTS or later                                                                                                        |
+| pnpm                                        | the one pinned in `package.json` (`corepack enable`, or `npm install -g pnpm@<version>` with the `packageManager` one) |
+| Rust                                        | pinned in `rust-toolchain.toml`; rustup installs it                                                                    |
+| Tauri v2 system dependencies                | see below                                                                                                              |
+| oito2_ui checkout (only to sync the parity) | a clone of `oito2/oito2_ui`, or a symbolic link to one, at `.references/oito2_ui`                                      |
 
 Linux system packages (Debian/Ubuntu):
 
@@ -68,7 +68,7 @@ The showcase uses the **built** packages: run `pnpm build` again after changing 
 | `packages/ui-test-utils` | Test helpers shared by the packages (private, never published)                 |
 | `plugins/`               | The Rust Tauri plugins `tauri-plugin-oito2-window` and `-settings`             |
 | `apps/showcase`          | The SvelteKit catalogue, built as a Tauri app and for GitHub Pages             |
-| `tools/`                 | CSS and API-reference generators, the parity exporter, release scripts         |
+| `tools/`                 | CSS and API-reference generators, the parity sync, release scripts             |
 
 ## Everyday commands
 
@@ -119,14 +119,14 @@ A test that passes in only one engine is a bug. Regenerate visual goldens only o
 
 ### Parity with oito2_ui
 
-With an oito2_ui checkout (or a symbolic link) at `.references/oito2_ui`, regenerate the fixtures with:
+oito2_ui exports the parity fixtures itself (its `tools/parity` package, run with Flutter there). With an oito2_ui checkout (or a symbolic link) at `.references/oito2_ui`, copy them into the packages with:
 
 ```bash
-cd tools/parity
-flutter test
+pnpm parity:sync    # copies the fixtures and records the commit in tools/parity/source.json
+pnpm parity:check   # only compares
 ```
 
-The [Parity workflow](.github/workflows/parity.yml) runs the same export every Monday (and on demand, from the Actions tab) against the current oito2_ui and fails when any fixture would change. A failed run means oito2_ui moved ahead: regenerate the fixtures locally, port the change and commit the new JSON.
+The [Parity workflow](.github/workflows/parity.yml) runs `pnpm parity:check` every Monday (and on demand, from the Actions tab) against the current oito2_ui and fails when any fixture differs. A failed run means oito2_ui moved ahead: sync the fixtures locally, port the change and commit the new JSON together with `tools/parity/source.json`.
 
 ## Conventions
 

@@ -101,11 +101,11 @@ rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
 ## Extra tools for this repository
 
-| Tool                | Needed for                                   | Install                                                                                           |
-| ------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Playwright browsers | The browser tests and the showcase e2e tests | `pnpm --filter @oito2/ui exec playwright install chromium webkit`                                 |
-| `libavif16` (Linux) | Playwright's WebKit                          | `sudo apt install libavif16`                                                                      |
-| Flutter (stable)    | Only to regenerate the parity fixtures       | With an oito2_ui checkout in `.references/oito2_ui`; see [CONTRIBUTING](../../../CONTRIBUTING.md) |
+| Tool                | Needed for                                   | Install                                                                                                                           |
+| ------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Playwright browsers | The browser tests and the showcase e2e tests | `pnpm --filter @oito2/ui exec playwright install chromium webkit`                                                                 |
+| `libavif16` (Linux) | Playwright's WebKit                          | `sudo apt install libavif16`                                                                                                      |
+| oito2_ui checkout   | Only to sync the parity fixtures             | Clone `oito2/oito2_ui` (or link one) at `.references/oito2_ui`; see [CONTRIBUTING](../../../CONTRIBUTING.md#parity-with-oito2_ui) |
 
 ## Runtime dependencies for end users
 

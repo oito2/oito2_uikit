@@ -4,29 +4,31 @@
 
 # Parity and generators
 
-The tools under `tools/` keep derived files in sync with their sources and keep oito2_uikit in agreement with oito2_ui. The CSS and API generators and the version sync have a write mode and a `--check` mode that CI runs. For every repository script, see [Repository scripts](../reference/repository-scripts.md).
+The tools under `tools/` keep derived files in sync with their sources and keep oito2_uikit in agreement with oito2_ui. The parity sync, the CSS and API generators and the version sync have a write mode and a `--check` mode that CI runs. For every repository script, see [Repository scripts](../reference/repository-scripts.md).
 
-| Tool                             | Input                                      | Output                                                                    | Check in CI                                                |
-| -------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `tools/parity`                   | oito2_ui (Flutter)                         | `packages/*/src/fixtures/parity/*.json`                                   | No (fixtures are committed; the Vitest suites assert them) |
-| `tools/generate-css`             | `values.ts`, `theme/`, `ui-themes` presets | `tokens.css`, `schemes.css`, `presets.css`                                | `pnpm generate:check`                                      |
-| `tools/generate-docs`            | Public exports of every package            | `apps/showcase/src/lib/api/api.json`                                      | `pnpm docs:check`                                          |
-| `tools/release/sync-versions.ts` | The `@oito2/*` version set by Changesets   | `Cargo.toml`, `Cargo.lock`, showcase `package.json` and `tauri.conf.json` | `sync-versions.ts --check <tag>` in the Release workflow   |
+| Tool                             | Input                                      | Output                                                                    | Check in CI                                              |
+| -------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `tools/parity/sync.ts`           | oito2_ui `tools/parity/fixtures/*.json`    | `packages/*/src/fixtures/parity/*.json`, `tools/parity/source.json`       | `pnpm parity:check` in the Parity workflow (weekly)      |
+| `tools/generate-css`             | `values.ts`, `theme/`, `ui-themes` presets | `tokens.css`, `schemes.css`, `presets.css`                                | `pnpm generate:check`                                    |
+| `tools/generate-docs`            | Public exports of every package            | `apps/showcase/src/lib/api/api.json`                                      | `pnpm docs:check`                                        |
+| `tools/release/sync-versions.ts` | The `@oito2/*` version set by Changesets   | `Cargo.toml`, `Cargo.lock`, showcase `package.json` and `tauri.conf.json` | `sync-versions.ts --check <tag>` in the Release workflow |
 
 ## Parity with oito2_ui (`tools/parity`)
 
-oito2_ui is the design source of truth. `tools/parity` is a Flutter package (`oito2_uikit_parity`) whose tests, instead of asserting anything about Flutter, **export** the design data of oito2_ui as JSON.
+oito2_ui is the design source of truth. Its own `tools/parity` package, a set of Flutter tests that **export** the design data of oito2_ui as JSON instead of asserting anything about Flutter, writes the fixtures to `tools/parity/fixtures/` in the oito2_ui repository, together with a `manifest.json` that records the Flutter and package versions they came from. oito2_uikit does not run Flutter: it copies those files.
 
-### Exporting
+### Syncing
 
-It depends on an oito2_ui checkout (or a symbolic link) at `.references/oito2_ui`, which is git-ignored:
+`tools/parity/sync.ts` reads an oito2_ui checkout (or a symbolic link) at `.references/oito2_ui`, which is git-ignored, and copies every fixture byte for byte into the package that tests against it:
 
 ```bash
-cd tools/parity
-flutter test
+pnpm parity:sync    # copy the fixtures and write tools/parity/source.json
+pnpm parity:check   # copy nothing; exit with an error when a fixture differs
 ```
 
-| Exporter                      | Fixture                                              | Contents                                                                                |
+`--from <dir>` reads another checkout. `tools/parity/source.json` records the oito2_ui repository, the commit that was copied and the content of its `manifest.json`; `--check` compares only the fixtures, so a new oito2_ui commit that leaves them unchanged does not fail it. A fixture that oito2_ui exports but no package tests against is reported as a warning.
+
+| oito2_ui exporter             | Fixture                                              | Contents                                                                                |
 | ----------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `export_test.dart`            | `packages/ui/src/fixtures/parity/tokens.json`        | `radius`, `spacing`, `sizes`, `accents`, `neutrals`, `status`, `typography`             |
 | `export_schemes_test.dart`    | `packages/ui/src/fixtures/parity/schemes.json`       | `base` schemes, preset source `palettes` and resolved `presets`                         |
@@ -36,7 +38,7 @@ flutter test
 | `export_syntax_test.dart`     | `packages/ui-syntax/src/fixtures/parity/syntax.json` | `languages`, `samples`, `scopeRoles`                                                    |
 | `export_extras_test.dart`     | `packages/ui-extras/src/fixtures/parity/qr.json`     | QR `codes` and the `tooLong` case                                                       |
 
-Colors are written as `#RRGGBB` (`#RRGGBBAA` when not opaque) and the JSON is tab-indented. The `PARITY_OUT` environment variable redirects the output directory. The `pubspec.yaml` pins, through `dependency_overrides`, the dependency versions oito2_ui is tested with.
+Colors are written as `#RRGGBB` (`#RRGGBBAA` when not opaque) and the JSON is tab-indented. Prettier ignores the copies, so they stay identical to oito2_ui.
 
 ### Comparing
 
@@ -52,9 +54,9 @@ it('has the same radii, spacing and sizes', () => {
 });
 ```
 
-Other suites do the same for color schemes and presets (`color-theme.test.ts`, `presets.test.ts`), contrast, platform, desktop environment, button layout and system settings (`foundation/*.test.ts`), strings (`l10n.test.ts`), formatting (`format.test.ts`), syntax (`syntax.test.ts`) and QR codes (`extras.test.ts`). A change in oito2_ui therefore shows up as a failing test here once the fixtures are regenerated.
+Other suites do the same for color schemes and presets (`color-theme.test.ts`, `presets.test.ts`), contrast, platform, desktop environment, button layout and system settings (`foundation/*.test.ts`), strings (`l10n.test.ts`), formatting (`format.test.ts`), syntax (`syntax.test.ts`) and QR codes (`extras.test.ts`). A change in oito2_ui therefore shows up as a failing test here once the fixtures are synced.
 
-CI runs Flutter only in the [Parity workflow](../../../.github/workflows/parity.yml), weekly and on demand: it regenerates the fixtures from the current oito2_ui and fails when any of them would change. Committing the regenerated fixtures remains a manual step after oito2_ui changes, described in [CONTRIBUTING](../../../CONTRIBUTING.md#parity-with-oito2_ui).
+The [Parity workflow](../../../.github/workflows/parity.yml) runs `tools/parity/sync.ts --check` against the current oito2_ui, weekly and on demand, and fails when any fixture differs. Syncing and committing the new fixtures remains a manual step after oito2_ui changes, described in [CONTRIBUTING](../../../CONTRIBUTING.md#parity-with-oito2_ui).
 
 ## CSS generator (`tools/generate-css`)
 
@@ -109,7 +111,7 @@ pnpm release:check vX.Y.Z    # sync-versions.ts --check vX.Y.Z
 | ------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ci.yml`      | Push to `main`, pull request, manual | **Frontend** (Ubuntu): `pnpm lint` (Prettier, ESLint and the license headers), `generate:check`, `docs:check`, `test:tools`, `build`, `check`, Playwright browsers, `pnpm test`; uploads screenshot diffs on failure. **Rust** (Ubuntu, Windows, macOS): `pnpm build` (the showcase crate embeds the frontend), `cargo fmt --check`, `clippy -D warnings`, `cargo test`. **MSRV** (Ubuntu): `cargo +1.90 check` of the plugin crates. **Smoke** (Ubuntu): the debug showcase driven by `tauri-driver` under Xvfb |
 | `pages.yml`   | Push to `main`, manual               | Builds the packages and the showcase with `BASE_PATH=/oito2_uikit` and deploys it to GitHub Pages                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `parity.yml`  | Weekly (Monday 06:00 UTC), manual    | Checks out `oito2/oito2_ui`, runs the exporter with Flutter and fails when any parity fixture would change                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `parity.yml`  | Weekly (Monday 06:00 UTC), manual    | Checks out `oito2/oito2_ui` and runs `tools/parity/sync.ts --check`, which fails when any parity fixture differs from the ones oito2_ui exports                                                                                                                                                                                                                                                                                                                                                                  |
 | `release.yml` | Tag `vX.Y.Z`                         | Checks versions against the tag, publishes the missing `@oito2/*` versions to npm with provenance, builds the showcase installers on Linux, Windows and macOS, and drafts a GitHub Release with the installers, `SHA256SUMS` and the changelog                                                                                                                                                                                                                                                                   |
 
 The Rust crates are not published to a registry: apps depend on them through git and the tag. The release process is described in [CONTRIBUTING](../../../CONTRIBUTING.md#releases-maintainers).

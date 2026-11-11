@@ -149,12 +149,12 @@
 			"fallbackSystemSettings": {
 				"kind": "function",
 				"source": "packages/ui/src/lib/foundation/system-settings.ts",
-				"doc": "Returns settings derived from `platform` only. On native Linux the desktop environment\ndefaults to `unknown`; elsewhere it is `null`. The control style and button layout follow\n`resolveWindowControlStyle` and `WindowButtonLayout.defaultFor`; there is no accent color\nand high contrast is off."
+				"doc": "Returns settings derived from `platform` only. On native Linux the desktop environment\ndefaults to `unknown`; elsewhere it is `null`. The control style and button layout follow\n`resolveWindowControlStyle` and `WindowButtonLayout.defaultFor`; there is no accent color\nnor color scheme preference, and high contrast is off."
 			},
 			"SystemSettings": {
 				"kind": "interface",
 				"source": "packages/ui/src/lib/foundation/system-settings.ts",
-				"doc": "The operating system preferences that shape an oito2 app: platform, desktop\nenvironment, window controls, accent color and contrast. `fallbackSystemSettings`\nderives them from the platform alone; `@oito2/ui-settings` reads the real ones."
+				"doc": "The operating system preferences that shape an oito2 app: platform, desktop\nenvironment, window controls, accent color, light or dark preference and contrast.\n`fallbackSystemSettings` derives them from the platform alone; `@oito2/ui-settings`\nreads the real ones."
 			},
 			"setSystemSettings": {
 				"kind": "function",

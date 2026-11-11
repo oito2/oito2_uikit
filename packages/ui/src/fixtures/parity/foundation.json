@@ -4202,26 +4202,40 @@
 			{
 				"value": "appmenu:minimize,maximize,close",
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			{
 				"value": "close,minimize,maximize:",
-				"leading": ["close", "minimize", "maximize"],
+				"leading": [
+					"close",
+					"minimize",
+					"maximize"
+				],
 				"trailing": []
 			},
 			{
 				"value": "icon, close:spacer,close,menu",
-				"leading": ["close"],
+				"leading": [
+					"close"
+				],
 				"trailing": []
 			},
 			{
 				"value": "appmenu:close",
 				"leading": [],
-				"trailing": ["close"]
+				"trailing": [
+					"close"
+				]
 			},
 			{
 				"value": "close",
-				"leading": ["close"],
+				"leading": [
+					"close"
+				],
 				"trailing": []
 			},
 			{
@@ -4236,18 +4250,30 @@
 			},
 			{
 				"value": "minimize:maximize:close",
-				"leading": ["minimize"],
-				"trailing": ["maximize"]
+				"leading": [
+					"minimize"
+				],
+				"trailing": [
+					"maximize"
+				]
 			},
 			{
 				"value": "close,close,close:minimize",
-				"leading": ["close"],
-				"trailing": ["minimize"]
+				"leading": [
+					"close"
+				],
+				"trailing": [
+					"minimize"
+				]
 			},
 			{
 				"value": "menu:minimize,maximize,close,spacer",
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			}
 		],
 		"kde": [
@@ -4255,12 +4281,20 @@
 				"buttonsOnLeft": "MS",
 				"buttonsOnRight": "HIAX",
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			{
 				"buttonsOnLeft": "XIA",
 				"buttonsOnRight": "",
-				"leading": ["close", "minimize", "maximize"],
+				"leading": [
+					"close",
+					"minimize",
+					"maximize"
+				],
 				"trailing": []
 			},
 			{
@@ -4272,31 +4306,52 @@
 			{
 				"buttonsOnLeft": "XX",
 				"buttonsOnRight": "XIA",
-				"leading": ["close"],
-				"trailing": ["minimize", "maximize"]
+				"leading": [
+					"close"
+				],
+				"trailing": [
+					"minimize",
+					"maximize"
+				]
 			},
 			{
 				"buttonsOnLeft": "M",
 				"buttonsOnRight": "IAXFB",
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			}
 		],
 		"xfwm": [
 			{
 				"value": "O|HMC",
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			{
 				"value": "CHMS|T",
-				"leading": ["close", "minimize", "maximize"],
+				"leading": [
+					"close",
+					"minimize",
+					"maximize"
+				],
 				"trailing": []
 			},
 			{
 				"value": "O|SHMC",
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			{
 				"value": "|",
@@ -4310,38 +4365,68 @@
 			},
 			{
 				"value": "HMC",
-				"leading": ["minimize", "maximize", "close"],
+				"leading": [
+					"minimize",
+					"maximize",
+					"close"
+				],
 				"trailing": []
 			},
 			{
 				"value": "C|C",
-				"leading": ["close"],
+				"leading": [
+					"close"
+				],
 				"trailing": []
 			}
 		],
 		"defaultFor": {
 			"gnome": {
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			"breeze": {
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			"xfwm": {
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			"cosmic": {
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			"windows": {
 				"leading": [],
-				"trailing": ["minimize", "maximize", "close"]
+				"trailing": [
+					"minimize",
+					"maximize",
+					"close"
+				]
 			},
 			"macos": {
-				"leading": ["close", "minimize", "maximize"],
+				"leading": [
+					"close",
+					"minimize",
+					"maximize"
+				],
 				"trailing": []
 			},
 			"none": {
@@ -5387,6 +5472,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5402,6 +5488,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5417,6 +5504,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5432,6 +5520,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5447,6 +5536,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5462,6 +5552,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5477,6 +5568,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5492,6 +5584,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5507,6 +5600,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5522,6 +5616,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5537,6 +5632,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5552,6 +5648,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5564,9 +5661,14 @@
 				"windowControlStyle": "gnome",
 				"windowButtonLayout": {
 					"leading": [],
-					"trailing": ["minimize", "maximize", "close"]
+					"trailing": [
+						"minimize",
+						"maximize",
+						"close"
+					]
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5579,9 +5681,14 @@
 				"windowControlStyle": "breeze",
 				"windowButtonLayout": {
 					"leading": [],
-					"trailing": ["minimize", "maximize", "close"]
+					"trailing": [
+						"minimize",
+						"maximize",
+						"close"
+					]
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5597,6 +5704,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5612,6 +5720,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5623,10 +5732,15 @@
 				"desktopEnvironment": null,
 				"windowControlStyle": "macos",
 				"windowButtonLayout": {
-					"leading": ["close", "minimize", "maximize"],
+					"leading": [
+						"close",
+						"minimize",
+						"maximize"
+					],
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5638,10 +5752,15 @@
 				"desktopEnvironment": null,
 				"windowControlStyle": "macos",
 				"windowButtonLayout": {
-					"leading": ["close", "minimize", "maximize"],
+					"leading": [
+						"close",
+						"minimize",
+						"maximize"
+					],
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5657,6 +5776,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5672,6 +5792,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5684,9 +5805,14 @@
 				"windowControlStyle": "windows",
 				"windowButtonLayout": {
 					"leading": [],
-					"trailing": ["minimize", "maximize", "close"]
+					"trailing": [
+						"minimize",
+						"maximize",
+						"close"
+					]
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5699,9 +5825,14 @@
 				"windowControlStyle": "windows",
 				"windowButtonLayout": {
 					"leading": [],
-					"trailing": ["minimize", "maximize", "close"]
+					"trailing": [
+						"minimize",
+						"maximize",
+						"close"
+					]
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5717,6 +5848,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		},
@@ -5732,6 +5864,7 @@
 					"trailing": []
 				},
 				"accentColor": null,
+				"colorScheme": null,
 				"highContrast": false
 			}
 		}

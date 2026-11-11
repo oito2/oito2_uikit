@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import type { Brightness } from '../theme/color-roles.js';
 import type { DesktopEnvironment } from './desktop-environment.js';
 import type { Platform } from './platform.js';
 import {
@@ -23,8 +24,9 @@ import {
 
 /**
  * The operating system preferences that shape an oito2 app: platform, desktop
- * environment, window controls, accent color and contrast. `fallbackSystemSettings`
- * derives them from the platform alone; `@oito2/ui-settings` reads the real ones.
+ * environment, window controls, accent color, light or dark preference and contrast.
+ * `fallbackSystemSettings` derives them from the platform alone; `@oito2/ui-settings`
+ * reads the real ones.
  */
 export interface SystemSettings {
 	/** The platform the app runs on. */
@@ -37,6 +39,11 @@ export interface SystemSettings {
 	readonly windowButtonLayout: WindowButtonLayout;
 	/** The system accent color as a hex string, or `null` when there is none or it is unknown. */
 	readonly accentColor: string | null;
+	/**
+	 * The light or dark scheme the system asks for, or `null` when it states no preference
+	 * or the preference is unknown.
+	 */
+	readonly colorScheme: Brightness | null;
 	/** Whether the system asks for high contrast. */
 	readonly highContrast: boolean;
 }
@@ -45,7 +52,7 @@ export interface SystemSettings {
  * Returns settings derived from `platform` only. On native Linux the desktop environment
  * defaults to `unknown`; elsewhere it is `null`. The control style and button layout follow
  * `resolveWindowControlStyle` and `WindowButtonLayout.defaultFor`; there is no accent color
- * and high contrast is off.
+ * nor color scheme preference, and high contrast is off.
  */
 export function fallbackSystemSettings(
 	platform: Platform,
@@ -62,6 +69,7 @@ export function fallbackSystemSettings(
 		windowControlStyle,
 		windowButtonLayout: WindowButtonLayout.defaultFor(windowControlStyle),
 		accentColor: null,
+		colorScheme: null,
 		highContrast: false
 	};
 }

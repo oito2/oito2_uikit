@@ -101,11 +101,11 @@ rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
 ## Ferramentas extras para este repositório
 
-| Ferramenta                | Necessária para                                    | Instalação                                                                                     |
-| ------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Navegadores do Playwright | Os testes de navegador e os testes e2e do showcase | `pnpm --filter @oito2/ui exec playwright install chromium webkit`                              |
-| `libavif16` (Linux)       | O WebKit do Playwright                             | `sudo apt install libavif16`                                                                   |
-| Flutter (stable)          | Só para regenerar as fixtures de paridade          | Com um checkout do oito2_ui em `.references/oito2_ui`; veja [Contribuindo](../contribuindo.md) |
+| Ferramenta                | Necessária para                                    | Instalação                                                                                                                          |
+| ------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Navegadores do Playwright | Os testes de navegador e os testes e2e do showcase | `pnpm --filter @oito2/ui exec playwright install chromium webkit`                                                                   |
+| `libavif16` (Linux)       | O WebKit do Playwright                             | `sudo apt install libavif16`                                                                                                        |
+| Checkout do oito2_ui      | Só para sincronizar as fixtures de paridade        | Clone `oito2/oito2_ui` (ou crie um link) em `.references/oito2_ui`; veja [Contribuindo](../contribuindo.md#paridade-com-o-oito2_ui) |
 
 ## Dependências de execução para usuários finais
 

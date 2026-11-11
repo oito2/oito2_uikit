@@ -20,10 +20,6 @@ playwright-report/
 **/__screenshots__/**/*-diff.png
 .vitest/
 
-# Dart (tools/parity)
-.dart_tool/
-tools/parity/pubspec.lock
-
 # Environment
 .env
 .env.*

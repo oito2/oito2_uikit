@@ -19,14 +19,15 @@ For setting it up in an app, see the [Desktop integration guide](../guides/deskt
 
 Defined in `packages/ui/src/lib/foundation/system-settings.ts`:
 
-| Field                | Type                         | Meaning                                         |
-| -------------------- | ---------------------------- | ----------------------------------------------- |
-| `platform`           | `Platform`                   | Operating system and whether it runs on the web |
-| `desktopEnvironment` | `DesktopEnvironment \| null` | The Linux desktop; `null` outside native Linux  |
-| `windowControlStyle` | `WindowControlStyle`         | The look of the window buttons                  |
-| `windowButtonLayout` | `WindowButtonLayout`         | The buttons on each side, in order              |
-| `accentColor`        | `string \| null`             | The system accent as hex                        |
-| `highContrast`       | `boolean`                    | Whether the system asks for high contrast       |
+| Field                | Type                         | Meaning                                                                                                                   |
+| -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `platform`           | `Platform`                   | Operating system and whether it runs on the web                                                                           |
+| `desktopEnvironment` | `DesktopEnvironment \| null` | The Linux desktop; `null` outside native Linux                                                                            |
+| `windowControlStyle` | `WindowControlStyle`         | The look of the window buttons                                                                                            |
+| `windowButtonLayout` | `WindowButtonLayout`         | The buttons on each side, in order                                                                                        |
+| `accentColor`        | `string \| null`             | The system accent as hex                                                                                                  |
+| `colorScheme`        | `Brightness \| null`         | The light or dark scheme the system asks for; `null` without a preference (always `null` for now: no reader fills it yet) |
+| `highContrast`       | `boolean`                    | Whether the system asks for high contrast                                                                                 |
 
 `SystemScope` provides it; `useSystemSettings()` reads it, falling back to `fallbackSystemSettings(Platform.current())` without a scope. The fallback derives everything from the platform: on native Linux the desktop is `unknown` (style `gnome`), on Windows the style is `windows`, on macOS `macos`, on the web and touch platforms `none`; the layout is `WindowButtonLayout.defaultFor(style)` (close, minimize, maximize on the leading side for macOS; minimize, maximize, close on the trailing side otherwise); no accent; no high contrast.
 
