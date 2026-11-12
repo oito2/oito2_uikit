@@ -1,6 +1,6 @@
 {
 	"name": "@oito2/ui-settings",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "System integration for @oito2/ui on Tauri v2: desktop environment detection, window button layout, accent color and high contrast.",
 	"license": "GPL-3.0-only",
 	"author": "OITO2",

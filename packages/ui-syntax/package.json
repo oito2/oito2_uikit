@@ -1,6 +1,6 @@
 {
 	"name": "@oito2/ui-syntax",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Syntax highlighting for @oito2/ui: code colored with the oito2 color schemes through highlight.js, plus a ready-made code block component.",
 	"license": "GPL-3.0-only",
 	"author": "OITO2",

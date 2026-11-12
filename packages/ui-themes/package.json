@@ -1,6 +1,6 @@
 {
 	"name": "@oito2/ui-themes",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "The 13 named color presets for @oito2/ui: Everforest, Ros\u00e9 Pine, Nord, Dracula/Alucard and Catppuccin, mapped to complete, WCAG-checked oito2 schemes.",
 	"license": "GPL-3.0-only",
 	"author": "OITO2",

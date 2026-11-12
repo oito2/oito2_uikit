@@ -1,6 +1,6 @@
 {
 	"name": "@oito2/ui-files",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "@oito2/ui file components: a file upload with a drop zone, previews and validation, and a download trigger, for Tauri and the browser.",
 	"license": "GPL-3.0-only",
 	"author": "OITO2",

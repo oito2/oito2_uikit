@@ -1,7 +1,7 @@
 {
 	"name": "@oito2/showcase",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Interactive showcase of the @oito2/ui components, as a Tauri desktop app and a static web build.",
 	"license": "GPL-3.0-only",
 	"author": "OITO2",

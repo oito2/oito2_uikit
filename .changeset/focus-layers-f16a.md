@@ -1,5 +1,0 @@
----
-'@oito2/ui': minor
----
-
-Fix focus and keyboard handling of nested overlays. A `Select`, `Menu`, `Popover` or other overlay opened from a `Dialog`, `Sheet`, `CommandPalette` or `Tour` keeps the focus instead of losing it to the trap of the panel below. Menus and selects opened by the pointer enter their items with the arrow keys, a submenu opened by hovering leaves the focus on its trigger and opens once the pointer rests on it, and Tab returns the focus to the trigger before moving on. A right click outside closes menus and popovers, and a second right click moves an open context menu. Closing panels stop handling Escape and focus at once instead of after their exit animation. `Dialog.Content` and `Sheet.Content` take `finalFocus`, the element focused on close when the trigger is gone. Shortcuts with punctuation (`Ctrl+-`, `Ctrl+,`) follow the keyboard layout instead of the key position. A disabled command of an inner `Commands` scope no longer overrides the outer command's shortcut. `CommandPalette` runs a command after it closes and plays its exit animation.

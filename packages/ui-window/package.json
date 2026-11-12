@@ -1,6 +1,6 @@
 {
 	"name": "@oito2/ui-window",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Window chrome integration for @oito2/ui on Tauri v2: client-side decorations and window controls on Linux, Windows and macOS.",
 	"license": "GPL-3.0-only",
 	"author": "OITO2",

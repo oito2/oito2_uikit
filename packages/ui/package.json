@@ -1,6 +1,6 @@
 {
 	"name": "@oito2/ui",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Svelte 5 design system for oito2 desktop apps on Tauri v2: tokens, themes, window chrome and components with desktop-grade density and GTK-style surfaces.",
 	"license": "GPL-3.0-only",
 	"author": "OITO2",
